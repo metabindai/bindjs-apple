@@ -57,6 +57,8 @@ public struct ComponentView: View {
                     ComponentView(array[index])
                 }
             }
+        case let string as String:
+            Text(string)
         case is EmptyComponent:
             EmptyView()
         default:
