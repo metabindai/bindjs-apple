@@ -56,6 +56,7 @@ struct Evaluator: ComponentVisitor {
         case "!" where binary.left is EmptyComponent: negate(right: binary.right)
         case "||": logicalOr(left: binary.left, right: binary.right)
         case "&&": logicalAnd(left: binary.left, right: binary.right)
+        case ".": propertyAccess(object: binary.left, key: binary.right)
         default: EmptyComponent()
         }
     }

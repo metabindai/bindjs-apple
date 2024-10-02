@@ -239,6 +239,14 @@ extension Component {
         Binary(left: self, op: ">=", right: other)
     }
     
+    public func get(_ key: String) -> Component {
+        Binary(left: self, op: ".", right: key)
+    }
+    
+    public func get(_ index: Int) -> Component {
+        Binary(left: self, op: ".", right: index)
+    }
+    
 }
 
 public protocol Callable: Component {
