@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "E36F1ACA-4595-4427-87BE-51987D5ED349",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "YapComponentTests",
+        "name" : "YapComponentTests"
+      }
+    }
+  ],
+  "version" : 1
+}

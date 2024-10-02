@@ -1,0 +1,157 @@
+import SwiftUI
+import YapComponent
+
+struct LeafView: View {
+    
+    enum Name: String, CaseIterable {
+        case Text
+        case Button
+        case Divider
+        case Spacer
+        case Progress
+        case Image
+        case Color
+    }
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var body: some View {
+        switch Name(rawValue: directive.type) {
+        case .Text: TextView(directive)
+        case .Button: ButtonView(directive)
+        case .Divider: Divider()
+        case .Spacer: Spacer()
+        case .Progress: ProgressViewWrapped(directive)
+        case .Image: ImageView(directive)
+        case .Color: ColorView(directive)
+        case .none: EmptyView()
+        }
+    }
+    
+}
+
+struct TextView: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var concat: String {
+        props.directive.children.map(String.init(describing:)).joined()
+    }
+    
+    var body: some View {
+        Text(LocalizedStringKey(props._0 ?? concat))
+    }
+}
+
+struct ButtonView: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var body: some View {
+        Button(action: {
+            print("Button pressed")
+        }) {
+            ComponentView(directive.children)
+        }
+    }
+}
+
+struct ProgressViewWrapped: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var body: some View {
+        if let total: Double = props.total {
+            ProgressView(value: props.value, total: total)
+        } else {
+            ProgressView()
+        }
+    }
+}
+
+struct ImageView: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var body: some View {
+        if let name: String = props.name {
+            // What would we do to request from our library?
+            Image(name)
+                .resizable()
+                .scaledToFit()
+        } else if let url: URL = props.url {
+            AsyncImage(url: url) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    RoundedRectangle(cornerRadius: 10)
+                        .foregroundStyle(.secondary)
+                        .scaledToFit()
+                }
+            }
+        } else if let systemName: String = props.systemName {
+            Image(systemName: systemName)
+                .resizable()
+                .scaledToFit()
+        } else {
+            EmptyView()
+        }
+    }
+}
+
+struct ColorView: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var body: some View {
+        if let color: Color = props._0 {
+            color
+        }
+    }
+}
