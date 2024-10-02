@@ -1,8 +1,8 @@
 import SwiftUI
 
 public class ComponentContext: ObservableObject {
-    var parent: ComponentContext?
-    var values: [String: Component] = [:]
+    public var parent: ComponentContext?
+    public var values: [String: Component] = [:]
     
     public init(parent: ComponentContext? = nil) {
         self.parent = parent

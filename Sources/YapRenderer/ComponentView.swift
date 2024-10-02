@@ -19,7 +19,23 @@ extension Directive: View {
     }
 }
 
+struct ComponentEnvironmentKey: @preconcurrency EnvironmentKey {
+    @MainActor static let defaultValue: ComponentContext = .init()
+}
+
+extension EnvironmentValues {
+    public var componentContext: ComponentContext {
+        get {
+            self[ComponentEnvironmentKey.self]
+        }
+        set {
+            self[ComponentEnvironmentKey.self] = newValue
+        }
+    }
+}
+
 public struct RootComponentView: View {
+    @Environment(\.componentContext) var parentContext
     let component: Component
     @State var evaluated: Component = []
     @StateObject var context = ComponentContext()
@@ -31,8 +47,9 @@ public struct RootComponentView: View {
     public var body: some View {
         ComponentView(evaluated)
             .task(id: component.jsonString) {
-                evaluated = component.evaluate(context)
+                context.parent = parentContext
                 context.objectWillChange.send()
+                evaluated = component.evaluate(context)
             }
     }
 }

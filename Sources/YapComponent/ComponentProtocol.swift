@@ -161,6 +161,18 @@ public struct Variable: PrimitiveComponent {
     }
 }
 
+public func Children() -> Variable {
+    Variable(name: "children")
+}
+
+public func Index() -> Variable {
+    Variable(name: "index")
+}
+
+public func Element() -> Variable {
+    Variable(name: "element")
+}
+
 /// Represents a binary operation
 public struct Binary: Component {
     var left: Component
@@ -334,7 +346,11 @@ public struct Directive: Component {
 
 extension Component {
     public func modifier(_ type: String, _ _0: Component) -> Directive {
-        Directive(type: type, props: ["_0": _0], children: [self])
+        if let props = _0 as? [String: Component] {
+            Directive(type: type, props: props, children: [self])
+        } else {
+            Directive(type: type, props: ["_0": _0], children: [self])
+        }
     }
     
     public func modifier(_ type: String) -> Directive {
