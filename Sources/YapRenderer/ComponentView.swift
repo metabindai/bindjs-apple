@@ -128,8 +128,12 @@ public struct ComponentView: View {
             EmptyView()
         case let anyView as AnyView:
             anyView
-        default:
-            Text("No View: \(type(of: component))")
+        case let value:
+            if let anyView = AnyView(_fromValue: value) {
+                anyView
+            } else {
+                Text("No View: \(type(of: component))")
+            }
         }
     }
 }

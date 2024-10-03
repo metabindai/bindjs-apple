@@ -87,7 +87,10 @@ struct Evaluator: ComponentVisitor {
     }
     
     mutating func visitArray(_ array: [any Component]) -> any Component {
-        let result = array.map { $0.accept(&self) }
+        let result = array.compactMap {
+            let product = $0.accept(&self)
+            return product is EmptyComponent ? nil : product
+        }
         switch result.count {
         case 0: return EmptyComponent()
         case 1: return result.first!
