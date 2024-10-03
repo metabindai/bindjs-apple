@@ -81,6 +81,26 @@ extension Axis.Set: _StringConvertible {
     }
 }
 
+extension TextAlignment: _StringConvertible {
+    public var description: String {
+        switch self {
+        case .leading: return "leading"
+        case .center: return "center"
+        case .trailing: return "trailing"
+        case .center: return "center"
+        }
+    }
+    
+    public init?(_ string: String) {
+        switch string.lowercased() {
+        case "leading": self = .leading
+        case "center": self = .center
+        case "trailing": self = .trailing
+        default: return nil
+        }
+    }
+}
+
 extension HorizontalAlignment: _StringConvertible {
     
     public var description: String {

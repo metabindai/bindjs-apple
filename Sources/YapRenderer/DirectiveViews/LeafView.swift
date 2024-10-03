@@ -52,8 +52,24 @@ struct TextView: View {
         props.directive.children.map(String.init(describing:)).joined()
     }
     
+    var firstImageChild: Image? {
+        if let directive = directive.children.first as? Directive, directive.type == "Image" {
+            let props = Props(directive)
+            if let name: String = props.name {
+                return Image(name)
+            } else if let systemName: String = props.systemName {
+                return Image(systemName: systemName)
+            }
+        }
+        return nil
+    }
+    
     var body: some View {
-        Text(LocalizedStringKey(props._0 ?? concat))
+        if let firstImageChild {
+            Text(firstImageChild)
+        } else {
+            Text(props._0 ?? concat)
+        }
     }
 }
 

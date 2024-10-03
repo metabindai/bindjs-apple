@@ -42,6 +42,7 @@ struct ModifierView: View {
         case compositingGroup
         case scrollClipDisabled
         case onTapGesture
+        case multiLineTextAlignment
     }
     
     let directive: Directive
@@ -223,8 +224,9 @@ struct ModifierView: View {
                 if let perform = props.first(where: { $0 is any Callable }) as? any Callable {
                     perform.callAsFunction([:], ComponentContext())
                 }
-                
             }
+        case .multiLineTextAlignment:
+            children.multilineTextAlignment(props._0 ?? .center)
         case .none:
             EmptyView()
         }
