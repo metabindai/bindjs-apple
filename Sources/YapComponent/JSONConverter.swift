@@ -187,7 +187,7 @@ extension Component {
 extension AnyComponent {
     public init(from json: String) {
         let data = json.data(using: .utf8)!
-        let any = try! JSONSerialization.jsonObject(with: data, options: .allowFragments)
+        let any = try! JSONSerialization.jsonObject(with: data, options: [.allowFragments, .json5Allowed])
         self.init(makeComponent(any))
     }
 }
