@@ -87,9 +87,9 @@ struct Evaluator: ComponentVisitor {
         let evaluatedProps = directive.props.mapValues { $0.accept(&self) }
         
         let directiveContext = nextContext()
-        for (key, value) in evaluatedProps {
-            directiveContext.define(key, value)
-        }
+//        for (key, value) in evaluatedProps {
+//            directiveContext.define(key, value)
+//        }
         
         let evaluatedChildren = directive.children.evaluate(directiveContext)
         

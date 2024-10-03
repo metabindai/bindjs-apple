@@ -10,7 +10,7 @@ struct Props {
     }
     
     subscript<T: _StringConvertible>(dynamicMember member: String) -> T? {
-        if let prop = directive.enclosedContext!.get(member) {
+        if let prop = directive.props[member] ?? directive.enclosedContext!.get(member) {
             return T(String(describing: prop))
         }
         return nil
