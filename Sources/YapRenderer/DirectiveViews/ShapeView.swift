@@ -27,7 +27,7 @@ struct ShapeView: View {
         case .Rectangle: Rectangle()
         case .Ellipse: Ellipse()
         case .Capsule: Capsule()
-        case .RoundedRectangle: RoundedRectangle(cornerRadius: props.cornerRadius ?? 0)
+        case .RoundedRectangle: RoundedRectangle(cornerRadius: props.cornerRadius ?? props._0 ?? 8)
         case .none: EmptyView()
         }
     }
