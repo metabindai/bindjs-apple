@@ -149,8 +149,6 @@ struct ImageView: View {
             }
         } else if let systemName: String = props.systemName {
             Image(systemName: systemName)
-                .resizable()
-                .scaledToFit()
         } else {
             EmptyView()
         }
