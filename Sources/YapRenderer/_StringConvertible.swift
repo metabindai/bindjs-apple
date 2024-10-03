@@ -19,6 +19,10 @@ struct Props {
     subscript(dynamicMember member: String) -> Component? {
         return directive.enclosedContext!.get(member)
     }
+    
+    func first(where predicate: (Component) throws -> Bool) rethrows -> Component? {
+        try directive.props.values.first(where: predicate)
+    }
 }
 
 
@@ -29,6 +33,11 @@ func ~= <T: RawRepresentable>(lhs: T.Type, rhs: T.RawValue) -> Bool where T.RawV
 public protocol _StringConvertible {
     init?(_ string: String)
     var description: String { get }
+}
+
+public protocol _DirectriveConvertible {
+    init?(_ directive: Directive)
+    var directive: Directive { get }
 }
 
 extension CGFloat: _StringConvertible {
@@ -325,6 +334,7 @@ extension Color: _StringConvertible {
             "yellow": .yellow,
             "orange": .orange,
             "purple": .purple,
+            "pink": .pink,
             "brown": .brown,
             "clear": .clear,
             "primary": .primary,
@@ -397,6 +407,47 @@ extension Color: _StringConvertible {
             
             self.init(red: redDouble, green: greenDouble, blue: blueDouble, opacity: alphaDouble)
         }
+    }
+}
+
+extension Color: _DirectriveConvertible {
+    public var directive: Directive {
+        Directive("Color", self.description)
+    }
+    
+    public init?(_ directive: Directive) {
+        guard directive.type == "Color" else { return nil }
+        if let fromString = Color(directive.props["_0"] as? String ?? "") {
+            self = fromString
+        } else {
+            return nil
+        }
+    }
+}
+
+extension UnitPoint: _StringConvertible {
+    public var description: String {
+        "\(x) \(y)"
+    }
+    
+    public init?(_ string: String) {
+        switch string {
+        case "center": self = .center; return;
+        case "top": self = .top; return;
+        case "leading": self = .leading; return;
+        case "bottom": self = .bottom; return;
+        case "trailing": self = .trailing; return;
+        case "topLeading": self = .topLeading; return;
+        case "topTrailing": self = .topTrailing; return;
+        case "bottomLeading": self = .bottomLeading; return;
+        case "bottomTrailing": self = .bottomTrailing; return;
+        case "zero": self = .zero; return;
+        default: break
+        }
+        let parts = string.split(separator: " ").map(String.init)
+        guard parts.count == 2 else { return nil }
+        guard let x = Double(parts[0]), let y = Double(parts[1]) else { return nil }
+        self = .init(x: x, y: y)
     }
 }
 

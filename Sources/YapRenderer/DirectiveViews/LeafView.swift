@@ -11,6 +11,7 @@ struct LeafView: View {
         case Progress
         case Image
         case Color
+        case LinearGradient
     }
     
     let directive: Directive
@@ -28,6 +29,7 @@ struct LeafView: View {
         case .Progress: ProgressViewWrapped(directive)
         case .Image: ImageView(directive)
         case .Color: ColorView(directive)
+        case .LinearGradient: LinearGradientView(directive)
         case .none: EmptyView()
         }
     }
@@ -155,5 +157,40 @@ struct ColorView: View {
         if let color: Color = props._0 {
             color
         }
+    }
+}
+
+struct LinearGradientView: View {
+    
+    let directive: Directive
+    
+    init(_ directive: Directive) {
+        self.directive = directive
+    }
+    
+    var props: Props {
+        Props(directive)
+    }
+    
+    var colors: [Color] {
+        directive.children.compactMap {
+            if let directive = $0 as? Directive {
+                return Color(directive)
+            } else {
+                return nil
+            }
+        }
+    }
+    
+    var startPoint: UnitPoint {
+        props.startPoint ?? .topLeading
+    }
+    
+    var endPoint: UnitPoint {
+        props.endPoint ?? .bottomTrailing
+    }
+    
+    var body: some View {
+        LinearGradient(colors: colors, startPoint: startPoint, endPoint: endPoint)
     }
 }

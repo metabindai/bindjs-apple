@@ -6,6 +6,8 @@ public class ComponentContext: ObservableObject {
     private var constants: Set<String> = []
     public var values: [String: Component] = [:]
     public var children: [ComponentContext] = []
+    var dependents: [String: Set<WeakBox<ComponentContext>>] = [:]
+    var dependencies: [String: WeakBox<ComponentContext>] = [:]
     public weak var parent: ComponentContext? = nil {
         didSet {
             if oldValue !== parent {
@@ -25,7 +27,9 @@ public class ComponentContext: ObservableObject {
         cancellables.forEach { $0.cancel() }
         cancellables.removeAll()
         
-        objectWillChange.sink { [weak self] _ in
+        objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
             self?.parent?.objectWillChange.send()
         }.store(in: &cancellables)
     }
@@ -40,7 +44,19 @@ public class ComponentContext: ObservableObject {
     }
     
     public func get(_ key: String) -> Component? {
-        values[key] ?? parent?.get(key)
+        DependencyTracker.withDependent(self) {
+            _get(key)
+        }
+    }
+
+    
+    private func _get(_ key: String) -> Component? {
+        if let value = values[key] {
+            DependencyTracker.addDependency(self, forKey: key)
+            return value
+        } else {
+            return parent?._get(key)
+        }
     }
     
     var allKeys: Set<String> {
@@ -49,8 +65,11 @@ public class ComponentContext: ObservableObject {
     
     public func assign(_ key: String, _ value: Component) {
         if (values.keys.contains(key) && !constants.contains(key)) || (parent == nil && !constants.contains(key)) {
+            let oldValue = values[key] ?? EmptyComponent()
             values[key] = value
-            objectWillChange.send()
+            if oldValue != value {
+                notifyDependents(forKey: key)
+            }
         } else {
             parent?.assign(key, value)
         }
@@ -67,6 +86,7 @@ public class ComponentContext: ObservableObject {
     
     enum BuiltinActionName: String {
         case setValueForKey
+        case print
     }
     
     // Handle the directive or delegate to the user defined values
@@ -79,7 +99,11 @@ public class ComponentContext: ObservableObject {
             }
             assign(key, value)
             return EmptyComponent()
-            
+        case .print:
+            for (key, value) in arguments {
+                print("\(key): \(value.evaluate(self))")
+            }
+            return EmptyComponent()
         default:
             if let callable = get(name) as? Callable {
                 let result = callable.callAsFunction(arguments, self)
@@ -121,4 +145,57 @@ extension ComponentContext {
         }
     }
     
+}
+extension ComponentContext {
+    func addDependency(_ context: ComponentContext, forKey key: String) {
+        dependencies[key] = WeakBox(context)
+        context.dependents[key, default: []].insert(WeakBox(self))
+    }
+    
+    func notifyDependents(forKey key: String) {
+        guard let dependents = dependents[key] else { return }
+        for dependent in dependents {
+            dependent.value?.valueWillChange(forKey: key)
+        }
+        self.dependents[key] = dependents.filter { $0.value != nil }
+    }
+    
+    func valueWillChange(forKey key: String) {
+        objectWillChange.send()
+    }
+}
+
+struct DependencyTracker {
+    nonisolated(unsafe) static var current: Self?
+    let dependent: ComponentContext
+    
+    static func addDependency(_ context: ComponentContext, forKey key: String) {
+        current?.dependent.addDependency(context, forKey: key)
+    }
+    
+    static func withDependent<R>(_ context: ComponentContext, body: () throws -> R) rethrows -> R {
+        let old = current
+        current = .init(dependent: context)
+        defer { current = old }
+        return try body()
+    }
+}
+
+
+final class WeakBox<T: AnyObject>: Hashable {
+    private let identifier: ObjectIdentifier
+    weak var value: T?
+    
+    init(_ value: T) {
+        self.value = value
+        self.identifier = ObjectIdentifier(value)
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(identifier)
+    }
+    
+    static func == (lhs: WeakBox<T>, rhs: WeakBox<T>) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
 }

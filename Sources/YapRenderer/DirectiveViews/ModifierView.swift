@@ -41,6 +41,7 @@ struct ModifierView: View {
         case drawingGroup
         case compositingGroup
         case scrollClipDisabled
+        case onTapGesture
     }
     
     let directive: Directive
@@ -216,6 +217,13 @@ struct ModifierView: View {
                 children.scrollClipDisabled(props.directive.props.isEmpty ? true : props._0 ?? true)
             } else {
                 children
+            }
+        case .onTapGesture:
+            children.onTapGesture {
+                if let perform = props.first(where: { $0 is any Callable }) as? any Callable {
+                    perform.callAsFunction([:], ComponentContext())
+                }
+                
             }
         case .none:
             EmptyView()

@@ -94,7 +94,9 @@ struct Evaluator: ComponentVisitor {
         let evaluatedChildren = directive.children.evaluate(directiveContext)
         
         var args = evaluatedProps
-        args["children"] = evaluatedChildren
+        if !(evaluatedChildren is EmptyComponent) {
+            args["children"] = evaluatedChildren
+        }
         if let result = context.perform(directive.type, with: args) {
             return result
         } else {

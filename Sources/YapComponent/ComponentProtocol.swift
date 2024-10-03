@@ -152,6 +152,11 @@ public struct RangeExpr: Component {
         self.end = end
     }
     
+    public init(_ range: Range<Int>) {
+        self.start = range.lowerBound
+        self.end = range.upperBound
+    }
+    
     public func accept<Visitor: ComponentVisitor>(_ visitor: inout Visitor) -> Visitor.Result {
         visitor.visitRange(self)
     }
@@ -168,6 +173,12 @@ public struct RangeExpr: Component {
             return (Int(lhs)..<Int(rhs)).map { $0 as Component }
         default: return []
         }
+    }
+}
+
+extension Range<Int>: Component {
+    public func accept<Visitor: ComponentVisitor>(_ visitor: inout Visitor) -> Visitor.Result {
+        visitor.visitRange(RangeExpr(self))
     }
 }
 
@@ -422,6 +433,10 @@ extension Directive {
 
 public func SetValueForKey(_ key: String, value: Component) -> Directive {
     Directive("setValueForKey", ["key": key, "value": value])
+}
+
+public func Print(_ argument: Component) -> Directive {
+    Directive("print", ["_0": argument])
 }
 
 extension Component {
