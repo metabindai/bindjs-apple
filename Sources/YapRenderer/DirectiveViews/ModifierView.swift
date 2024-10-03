@@ -126,7 +126,11 @@ struct ModifierView: View {
                 )
             }
         case .font:
-            children.font(props._0 ?? .body)
+            if let size: Double = props._0 {
+                children.font(.system(size: size))
+            } else {
+                children.font(props._0 ?? .body)
+            }
         case .fontWeight:
             if #available(iOS 16.0, *) {
                 children.fontWeight(props._0 ?? .regular)

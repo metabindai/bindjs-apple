@@ -9,6 +9,7 @@ public class ComponentContext: ObservableObject {
         }
     }
     public var values: [String: Component] = [:]
+    public var constants: Set<String> = []
     
     public init(parent: ComponentContext? = nil) {
         self.parent = parent
@@ -24,7 +25,7 @@ public class ComponentContext: ObservableObject {
     }
     
     public func assign(_ key: String, _ value: Component) {
-        if values.keys.contains(key) || parent == nil {
+        if (values.keys.contains(key) && !constants.contains(key)) || (parent == nil && !constants.contains(key)) {
             values[key] = value
             objectWillChange.send()
         } else {
@@ -32,9 +33,12 @@ public class ComponentContext: ObservableObject {
         }
     }
     
-    public func define(_ key: String, _ value: Component) {
+    public func define(_ key: String, _ value: Component, isConstant: Bool = true) {
         if !values.keys.contains(key) {
             values[key] = value
+            if isConstant {
+                constants.insert(key)
+            }
         }
     }
 }

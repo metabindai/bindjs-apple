@@ -18,10 +18,21 @@ struct Evaluator: ComponentVisitor {
         let defaultsContext = ComponentContext(parent: context)
         
         for (key, value) in defaults.constants {
-            defaultsContext.define(key, value.accept(&self))
+            defaultsContext.define(key, value.accept(&self), isConstant: true)
         }
         
         return defaults.content.evaluate(defaultsContext)
+    }
+    
+    
+    mutating func visitState(_ state: StateVars) -> any Component {
+        let stateContext = ComponentContext(parent: context)
+        
+        for (key, value) in state.bindings {
+            stateContext.define(key, value.accept(&self), isConstant: false)
+        }
+        
+        return state.content.evaluate(stateContext)
     }
     
     mutating func visitConditional(_ conditional: ConditionalComponent) -> any Component {
@@ -85,6 +96,7 @@ struct Evaluator: ComponentVisitor {
         )
         .bind(directiveContext)
     }
+    
     
     mutating func visitArray(_ array: [any Component]) -> any Component {
         let result = array.compactMap {

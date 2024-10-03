@@ -65,6 +65,14 @@ private struct JSONConverter: ComponentVisitor {
         ]
     }
     
+    mutating func visitState(_ state: StateVars) -> Any {
+        [
+            "type": "State",
+            "bindings": state.bindings.mapValues { $0.accept(&self) },
+            "content": state.content.accept(&self)
+        ]
+    }
+    
     mutating func visitDirective(_ directive: Directive) -> Any {
         var result: [String: Any] = [
             "type": directive.type,
@@ -140,6 +148,11 @@ func makeComponent(_ any: Any) -> Component {
                 case "Defaults":
                     return Defaults(
                         constants: (dict["constants"] as? [String: Any] ?? [:]).mapValues(makeComponent),
+                        content: makeComponent(dict["content"]!)
+                    )
+                case "State":
+                    return StateVars(
+                        bindings: (dict["bindings"] as? [String: Any] ?? [:]).mapValues(makeComponent),
                         content: makeComponent(dict["content"]!)
                     )
                 case "Range":

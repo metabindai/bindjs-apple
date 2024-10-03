@@ -75,6 +75,11 @@ struct EqualityVisitor: ComponentVisitor {
         && lhs.content == defaults.content
     }
     
+    mutating func visitState(_ state: StateVars) -> Bool {
+        guard let lhs = lhs as? StateVars else { return false }
+        return lhs.bindings == state.bindings
+    }
+    
     mutating func visitDirective(_ directive: Directive) -> Bool {
         guard let lhs = lhs as? Directive else { return false }
         return lhs.type == directive.type

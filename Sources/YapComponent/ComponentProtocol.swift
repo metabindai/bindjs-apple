@@ -32,6 +32,7 @@ public protocol ComponentVisitor {
     mutating func visitBinary(_ binary: Binary) -> Result
     mutating func visitClosure(_ closure: Closure) -> Result
     mutating func visitDefaults(_ defaults: Defaults) -> Result
+    mutating func visitState(_ state: StateVars) -> Result
     mutating func visitDirective(_ directive: Directive) -> Result
 }
 
@@ -351,6 +352,30 @@ public struct Defaults: Component {
 extension Component {
     public func defaults(_ key: String, _ value: Component) -> some Component {
         Defaults(constants: [key: value], content: self)
+    }
+}
+
+public struct StateVars: Component {
+    public var bindings: [String: Component]
+    public var content: Component
+    
+    public init(bindings: [String: Component], content: Component) {
+        self.bindings = bindings
+        self.content = content
+    }
+    
+    public func accept<Visitor: ComponentVisitor>(_ visitor: inout Visitor) -> Visitor.Result {
+        visitor.visitState(self)
+    }
+}
+
+public extension Component {
+    func state(_ bindings: [String: Component]) -> StateVars {
+        StateVars(bindings: bindings, content: self)
+    }
+    
+    func state(_ key: String, _ value: Component) -> some Component {
+        StateVars(bindings: [key: value], content: self)
     }
 }
 
