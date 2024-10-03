@@ -37,6 +37,7 @@ struct ModifierView: View {
         case zIndex
         case hidden
         case layoutPriority
+        case border
     }
     
     let directive: Directive
@@ -193,6 +194,12 @@ struct ModifierView: View {
             children.aspectRatio(props._0 ?? 1.0, contentMode: props.contentMode ?? .fit)
         case .contentMode:
             children.aspectRatio(contentMode: props.contentMode ?? .fit)
+        case .border:
+            if let color: Color = props._0 ?? props.color {
+                children.border(color, width: props.width ?? 1)
+            } else {
+                children.border(props._0 ?? Color.primary, width: props.width ?? 1)
+            }
         case .none:
             EmptyView()
         }

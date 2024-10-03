@@ -211,6 +211,11 @@ extension Component {
         Binary(left: self, op: "+", right: other)
     }
     
+    /// Same thing as `Component.adding(_:)`.
+    public func concat(_ other: Component) -> Component {
+        Binary(left: self, op: "+", right: other)
+    }
+    
     public func subtracting(_ other: Component) -> Component {
         Binary(left: self, op: "-", right: other)
     }
@@ -257,12 +262,6 @@ extension Component {
     
     public func get(_ index: Int) -> Component {
         Binary(left: self, op: ".", right: index)
-    }
-}
-
-extension String {
-    public func concat(_ other: Component) -> Component {
-        Binary(left: self, op: "+", right: other)
     }
 }
 
@@ -346,6 +345,16 @@ public struct Directive: Component {
         var directive = self
         directive.enclosedContext = context
         return directive
+    }
+}
+
+extension Directive {
+    public init(_ type: String, _ _0: Component) {
+        if let props = _0 as? [String: Component] {
+            self.init(type: type, props: props)
+        } else {
+            self.init(type: type, props: ["_0": _0])
+        }
     }
 }
 
