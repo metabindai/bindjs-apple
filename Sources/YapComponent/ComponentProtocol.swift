@@ -258,7 +258,12 @@ extension Component {
     public func get(_ index: Int) -> Component {
         Binary(left: self, op: ".", right: index)
     }
-    
+}
+
+extension String {
+    public func concat(_ other: Component) -> Component {
+        Binary(left: self, op: "+", right: other)
+    }
 }
 
 public protocol Callable: Component {
