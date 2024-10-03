@@ -43,7 +43,7 @@ struct ContainerView: View {
                 children
             }
         case .ScrollView:
-            ScrollView {
+            ScrollView(props.axes ?? props._0 ?? .vertical, showsIndicators: props.showsIndicators ?? true) {
                 children
             }
         case .List:

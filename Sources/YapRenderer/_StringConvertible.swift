@@ -45,6 +45,29 @@ extension Bool: _StringConvertible {}
 
 extension Double: _StringConvertible {}
 
+extension Axis.Set: _StringConvertible {
+    public var description: String {
+        var axes: [String] = []
+        if contains(.horizontal) { axes.append("horizontal") }
+        if contains(.vertical) { axes.append("vertical") }
+        if axes.isEmpty { return "none" }
+        return axes.joined(separator: " ")
+    }
+    
+    public init?(_ string: String) {
+        let parts = string.split(separator: " ").map(String.init)
+        var axes: Axis.Set = []
+        for part in parts {
+            switch part.lowercased() {
+            case "horizontal": axes.insert(.horizontal)
+            case "vertical": axes.insert(.vertical)
+            default: return nil
+            }
+        }
+        self = axes
+    }
+}
+
 extension HorizontalAlignment: _StringConvertible {
     
     public var description: String {

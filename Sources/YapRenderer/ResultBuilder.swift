@@ -21,6 +21,14 @@ extension Directive {
     public init(_ type: String, props: [String: Component] = [:], @ComponentBuilder children build: () -> Component = {[]}) {
         self.init(type: type, props: props, children: build().arrayValue)
     }
+    
+    public init(_ type: String, _ _0: Component, @ComponentBuilder children build: () -> Component = {[]}) {
+        if let props = _0 as? [String: Component] {
+            self.init(type: type, props: props, children: build().arrayValue)
+        } else {
+            self.init(type: type, props: ["_0": _0], children: build().arrayValue)
+        }
+    }
 }
 
 extension ConditionalComponent {
