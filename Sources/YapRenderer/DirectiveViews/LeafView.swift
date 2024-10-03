@@ -69,7 +69,9 @@ struct ButtonView: View {
     
     var body: some View {
         Button(action: {
-            print("Button pressed")
+            if let action = props.action as? Closure {
+                let _ = action()
+            }
         }) {
             ComponentView(directive.children)
         }

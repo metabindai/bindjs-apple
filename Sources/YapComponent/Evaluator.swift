@@ -2,6 +2,17 @@ struct Evaluator: ComponentVisitor {
     
     let context: ComponentContext
     
+    // MARK: - Context Reuse
+    
+    var indexInContexts: Int = 0
+    
+    mutating func nextContext() -> ComponentContext {
+        defer { indexInContexts += 1 }
+        return context.child(at: indexInContexts)
+    }
+    
+    // MARK: - Evaluations
+    
     mutating func defaultVisit(_ component: Component) -> Component {
         component
     }
@@ -15,7 +26,7 @@ struct Evaluator: ComponentVisitor {
     }
     
     mutating func visitDefaults(_ defaults: Defaults) -> any Component {
-        let defaultsContext = ComponentContext(parent: context)
+        let defaultsContext = nextContext()
         
         for (key, value) in defaults.constants {
             defaultsContext.define(key, value.accept(&self), isConstant: true)
@@ -26,7 +37,7 @@ struct Evaluator: ComponentVisitor {
     
     
     mutating func visitState(_ state: StateVars) -> any Component {
-        let stateContext = ComponentContext(parent: context)
+        let stateContext = nextContext()
         
         for (key, value) in state.bindings {
             stateContext.define(key, value.accept(&self), isConstant: false)
@@ -75,26 +86,25 @@ struct Evaluator: ComponentVisitor {
     mutating func visitDirective(_ directive: Directive) -> any Component {
         let evaluatedProps = directive.props.mapValues { $0.accept(&self) }
         
-        let directiveContext = ComponentContext(parent: context)
+        let directiveContext = nextContext()
         for (key, value) in evaluatedProps {
             directiveContext.define(key, value)
         }
         
         let evaluatedChildren = directive.children.evaluate(directiveContext)
         
-        if let callable = context.get(directive.type) as? Callable {
-            var args = evaluatedProps
-            args["children"] = evaluatedChildren
-            let result = callable.callAsFunction(args, context)
+        var args = evaluatedProps
+        args["children"] = evaluatedChildren
+        if let result = context.perform(directive.type, with: args) {
             return result
+        } else {
+            return  Directive(
+                type: directive.type,
+                props: evaluatedProps,
+                children: evaluatedChildren.arrayValue
+            )
+            .bind(directiveContext)
         }
-        
-        return Directive(
-            type: directive.type,
-            props: evaluatedProps,
-            children: evaluatedChildren.arrayValue
-        )
-        .bind(directiveContext)
     }
     
     

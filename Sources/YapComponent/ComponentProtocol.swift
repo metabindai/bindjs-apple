@@ -50,13 +50,14 @@ extension ComponentVisitor {
     public mutating func visitBinary(_ binary: Binary) -> Result { defaultVisit(binary) }
     public mutating func visitClosure(_ closure: Closure) -> Result { defaultVisit(closure) }
     public mutating func visitDefaults(_ defaults: Defaults) -> Result { defaultVisit(defaults) }
+    public mutating func visitState(_ state: StateVars) -> Result { defaultVisit(state) }
     public mutating func visitDirective(_ directive: Directive) -> Result { defaultVisit(directive) }
 }
 
 // MARK: - Component Implementations
 
 /// A type-erasing wrapper for Component
-public struct AnyComponent: Component, CustomStringConvertible {
+public struct AnyComponent: Component, Equatable, CustomStringConvertible {
     public var component: Component
     
     public init(_ component: Component) {
@@ -74,6 +75,12 @@ public struct AnyComponent: Component, CustomStringConvertible {
     public var description: String {
         String(describing: component)
     }
+    
+    public static func == (lhs: AnyComponent, rhs: AnyComponent) -> Bool {
+        lhs.unerased == rhs.unerased
+    }
+    
+    public static var empty: Self { .init(EmptyComponent()) }
 }
 
 extension Component {
@@ -321,7 +328,7 @@ public struct Closure: Callable {
         return closure
     }
     
-    public func callAsFunction(_ arguments: [String: Component] = [:], _ callingContext: ComponentContext) -> any Component {
+    public func callAsFunction(_ arguments: [String: Component] = [:], _ callingContext: ComponentContext = .init()) -> any Component {
         let context = ComponentContext()
         for (key, value) in parameters {
             context.define(key, value)
@@ -411,6 +418,10 @@ extension Directive {
             self.init(type: type, props: ["_0": _0])
         }
     }
+}
+
+public func SetValueForKey(_ key: String, value: Component) -> Directive {
+    Directive("setValueForKey", ["key": key, "value": value])
 }
 
 extension Component {

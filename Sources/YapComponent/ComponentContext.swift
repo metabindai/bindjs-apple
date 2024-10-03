@@ -1,19 +1,42 @@
 import SwiftUI
+import Combine
 
 public class ComponentContext: ObservableObject {
-    public var parent: ComponentContext? {
+    private var cancellables: Set<AnyCancellable> = []
+    private var constants: Set<String> = []
+    public var values: [String: Component] = [:]
+    public var children: [ComponentContext] = []
+    public weak var parent: ComponentContext? = nil {
         didSet {
             if oldValue !== parent {
                 objectWillChange.send()
             }
+            setupPublishers()
         }
     }
-    public var values: [String: Component] = [:]
-    public var constants: Set<String> = []
-    
+
     public init(parent: ComponentContext? = nil) {
         self.parent = parent
         registerBuiltinsIfNeeded()
+        setupPublishers()
+    }
+    
+    func setupPublishers() {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        
+        objectWillChange.sink { [weak self] _ in
+            self?.parent?.objectWillChange.send()
+        }.store(in: &cancellables)
+    }
+    
+    public func child(at index: Int) -> ComponentContext {
+        guard children.indices.contains(index) else {
+            let context = ComponentContext(parent: self)
+            children.append(context)
+            return context
+        }
+        return children[index]
     }
     
     public func get(_ key: String) -> Component? {
@@ -39,6 +62,30 @@ public class ComponentContext: ObservableObject {
             if isConstant {
                 constants.insert(key)
             }
+        }
+    }
+    
+    enum BuiltinActionName: String {
+        case setValueForKey
+    }
+    
+    // Handle the directive or delegate to the user defined values
+    public func perform(_ name: String, with arguments: [String: Component]) -> Component? {
+        switch BuiltinActionName(rawValue: name) {
+        case .setValueForKey:
+            guard let key = arguments["key"] as? String, let value = arguments["value"] else {
+                // Delegate to user defined below
+                fallthrough
+            }
+            assign(key, value)
+            return EmptyComponent()
+            
+        default:
+            if let callable = get(name) as? Callable {
+                let result = callable.callAsFunction(arguments, self)
+                return result
+            }
+            return nil
         }
     }
 }

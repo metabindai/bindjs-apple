@@ -288,9 +288,38 @@ import QuartzCore
 @Test func testJSONToComponentConversion() {
     let jsonString = "{\"key\":\"value\",\"array\":[1,2,3]}"
     let component = AnyComponent(from: jsonString)
-    let dict = component.component as? [String: Any]
+    let dict = component.unerased as? [String: Any]
     #expect(dict?["key"] as? String == "value")
     #expect(dict?["array"] as? [Int] == [1, 2, 3])
+}
+
+@Test func testAnyComponentEquality() {
+    let component1 = Directive(type: "Circle").erasedToAnyComponent
+    let component2 = Directive(type: "Circle").erasedToAnyComponent
+    #expect(component1 == component2)
+    
+    let component3 = Directive(type: "Rectangle").erasedToAnyComponent
+    #expect(component1 != component3)
+    
+    let component4 = "Test".erasedToAnyComponent
+    let component5 = "Test".erasedToAnyComponent
+    #expect(component4 == component5)
+    
+    let component6 = [1, 2, 3].erasedToAnyComponent
+    let component7 = [3, 2, 1].erasedToAnyComponent
+    #expect(component6 != component7)
+    
+    let component8 = ["a": 1, "b": 2].erasedToAnyComponent
+    let component9 = ["b": 2, "a": 1].erasedToAnyComponent
+    #expect(component8 == component9)
+    
+    let component10 = true.erasedToAnyComponent
+    let component11 = false.erasedToAnyComponent
+    #expect(component10 != component11)
+    
+    let component12 = 42.erasedToAnyComponent
+    let component13 = 42.0.erasedToAnyComponent
+    #expect(component12 != component13)
 }
 
 // MARK: - Error Handling Tests

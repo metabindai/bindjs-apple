@@ -31,6 +31,10 @@ extension Directive {
     }
 }
 
+public func Group(@ComponentBuilder content: () -> Component) -> Component {
+    Directive(type: "Group", children: content().arrayValue)
+}
+
 extension ConditionalComponent {
     public init(_ condition: Component, @ComponentBuilder then thenContent: () -> Component, @ComponentBuilder else elseContent: () -> Component) {
         self.init(condition: condition, then: thenContent(), else: elseContent())

@@ -35,6 +35,16 @@ extension View {
         }
     }
     
+    public func defaults(_ keysAndValues: [String: Component]) -> some View {
+        transformEnvironment(\.componentContext) { context in
+            let newContext = ComponentContext(parent: context)
+            for (key, value) in keysAndValues {
+                newContext.define(key, value.evaluate(context))
+            }
+            context = newContext
+        }
+    }
+    
     public func defaults<Content: View>(_ key: String, @ViewBuilder _ content: @escaping (_ props: [String: Component], _ children: [Component]) -> Content) -> some View {
         transformEnvironment(\.componentContext) { context in
             let newContext = ComponentContext(parent: context)
@@ -42,6 +52,25 @@ extension View {
                 AnyView(content(props, children))
             }
             newContext.define(key, OpaqueFunction(body: opaque))
+            context = newContext
+        }
+    }
+    
+    public func defaults<Result: Component>(_ key: String, body: @escaping (_ props: [String: Component], _ children: [Component], _ context: ComponentContext) -> Result) -> some View {
+        transformEnvironment(\.componentContext) { context in
+            let newContext = ComponentContext(parent: context)
+            newContext.define(key, OpaqueFunction(body: body))
+            context = newContext
+        }
+    }
+    
+    public func defaults(_ key: String, body: @escaping (_ props: [String: Component], _ children: [Component], _ context: ComponentContext) -> Void) -> some View {
+        transformEnvironment(\.componentContext) { context in
+            let newContext = ComponentContext(parent: context)
+            newContext.define(key, OpaqueFunction(body: {
+                body($0, $1, $2)
+                return EmptyComponent()
+            }))
             context = newContext
         }
     }
@@ -79,7 +108,7 @@ extension EnvironmentValues {
 public struct RootComponentView: View {
     @Environment(\.componentContext) var parentContext
     let component: Component
-    @State var evaluated: Component = []
+    @State var evaluated: AnyComponent = .empty
     @StateObject var context = ComponentContext()
     
     public init(_ component: Component) {
@@ -88,7 +117,7 @@ public struct RootComponentView: View {
     
     public func evaluate() {
         context.parent = parentContext
-        evaluated = component.evaluate(context)
+        evaluated = component.evaluate(context).erasedToAnyComponent
     }
     
     public var body: some View {
@@ -102,12 +131,12 @@ public struct RootComponentView: View {
     }
 }
 
-public struct ComponentView: View {
+public struct ComponentView: View, @preconcurrency Equatable {
     
-    let component: Component
+    let component: AnyComponent
     
     public init(_ component: Component) {
-        self.component = component
+        self.component = component.erasedToAnyComponent
     }
     
     public var body: some View {
@@ -125,7 +154,7 @@ public struct ComponentView: View {
         case let string as String:
             Text(string)
         case is EmptyComponent:
-            EmptyView()
+            Color.clear.frame(width: 0, height: 0).hidden()
         case let anyView as AnyView:
             anyView
         case let value:
@@ -135,5 +164,9 @@ public struct ComponentView: View {
                 Text("No View: \(type(of: component))")
             }
         }
+    }
+    
+    public static func == (lhs: ComponentView, rhs: ComponentView) -> Bool {
+        lhs.component == rhs.component
     }
 }

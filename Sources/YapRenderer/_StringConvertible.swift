@@ -15,6 +15,10 @@ struct Props {
         }
         return nil
     }
+    
+    subscript(dynamicMember member: String) -> Component? {
+        return directive.enclosedContext!.get(member)
+    }
 }
 
 
