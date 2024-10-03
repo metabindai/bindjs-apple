@@ -38,10 +38,10 @@ extension View {
     public func defaults<Content: View>(_ key: String, @ViewBuilder _ content: @escaping (_ props: [String: Component], _ children: [Component]) -> Content) -> some View {
         transformEnvironment(\.componentContext) { context in
             let newContext = ComponentContext(parent: context)
-            let opaque: ([String: Component], [Component]) -> AnyView = {
-                AnyView(content($0, $1))
+            let opaque: ([String: Component], [Component], ComponentContext) -> AnyView = { props, children, _ in
+                AnyView(content(props, children))
             }
-            newContext.define(key, OpaqueFunction(function: opaque))
+            newContext.define(key, OpaqueFunction(body: opaque))
             context = newContext
         }
     }
@@ -52,20 +52,6 @@ extension View {
             transform(newContext)
             context = newContext
         }
-    }
-}
-
-/// A wrapper around a Swift function
-struct OpaqueFunction: Callable {
-    let function: ([String: Component], [Component]) -> AnyView
-    
-    func accept<Visitor>(_ visitor: inout Visitor) -> Visitor.Result where Visitor : ComponentVisitor {
-        visitor.defaultVisit(self)
-    }
-    
-    func callAsFunction(_ arguments: [String : any Component]) -> any Component {
-        let children = arguments["children"]?.arrayValue ?? []
-        return function(arguments, children)
     }
 }
 

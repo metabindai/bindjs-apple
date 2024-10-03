@@ -18,7 +18,7 @@ struct Evaluator: ComponentVisitor {
         let defaultsContext = ComponentContext(parent: context)
         
         for (key, value) in defaults.constants {
-            defaultsContext.define(key, value)
+            defaultsContext.define(key, value.accept(&self))
         }
         
         return defaults.content.evaluate(defaultsContext)
@@ -74,7 +74,7 @@ struct Evaluator: ComponentVisitor {
         if let callable = context.get(directive.type) as? Callable {
             var args = evaluatedProps
             args["children"] = evaluatedChildren
-            let result = callable.callAsFunction(args)
+            let result = callable.callAsFunction(args, context)
             return result
         }
         

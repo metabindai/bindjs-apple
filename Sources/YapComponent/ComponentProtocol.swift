@@ -267,7 +267,7 @@ extension String {
 }
 
 public protocol Callable: Component {
-    func callAsFunction(_ arguments: [String: Component]) -> Component
+    func callAsFunction(_ arguments: [String: Component], _ callingContext: ComponentContext) -> Component
 }
 
 /// Represents a closure
@@ -291,7 +291,7 @@ public struct Closure: Callable {
         return closure
     }
     
-    public func callAsFunction(_ arguments: [String: Component] = [:]) -> any Component {
+    public func callAsFunction(_ arguments: [String: Component] = [:], _ callingContext: ComponentContext) -> any Component {
         let context = ComponentContext()
         for (key, value) in parameters {
             context.define(key, value)
