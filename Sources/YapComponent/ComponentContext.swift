@@ -1,7 +1,13 @@
 import SwiftUI
 
 public class ComponentContext: ObservableObject {
-    public var parent: ComponentContext?
+    public var parent: ComponentContext? {
+        didSet {
+            if oldValue !== parent {
+                objectWillChange.send()
+            }
+        }
+    }
     public var values: [String: Component] = [:]
     
     public init(parent: ComponentContext? = nil) {
@@ -13,9 +19,14 @@ public class ComponentContext: ObservableObject {
         values[key] ?? parent?.get(key)
     }
     
+    var allKeys: Set<String> {
+        Set(values.keys).union(parent?.allKeys ?? [])
+    }
+    
     public func assign(_ key: String, _ value: Component) {
         if values.keys.contains(key) || parent == nil {
             values[key] = value
+            objectWillChange.send()
         } else {
             parent?.assign(key, value)
         }

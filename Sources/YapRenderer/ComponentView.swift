@@ -30,7 +30,7 @@ extension View {
     public func defaults(_ key: String, _ value: Component) -> some View {
         transformEnvironment(\.componentContext) { context in
             let newContext = ComponentContext(parent: context)
-            newContext.define(key, value)
+            newContext.define(key, value.evaluate(context))
             context = newContext
         }
     }
@@ -86,12 +86,18 @@ public struct RootComponentView: View {
         self.component = component
     }
     
+    public func evaluate() {
+        context.parent = parentContext
+        evaluated = component.evaluate(context)
+    }
+    
     public var body: some View {
         ComponentView(evaluated)
             .task(id: component.jsonString) {
-                context.parent = parentContext
-                context.objectWillChange.send()
-                evaluated = component.evaluate(context)
+                evaluate()
+            }
+            .onReceive(context.objectWillChange) { _ in
+                evaluate()
             }
     }
 }
