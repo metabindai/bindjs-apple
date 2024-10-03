@@ -212,7 +212,7 @@ struct ModifierView: View {
         case .drawingGroup:
             children.drawingGroup()
         case .scrollClipDisabled:
-            if #available(iOS 16.0, macOS 14.0, *) {
+            if #available(iOS 17.0, macOS 14.0, *) {
                 children.scrollClipDisabled(props.directive.props.isEmpty ? true : props._0 ?? true)
             } else {
                 children
