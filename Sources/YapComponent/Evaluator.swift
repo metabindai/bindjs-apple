@@ -101,6 +101,10 @@ struct Evaluator: ComponentVisitor {
     mutating func visitDictionary(_ dictionary: [String : any Component]) -> any Component {
         dictionary.mapValues { $0.accept(&self) }
     }
+    
+    mutating func visitRange(_ range: RangeExpr) -> any Component {
+        RangeExpr(start: range.start.accept(&self), end: range.end.accept(&self))
+    }
 }
 
 extension Evaluator {
@@ -157,7 +161,7 @@ extension Evaluator {
         return right.isTruthy
     }
     
-    private mutating func numberOperands(left: Component, right: Component) -> (Component, Component)? {
+    mutating func numberOperands(left: Component, right: Component) -> (Component, Component)? {
         switch (left, right) {
         case (let left as Double, let right as Double):
             return (left, right)
@@ -274,6 +278,7 @@ extension Component {
     public var arrayValue: [Component] {
         switch self {
         case let array as [Component]: return array
+        case let range as RangeExpr: return range.arrayValue
         case is EmptyComponent: return []
         default: return [self]
         }

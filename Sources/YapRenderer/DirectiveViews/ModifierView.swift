@@ -38,6 +38,9 @@ struct ModifierView: View {
         case hidden
         case layoutPriority
         case border
+        case drawingGroup
+        case compositingGroup
+        case scrollClipDisabled
     }
     
     let directive: Directive
@@ -199,6 +202,16 @@ struct ModifierView: View {
                 children.border(color, width: props.width ?? 1)
             } else {
                 children.border(props._0 ?? Color.primary, width: props.width ?? 1)
+            }
+        case .compositingGroup:
+            children.compositingGroup()
+        case .drawingGroup:
+            children.drawingGroup()
+        case .scrollClipDisabled:
+            if #available(iOS 16.0, macOS 14.0, *) {
+                children.scrollClipDisabled(props.directive.props.isEmpty ? true : props._0 ?? true)
+            } else {
+                children
             }
         case .none:
             EmptyView()

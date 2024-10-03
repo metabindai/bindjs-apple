@@ -26,6 +26,7 @@ public protocol ComponentVisitor {
     mutating func visitArray(_ array: [Component]) -> Result
     mutating func visitDictionary(_ dictionary: [String: Component]) -> Result
     mutating func visitConditional(_ conditional: ConditionalComponent) -> Result
+    mutating func visitRange(_ range: RangeExpr) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
     mutating func visitVariable(_ variable: Variable) -> Result
     mutating func visitBinary(_ binary: Binary) -> Result
@@ -42,6 +43,7 @@ extension ComponentVisitor {
     public mutating func visitArray(_ array: [Component]) -> Result { defaultVisit(array) }
     public mutating func visitDictionary(_ dictionary: [String: Component]) -> Result { defaultVisit(dictionary) }
     public mutating func visitConditional(_ conditional: ConditionalComponent) -> Result { defaultVisit(conditional) }
+    public mutating func visitRange(_ range: RangeExpr) -> Result { defaultVisit(range) }
     public mutating func visitForEach(_ forEach: ForEachComponent) -> Result { defaultVisit(forEach) }
     public mutating func visitVariable(_ variable: Variable) -> Result { defaultVisit(variable) }
     public mutating func visitBinary(_ binary: Binary) -> Result { defaultVisit(binary) }
@@ -130,6 +132,34 @@ public struct ConditionalComponent: Component {
     
     public func accept<Visitor: ComponentVisitor>(_ visitor: inout Visitor) -> Visitor.Result {
         visitor.visitConditional(self)
+    }
+}
+
+public struct RangeExpr: Component {
+    let start: Component
+    let end: Component
+    
+    public init(start: Component, end: Component) {
+        self.start = start
+        self.end = end
+    }
+    
+    public func accept<Visitor: ComponentVisitor>(_ visitor: inout Visitor) -> Visitor.Result {
+        visitor.visitRange(self)
+    }
+    
+    var arrayValue: [Component] {
+        var evaluator = Evaluator(context: .init())
+        guard let (lhs, rhs) = evaluator.numberOperands(left: self.start, right: self.end) else {
+            return []
+        }
+        switch (lhs, rhs) {
+        case (let lhs as Int, let rhs as Int):
+            return (lhs..<rhs).map { $0 as Component }
+        case (let lhs as Double, let rhs as Double):
+            return (Int(lhs)..<Int(rhs)).map { $0 as Component }
+        default: return []
+        }
     }
 }
 

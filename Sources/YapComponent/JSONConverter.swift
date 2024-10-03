@@ -78,6 +78,14 @@ private struct JSONConverter: ComponentVisitor {
         return result
     }
     
+    mutating func visitRange(_ range: RangeExpr) -> Any {
+        [
+            "type": "Range",
+            "start": range.start.accept(&self),
+            "end": range.end.accept(&self)
+        ]
+    }
+    
     mutating func defaultVisit(_ component: any Component) -> Any {
         fatalError()
     }
@@ -133,6 +141,11 @@ func makeComponent(_ any: Any) -> Component {
                     return Defaults(
                         constants: (dict["constants"] as? [String: Any] ?? [:]).mapValues(makeComponent),
                         content: makeComponent(dict["content"]!)
+                    )
+                case "Range":
+                    return RangeExpr(
+                        start: makeComponent(dict["start"]!),
+                        end: makeComponent(dict["end"]!)
                     )
                 default:
                 return Directive(

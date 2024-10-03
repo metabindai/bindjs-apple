@@ -32,6 +32,12 @@ struct EqualityVisitor: ComponentVisitor {
         }
     }
     
+    mutating func visitRange(_ range: RangeExpr) -> Bool {
+        guard let lhs = lhs as? RangeExpr else { return false }
+        return lhs.start == range.start
+        && lhs.end == range.end
+    }
+    
     mutating func visitConditional(_ conditional: ConditionalComponent) -> Bool {
         guard let lhs = lhs as? ConditionalComponent else { return false }
         return lhs.condition == conditional.condition
