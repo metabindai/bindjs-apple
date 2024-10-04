@@ -21,34 +21,34 @@ struct EqualityVisitor: ComponentVisitor {
     mutating func visitArray(_ array: [any Component]) -> Bool {
         guard let lhs = lhs as? [any Component] else { return false }
         guard lhs.count == array.count else { return false }
-        return zip(lhs, array).allSatisfy(==)
+        return zip(lhs, array).allSatisfy(isEqual)
     }
     
     mutating func visitDictionary(_ dictionary: [String : any Component]) -> Bool {
         guard let lhs = lhs as? [String: any Component] else { return false }
         guard lhs.count == dictionary.count else { return false }
         return dictionary.allSatisfy { key, value in
-            (lhs[key] ?? EmptyComponent()) == value
+            isEqual((lhs[key] ?? EmptyComponent()) , value)
         }
     }
     
     mutating func visitRange(_ range: RangeExpr) -> Bool {
         guard let lhs = lhs as? RangeExpr else { return false }
-        return lhs.start == range.start
-        && lhs.end == range.end
+        return isEqual(lhs.start , range.start)
+        && isEqual(lhs.end , range.end)
     }
     
     mutating func visitConditional(_ conditional: ConditionalComponent) -> Bool {
         guard let lhs = lhs as? ConditionalComponent else { return false }
-        return lhs.condition == conditional.condition
-        && lhs.thenContent == conditional.thenContent
-        && (lhs.elseContent ?? EmptyComponent()) == (conditional.elseContent ?? EmptyComponent())
+        return isEqual(lhs.condition , conditional.condition)
+        && isEqual(lhs.thenContent , conditional.thenContent)
+        && isEqual((lhs.elseContent ?? EmptyComponent()), (conditional.elseContent ?? EmptyComponent()))
     }
     
     mutating func visitForEach(_ forEach: ForEachComponent) -> Bool {
         guard let lhs = lhs as? ForEachComponent else { return false }
-        return lhs.data == forEach.data
-        && lhs.content == forEach.content
+        return isEqual(lhs.data , forEach.data)
+        && isEqual(lhs.content , forEach.content)
     }
     
     mutating func visitVariable(_ variable: Variable) -> Bool {
@@ -58,33 +58,33 @@ struct EqualityVisitor: ComponentVisitor {
     
     mutating func visitBinary(_ binary: Binary) -> Bool {
         guard let lhs = lhs as? Binary else { return false }
-        return lhs.left == binary.left
+        return isEqual(lhs.left , binary.left)
         && lhs.op == binary.op
-        && lhs.right == binary.right
+        && isEqual(lhs.right , binary.right)
     }
     
     mutating func visitClosure(_ closure: Closure) -> Bool {
         guard let lhs = lhs as? Closure else { return false }
-        return lhs.parameters == closure.parameters
-        && lhs.content == closure.content
+        return isEqual(lhs.parameters , closure.parameters)
+        && isEqual(lhs.content , closure.content)
     }
     
     mutating func visitDefaults(_ defaults: Defaults) -> Bool {
         guard let lhs = lhs as? Defaults else { return false }
-        return lhs.constants == defaults.constants
-        && lhs.content == defaults.content
+        return isEqual(lhs.constants , defaults.constants)
+        && isEqual(lhs.content , defaults.content)
     }
     
     mutating func visitState(_ state: StateVars) -> Bool {
         guard let lhs = lhs as? StateVars else { return false }
-        return lhs.bindings == state.bindings
+        return isEqual(lhs.bindings , state.bindings)
     }
     
     mutating func visitDirective(_ directive: Directive) -> Bool {
         guard let lhs = lhs as? Directive else { return false }
         return lhs.type == directive.type
-        && lhs.props == directive.props
-        && lhs.children == directive.children
+        && isEqual(lhs.props , directive.props)
+        && isEqual(lhs.children , directive.children)
     }
     
     public mutating func visitEmpty(_ empty: EmptyComponent) -> Bool {
@@ -93,11 +93,7 @@ struct EqualityVisitor: ComponentVisitor {
     }
 }
 
-public func == (lhs: Component, rhs: Component) -> Bool {
+public func isEqual (_ lhs: Component, _ rhs: Component) -> Bool {
     var visitor = EqualityVisitor(lhs: lhs)
     return rhs.accept(&visitor)
-}
-
-public func != (lhs: Component, rhs: Component) -> Bool {
-    !(lhs == rhs)
 }

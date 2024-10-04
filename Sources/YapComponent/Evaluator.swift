@@ -153,11 +153,11 @@ extension Evaluator {
     }
     
     private mutating func isEqual(left: Component, right: Component) -> Bool {
-        left.accept(&self) == right.accept(&self)
+        YapComponent.isEqual(left.accept(&self), right.accept(&self))
     }
     
     private mutating func isNotEqual(left: Component, right: Component) -> Bool {
-        left.accept(&self) != right.accept(&self)
+        !YapComponent.isEqual(left.accept(&self), right.accept(&self))
     }
     
     private mutating func negate(right: Component) -> Component {

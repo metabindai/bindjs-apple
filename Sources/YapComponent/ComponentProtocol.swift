@@ -77,7 +77,7 @@ public struct AnyComponent: Component, Equatable, CustomStringConvertible {
     }
     
     public static func == (lhs: AnyComponent, rhs: AnyComponent) -> Bool {
-        lhs.unerased == rhs.unerased
+        YapComponent.isEqual(lhs.unerased, rhs.unerased)
     }
     
     public static var empty: Self { .init(EmptyComponent()) }

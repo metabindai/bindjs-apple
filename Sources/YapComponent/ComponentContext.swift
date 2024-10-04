@@ -67,7 +67,7 @@ public class ComponentContext: ObservableObject {
         if (values.keys.contains(key) && !constants.contains(key)) || (parent == nil && !constants.contains(key)) {
             let oldValue = values[key] ?? EmptyComponent()
             values[key] = value
-            if oldValue != value {
+            if !YapComponent.isEqual(oldValue, value) {
                 notifyDependents(forKey: key)
             }
         } else {
