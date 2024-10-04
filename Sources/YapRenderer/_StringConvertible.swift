@@ -471,6 +471,36 @@ extension UnitPoint: _StringConvertible {
     }
 }
 
+extension UnitPoint: _DirectriveConvertible {
+    public var directive: Directive {
+        Directive("UnitPoint", self.description)
+    }
+    
+    public init?(_ directive: Directive) {
+        guard directive.type == "UnitPoint" else { return nil }
+        if let fromString = UnitPoint(directive.props["_0"] as? String ?? "") {
+            self = fromString
+        } else {
+            return nil
+        }
+    }
+}
+
+extension Material: _DirectriveConvertible {
+    public var directive: Directive {
+        Directive("Material", self.description)
+    }
+    
+    public init?(_ directive: Directive) {
+        guard directive.type == "Material" else { return nil }
+        if let fromString = Material(directive.props["_0"] as? String ?? "") {
+            self = fromString
+        } else {
+            return nil
+        }
+    }
+}
+
 extension URL: _StringConvertible {
     public init?(_ string: String) {
         guard let url = URL(string: string) else { return nil }

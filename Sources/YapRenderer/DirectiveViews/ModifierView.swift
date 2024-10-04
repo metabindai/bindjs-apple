@@ -252,10 +252,24 @@ struct ForegroundStyleModifier: View {
         ComponentView(directive.children)
     }
     
+    var firstColor: Color? {
+        guard let colorDirective = props.first(where: { $0 is Directive }) as? Directive, colorDirective.type == "Color" else {
+            return nil
+        }
+        return Color(colorDirective)
+    }
+    
+    var firstMaterial: Material? {
+        guard let materialDirective = props.first(where: { $0 is Directive }) as? Directive, materialDirective.type == "Material" else {
+            return nil
+        }
+        return Material(materialDirective)
+    }
+    
     var body: some View {
-        if let material = Material(props._0 ?? "") {
+        if let material = Material(props._0 ?? "") ?? firstMaterial {
             children.foregroundStyle(material)
-        } else if let color = Color(props._0 ?? "") {
+        } else if let color = Color(props._0 ?? "") ?? firstColor {
             children.foregroundStyle(color)
 //        } else if let gradient = Gradient(props._0 ?? "") { // TODO
             
