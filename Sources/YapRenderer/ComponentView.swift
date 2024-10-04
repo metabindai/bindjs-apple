@@ -122,7 +122,7 @@ public struct RootComponentView: View {
     
     public var body: some View {
         ComponentView(evaluated)
-            .task(id: component.jsonString) {
+            .task(id: AnyComponent(component)) {
                 evaluate()
             }
             .onReceive(context.objectWillChange) { _ in
