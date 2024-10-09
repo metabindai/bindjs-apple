@@ -94,13 +94,13 @@ private struct JSONConverter: ComponentVisitor {
     }
 }
 
-func decodeComponent(from json: String) -> ComponentProtocol {
+public func decodeComponent(from json: String) -> ComponentProtocol {
     let data = json.data(using: .utf8)!
     let any = try! JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed, .json5Allowed])
     return decodeComponent(any)
 }
 
-func decodeComponent(_ any: Any) -> ComponentProtocol {
+public func decodeComponent(_ any: Any) -> ComponentProtocol {
     switch any {
     case is NSNull:
         return EmptyComponent()
