@@ -15,11 +15,7 @@ extension BoldComponent: ViewModifier {
         if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
             content.bold(isActive)
         } else {
-            if isActive {
-                content.bold()
-            } else {
-                content
-            }
+            content
         }
     }
 }

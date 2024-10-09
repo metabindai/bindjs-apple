@@ -21,7 +21,11 @@ public struct NavigationLinkComponent: AutomaticComponentConvertible {
 
 extension NavigationLinkComponent: View {
     public var body: some View {
-        NavigationLink(value: value) {
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+            NavigationLink(value: value) {
+                ComponentView(label)
+            }
+        } else {
             ComponentView(label)
         }
     }
