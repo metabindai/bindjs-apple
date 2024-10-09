@@ -1,27 +1,27 @@
 import SwiftUI
 
-class ComponentContext {
-    var parent: ComponentContext?
+public class ComponentContext {
+    public var parent: ComponentContext?
     
-    init(parent: ComponentContext? = nil) {
+    public init(parent: ComponentContext? = nil) {
         self.parent = parent
     }
     
-    var values: [String: ComponentProtocol] = [:]
+    public var values: [String: ComponentProtocol] = [:]
     
-    func get(_ name: String) -> ComponentProtocol? {
+    public func get(_ name: String) -> ComponentProtocol? {
         values[name] ?? parent?.get(name)
     }
     
-    func define(_ name: String, _ value: ComponentProtocol) {
+    public func define(_ name: String, _ value: ComponentProtocol) {
         values[name] = value
     }
     
-    func define(_ component: Component) {
+    public func define(_ component: Component) {
         values[component.type] = component.evaluate(self)
     }
     
-    func assign(_ name: String, _ value: ComponentProtocol) {
+    public func assign(_ name: String, _ value: ComponentProtocol) {
         if values[name] != nil || parent == nil {
             values[name] = value
         } else {
@@ -29,7 +29,7 @@ class ComponentContext {
         }
     }
     
-    var allKeys: Set<String> {
+    public var allKeys: Set<String> {
         Set(values.keys).union(parent?.allKeys ?? [])
     }
 }
@@ -46,7 +46,7 @@ struct ComponentContextKey: EnvironmentKey {
 }
 
 extension EnvironmentValues {
-    var componentContext: ComponentContext {
+    public var componentContext: ComponentContext {
         get {
             self[ComponentContextKey.self]
         }

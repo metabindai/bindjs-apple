@@ -176,6 +176,10 @@ public extension ComponentProtocol {
         modifier(ForegroundStyleComponent(material: material))
     }
     
+    func foregroundStyle(_ name: String) -> ComponentProtocol {
+        modifier(ForegroundStyleComponent(name: name))
+    }
+    
     func accessibilityLabel(_ label: String) -> ComponentProtocol {
         modifier(AccessibilityLabelComponent(value: label))
     }

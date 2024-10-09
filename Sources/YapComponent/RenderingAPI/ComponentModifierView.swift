@@ -116,7 +116,7 @@ struct ComponentViewModifier: ViewModifier {
             content.compositingGroup()
         
         case .foregroundStyle(let foregroundStyleComponent):
-            content.modifier(foregroundStyleComponent)
+            content.modifier(ForegroundStyleComponentModifier(foregroundStyleComponent))
         
         case .accessibilityLabel(let accessibilityLabelComponent):
             if let value = accessibilityLabelComponent.value {
