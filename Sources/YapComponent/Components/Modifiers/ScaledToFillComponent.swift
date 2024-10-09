@@ -1,0 +1,1 @@
+struct ScaledToFillComponent: AutomaticComponentConvertible {}

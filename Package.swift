@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.11
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -17,9 +17,6 @@ let package = Package(
         .library(
             name: "YapComponent",
             targets: ["YapComponent"]),
-        .library(
-            name: "YapRenderer",
-            targets: ["YapRenderer"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -30,9 +27,5 @@ let package = Package(
             name: "YapComponentTests",
             dependencies: ["YapComponent"]
         ),
-        .target(
-            name: "YapRenderer",
-            dependencies: ["YapComponent"]
-        )
     ]
 )

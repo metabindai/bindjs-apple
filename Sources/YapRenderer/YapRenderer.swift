@@ -1,1 +1,0 @@
-// Yap Renderer
