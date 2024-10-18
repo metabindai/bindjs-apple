@@ -3,12 +3,12 @@ import SwiftUI
 public struct HStackComponent: AutomaticComponentConvertible {
     public var alignment: VerticalAlignmentComponent = .center
     public var spacing: Double?
-    public var content: ComponentProtocol = EmptyComponent()
+    public var children: ComponentProtocol = EmptyComponent()
     
     public init(alignment: VerticalAlignmentComponent, spacing: Double? = nil, content: ComponentProtocol) {
         self.alignment = alignment
         self.spacing = spacing
-        self.content = content
+        self.children = content
     }
     
     public init() {}
@@ -17,7 +17,7 @@ public struct HStackComponent: AutomaticComponentConvertible {
         [
             ("alignment", \Self.alignment),
             ("spacing", \Self.spacing),
-            ("content", \Self.content)
+            ("children", \Self.children)
         ]
     }
 }
@@ -25,7 +25,7 @@ public struct HStackComponent: AutomaticComponentConvertible {
 extension HStackComponent: View {
     public var body: some View {
         HStack(alignment: alignment.swiftUI, spacing: spacing.flatMap { CGFloat($0) }) {
-            ComponentView(content)
+            ComponentView(children)
         }
     }
 }

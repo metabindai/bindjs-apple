@@ -5,6 +5,12 @@ public struct Binary: ComponentProtocol {
     let `operator`: String
     let right: ComponentProtocol
     
+    public init(left: ComponentProtocol, operator: String, right: ComponentProtocol) {
+        self.left = left
+        self.operator = `operator`
+        self.right = right
+    }
+    
     public func accept<V>(_ visitor: inout V) -> V.Result where V : ComponentVisitor {
         visitor.visitBinary(self)
     }

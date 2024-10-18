@@ -1,8 +1,13 @@
 import SwiftUI
 
 public struct ModifiedComponent: ComponentProtocol {
-    var content: ComponentProtocol = EmptyComponent()
-    var modifier: ComponentProtocol = EmptyComponent()
+    public var content: ComponentProtocol = EmptyComponent()
+    public var modifier: ComponentProtocol = EmptyComponent()
+    
+    public init(content: ComponentProtocol, modifier: ComponentProtocol) {
+        self.content = content
+        self.modifier = modifier
+    }
     
     public func accept<V: ComponentVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitModifiedComponent(self)

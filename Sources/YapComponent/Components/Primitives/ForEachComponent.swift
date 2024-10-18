@@ -1,16 +1,16 @@
 import SwiftUI
 
 public struct ForEachComponent: ComponentProtocol {
+    let variable: String
     let data: ComponentProtocol
     let content: ComponentProtocol
     
     public func accept<V: ComponentVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitForEach(self)
     }
-}
-
-extension ForEachComponent {
-    init(_ data: ComponentProtocol, _ content: ComponentProtocol) {
+    
+    public init(variable: String, data: ComponentProtocol, content: ComponentProtocol) {
+        self.variable = variable
         self.data = data
         self.content = content
     }
@@ -32,6 +32,7 @@ struct ForEachView: View {
                     let newContext = ComponentContext(parent: context)
                     newContext.define("index", index)
                     newContext.define("element", array[index])
+                    newContext.define(forEachComponent.variable, array[index])
                     
                     context = newContext
                 }
@@ -47,6 +48,7 @@ extension Evaluator {
             let newContext = ComponentContext(parent: context)
             newContext.define("index", index)
             newContext.define("element", element)
+            newContext.define(forEach.variable, element)
             result.append(forEach.content.evaluate(newContext))
         }
         return result

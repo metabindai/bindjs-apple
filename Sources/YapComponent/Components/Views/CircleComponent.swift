@@ -1,3 +1,5 @@
 public struct CircleComponent: AutomaticComponentConvertible {
-    public init() {}
+    public init() {
+        
+    }
 }

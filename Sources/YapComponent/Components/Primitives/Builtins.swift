@@ -1,6 +1,9 @@
 // MARK: - EmptyComponent
 
 public struct EmptyComponent: ComponentProtocol {
+    
+    public init() {}
+    
     public func accept<V: ComponentVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitEmpty(self)
     }

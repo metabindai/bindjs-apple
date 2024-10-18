@@ -82,7 +82,7 @@ enum ComponentViewModifierEnum {
 
 extension ComponentConvertible {
     static var componentName: String {
-        "\(Self.self)".replacingOccurrences(of: "Component", with: "")
+        "\(Self.self)".replacingOccurrences(of: "Component", with: "").lowercased()
     }
     
     var component: Component {

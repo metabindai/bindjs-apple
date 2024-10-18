@@ -6,9 +6,10 @@ public struct ComponentBuilder {
 }
 
 extension ForEachComponent {
-    public init(_ data: ComponentProtocol, @ComponentBuilder _ content: () -> [ComponentProtocol]) {
+    public init(_ data: ComponentProtocol, variable: String, @ComponentBuilder _ content: () -> [ComponentProtocol]) {
         self.data = data
         self.content = content()
+        self.variable = variable
     }
 }
 
@@ -27,18 +28,18 @@ extension ConditionalComponent {
 }
 
 extension VStackComponent {
-    public init(alignment: HorizontalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder content: () -> [ComponentProtocol]) {
+    public init(alignment: HorizontalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
         self.alignment = alignment
         self.spacing = spacing
-        self.content = content()
+        self.children = children()
     }
 }
 
 extension HStackComponent {
-    public init(alignment: VerticalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder content: () -> [ComponentProtocol]) {
+    public init(alignment: VerticalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
         self.alignment = alignment
         self.spacing = spacing
-        self.content = content()
+        self.children = children()
     }
 }
 

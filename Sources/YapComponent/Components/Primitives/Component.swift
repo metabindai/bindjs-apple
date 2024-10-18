@@ -1,9 +1,9 @@
 import SwiftUI
 
 public struct Component: ComponentProtocol {
-    let type: String
-    var props: [String: ComponentProtocol] = [:]
-    var children: [ComponentProtocol] {
+    public let type: String
+    public var props: [String: ComponentProtocol] = [:]
+    public var children: [ComponentProtocol] {
         get { props["children"]?.arrayValue ?? [] }
         set { props["children"] = newValue }
     }
@@ -53,11 +53,14 @@ extension Evaluator {
     
     mutating func visitComponent(_ component: Component) -> any ComponentProtocol {
         let props = component.props.mapValues { $0.accept(&self) }
+        let component = Component(type: component.type, props: props)
         
         if let definition = context.get(component.type) as? Callable {
             return definition.callAsFunction(props, context: context)
+        } else if let converted = convertComponent(component) {
+            return converted
         }
         
-        return Component(type: component.type, props: props)
+        return component
     }
 }

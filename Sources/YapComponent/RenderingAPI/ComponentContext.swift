@@ -68,7 +68,7 @@ struct Evaluator: ComponentVisitor {
 
 
 extension ComponentProtocol {
-    var isTruthy: Bool {
+    public var isTruthy: Bool {
         switch self {
         case let bool as Bool:
             return bool
@@ -79,7 +79,7 @@ extension ComponentProtocol {
         }
     }
     
-    var arrayValue: [ComponentProtocol] {
+    public var arrayValue: [ComponentProtocol] {
         switch self {
         case let array as [ComponentProtocol]:
             return array
@@ -90,7 +90,7 @@ extension ComponentProtocol {
         }
     }
     
-    var dictionaryValue: [String: ComponentProtocol] {
+    public var dictionaryValue: [String: ComponentProtocol] {
         switch self {
         case let dictionary as [String: ComponentProtocol]:
             return dictionary

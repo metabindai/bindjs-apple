@@ -77,12 +77,15 @@ private struct JSONConverter: ComponentVisitor {
     }
     
     mutating func visitConditional(_ conditional: ConditionalComponent) -> Any {
-        [
+        var result: [String: Any] = [
             "type": "Conditional",
             "condition": conditional.condition.accept(&self),
-            "then": conditional.thenContent.accept(&self),
-            "else": conditional.elseContent.accept(&self),
+            "then": conditional.thenContent.accept(&self)
         ]
+        if let elseContent = conditional.elseContent {
+            result["else"] = elseContent.accept(&self)
+        }
+        return result
     }
     
     mutating func visitClosure(_ closure: Closure) -> Any {
@@ -136,7 +139,8 @@ public func decodeComponent(_ any: Any) -> ComponentProtocol {
             case "ForEach":
                 let data = decodeComponent(dictionary["data"] ?? [:])
                 let content = decodeComponent(dictionary["content"] ?? [:])
-                return ForEachComponent(data: data, content: content)
+                let variable = dictionary["variable"] as? String ?? ""
+                return ForEachComponent(variable: variable, data: data, content: content)
             case "Conditional":
                 let condition = decodeComponent(dictionary["condition"] ?? [:])
                 let thenContent = decodeComponent(dictionary["then"] ?? [:])
@@ -167,7 +171,7 @@ public func decodeComponent(_ any: Any) -> ComponentProtocol {
 // MARK: Giant Switch Statement
 
 func convertComponent(_ component: Component) -> ComponentConvertible? {
-    switch component.type {
+    switch component.type.lowercased() {
     case AccessibilityLabelComponent.componentName: AccessibilityLabelComponent(component)
     case AlignmentComponent.componentName: AlignmentComponent(component)
     case AspectRatioComponent.componentName: AspectRatioComponent(component)
@@ -288,7 +292,7 @@ struct CaseInViewEnum: ComponentVisitor {
         component.props = component.props.mapValues { $0.evaluate(context) }
         
         // Convert the component based on its type and return an appropriate case from the enum
-        return switch component.type {
+        return switch component.type.lowercased() {
         case ButtonComponent.componentName: .button(ButtonComponent(component))
         case CapsuleComponent.componentName: .capsule(CapsuleComponent())
         case CircleComponent.componentName: .circle(CircleComponent())
@@ -328,7 +332,7 @@ struct CaseInViewModifierEnum: ComponentVisitor {
         // Evaluate the props of the component
         component.props = component.props.mapValues { $0.evaluate(context) }
         
-        return switch component.type {
+        return switch component.type.lowercased() {
         case AccessibilityLabelComponent.componentName: .accessibilityLabel(AccessibilityLabelComponent(component))
         case AspectRatioComponent.componentName: .aspectRatio(AspectRatioComponent(component))
         case BackgroundComponent.componentName: .background(BackgroundComponent(component))

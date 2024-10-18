@@ -8,6 +8,12 @@ public struct Closure: Callable {
     let body: ComponentProtocol
     var enclosedContext: ComponentContext?
     
+    public init(props: [String : ComponentProtocol], body: ComponentProtocol, enclosedContext: ComponentContext? = nil) {
+        self.props = props
+        self.body = body
+        self.enclosedContext = enclosedContext
+    }
+    
     public func accept<V: ComponentVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitClosure(self)
     }

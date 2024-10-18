@@ -46,7 +46,7 @@ struct EqualityVisitor: ComponentVisitor {
         guard let lhs = lhs as? ConditionalComponent else { return false }
         return isEqual(lhs.condition , conditional.condition)
         && isEqual(lhs.thenContent , conditional.thenContent)
-        && isEqual(lhs.elseContent, conditional.elseContent)
+        && isEqual(lhs.elseContent ?? EmptyComponent(), conditional.elseContent ?? EmptyComponent())
     }
     
     mutating func visitForEach(_ forEach: ForEachComponent) -> Bool {
