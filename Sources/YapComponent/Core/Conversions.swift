@@ -99,8 +99,12 @@ private struct JSONConverter: ComponentVisitor {
 
 public func decodeComponent(from json: String) -> ComponentProtocol {
     let data = json.data(using: .utf8)!
-    let any = try! JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed, .json5Allowed])
-    return decodeComponent(any)
+    do {
+        let any = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed, .json5Allowed])
+        return decodeComponent(any)
+    } catch {
+        return EmptyComponent()
+    }
 }
 
 public func decodeComponent(_ any: Any) -> ComponentProtocol {
