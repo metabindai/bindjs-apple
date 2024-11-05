@@ -3,7 +3,7 @@ struct DisabledComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("isActive", \DisabledComponent.isActive)
+            ("rawValue", \DisabledComponent.isActive)
         ]
     }
 }

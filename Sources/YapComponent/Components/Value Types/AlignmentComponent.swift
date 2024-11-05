@@ -24,10 +24,6 @@ public struct AlignmentComponent: Equatable {
 }
 
 extension AlignmentComponent: AutomaticComponentConvertible {
-//    public init(_ component: Component) {
-//        self.horizontal = component.props["horizontal"].map(decodeComponent(_:)) as? HorizontalAlignmentComponent ?? .center
-//        self.vertical = component.props["vertical"].map(decodeComponent(_:)) as? VerticalAlignmentComponent ?? .center
-//    }
 }
 
 extension AlignmentComponent {

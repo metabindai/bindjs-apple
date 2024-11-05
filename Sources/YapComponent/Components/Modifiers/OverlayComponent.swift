@@ -3,7 +3,7 @@ struct OverlayComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("content", \Self.content)
+            ("rawValue", \Self.content)
         ]
     }
 }

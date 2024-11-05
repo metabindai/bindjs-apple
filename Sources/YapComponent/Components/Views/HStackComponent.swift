@@ -5,10 +5,10 @@ public struct HStackComponent: AutomaticComponentConvertible {
     public var spacing: Double?
     public var children: ComponentProtocol = EmptyComponent()
     
-    public init(alignment: VerticalAlignmentComponent, spacing: Double? = nil, content: ComponentProtocol) {
+    public init(alignment: VerticalAlignmentComponent, spacing: Double? = nil, children: ComponentProtocol) {
         self.alignment = alignment
         self.spacing = spacing
-        self.children = content
+        self.children = children
     }
     
     public init() {}

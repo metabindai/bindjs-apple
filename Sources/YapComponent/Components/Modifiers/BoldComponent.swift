@@ -5,7 +5,7 @@ struct BoldComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("isActive", \Self.isActive)
+            ("rawValue", \Self.isActive)
         ]
     }
 }

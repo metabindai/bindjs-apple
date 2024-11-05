@@ -44,23 +44,23 @@ extension HStackComponent {
 }
 
 extension ZStackComponent {
-    public init(alignment: AlignmentComponent = .init(), @ComponentBuilder content: () -> [ComponentProtocol]) {
+    public init(alignment: AlignmentComponent = .init(), @ComponentBuilder children: () -> [ComponentProtocol]) {
         self.alignment = alignment
-        self.content = content()
+        self.children = children()
     }
 }
 
 extension ScrollViewComponent {
-    public init(axes: AxisSetComponent = .vertical, showsIndicators: Bool = true, @ComponentBuilder content: () -> [ComponentProtocol]) {
+    public init(axes: AxisSetComponent = .vertical, showsIndicators: Bool = true, @ComponentBuilder children: () -> [ComponentProtocol]) {
         self.axes = axes
         self.showsIndicators = showsIndicators
-        self.content = content()
+        self.children = children()
     }
 }
 
 extension ListComponent {
-    public init(@ComponentBuilder content: () -> [ComponentProtocol]) {
-        self.content = content()
+    public init(@ComponentBuilder children: () -> [ComponentProtocol]) {
+        self.children = children()
     }
 }
 

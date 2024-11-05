@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct FontSizeComponent: AutomaticComponentConvertible {
-    var size: Double = 15.0
+    var size: Double?
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("size", \Self.size)
+            ("rawValue", \Self.size)
         ]
     }
 }
@@ -13,6 +13,10 @@ struct FontSizeComponent: AutomaticComponentConvertible {
 extension FontSizeComponent: ViewModifier {
     
     func body(content: Content) -> some View {
-        content.font(.system(size: size))
+        if let size {
+            content.font(.system(size: size))
+        } else {
+            content
+        }
     }
 }

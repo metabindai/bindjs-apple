@@ -1,17 +1,17 @@
 import SwiftUI
 
 public struct ListComponent: AutomaticComponentConvertible {
-    public var content: ComponentProtocol = EmptyComponent()
+    public var children: ComponentProtocol = EmptyComponent()
     
-    public init(content: ComponentProtocol) {
-        self.content = content
+    public init(children: ComponentProtocol) {
+        self.children = children
     }
     
     public init() {}
     
     public static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("content", \Self.content)
+            ("children", \Self.children),
         ]
     }
 }
@@ -19,7 +19,7 @@ public struct ListComponent: AutomaticComponentConvertible {
 extension ListComponent: View {
     public var body: some View {
         List {
-            ComponentView(content)
+            ComponentView(children)
         }
     }
 }

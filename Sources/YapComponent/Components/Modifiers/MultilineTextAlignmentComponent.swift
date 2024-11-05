@@ -5,7 +5,7 @@ struct MultiLineTextAlignmentComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("alignment", \Self.alignment)
+            ("rawValue", \Self.alignment)
         ]
     }
 }

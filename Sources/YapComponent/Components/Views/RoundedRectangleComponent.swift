@@ -11,7 +11,7 @@ public struct RoundedRectangleComponent: AutomaticComponentConvertible {
     
     public static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("cornerRadius", \Self.cornerRadius)
+            ("rawValue", \Self.cornerRadius)
         ]
     }
 }

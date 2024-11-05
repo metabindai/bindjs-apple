@@ -6,6 +6,7 @@ struct RotationEffectComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
+            ("rawValue", \Self.angle),
             ("angle", \Self.angle),
             ("anchor", \Self.anchor)
         ]

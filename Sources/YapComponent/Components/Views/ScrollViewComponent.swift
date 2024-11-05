@@ -3,12 +3,12 @@ import SwiftUI
 public struct ScrollViewComponent: AutomaticComponentConvertible {
     public var axes: AxisSetComponent = .vertical
     public var showsIndicators: Bool = true
-    public var content: ComponentProtocol = EmptyComponent()
+    public var children: ComponentProtocol = EmptyComponent()
     
-    public init(axes: AxisSetComponent, showsIndicators: Bool, content: ComponentProtocol) {
+    public init(axes: AxisSetComponent, showsIndicators: Bool, children: ComponentProtocol) {
         self.axes = axes
         self.showsIndicators = showsIndicators
-        self.content = content
+        self.children = children
     }
     
     public init() {}
@@ -17,7 +17,7 @@ public struct ScrollViewComponent: AutomaticComponentConvertible {
         [
             ("axes", \Self.axes),
             ("showsIndicators", \Self.showsIndicators),
-            ("content", \Self.content)
+            ("children", \Self.children)
         ]
     }
 }
@@ -25,7 +25,7 @@ public struct ScrollViewComponent: AutomaticComponentConvertible {
 extension ScrollViewComponent: View {
     public var body: some View {
         ScrollView(axes.swiftUI, showsIndicators: showsIndicators) {
-            ComponentView(content)
+            ComponentView(children)
         }
     }
 }

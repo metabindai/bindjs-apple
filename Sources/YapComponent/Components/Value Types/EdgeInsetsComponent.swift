@@ -5,13 +5,15 @@ struct EdgeInsetsComponent: AutomaticComponentConvertible {
     var leading: Double = 0.0
     var bottom: Double = 0.0
     var trailing: Double = 0.0
+    var all: Double?
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
             ("top", \Self.top),
             ("leading", \Self.leading),
             ("bottom", \Self.bottom),
-            ("trailing", \Self.trailing)
+            ("trailing", \Self.trailing),
+            ("rawValue", \Self.all)
         ]
     }
 }
@@ -25,10 +27,10 @@ extension EdgeInsetsComponent {
 extension EdgeInsetsComponent {
     var swiftUI: EdgeInsets {
         EdgeInsets(
-            top: top,
-            leading: leading,
-            bottom: bottom,
-            trailing: trailing
+            top: all ?? top,
+            leading: all ?? leading,
+            bottom: all ?? bottom,
+            trailing: all ?? trailing
         )
     }
 }

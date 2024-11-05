@@ -3,7 +3,7 @@ struct BlurComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("radius", \Self.radius)
+            ("rawValue", \Self.radius)
         ]
     }
 }

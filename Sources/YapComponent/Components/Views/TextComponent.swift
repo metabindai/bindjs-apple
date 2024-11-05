@@ -11,7 +11,7 @@ public struct TextComponent: AutomaticComponentConvertible {
     
     public static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("text", \Self.text)
+            ("rawValue", \Self.text)
         ]
     }
 }

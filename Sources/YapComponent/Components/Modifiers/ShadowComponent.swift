@@ -8,6 +8,7 @@ struct ShadowComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
+            ("rawValue", \Self.radius),
             ("color", \Self.color),
             ("radius", \Self.radius),
             ("x", \Self.x),

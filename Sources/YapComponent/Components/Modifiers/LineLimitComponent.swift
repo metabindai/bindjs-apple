@@ -3,7 +3,7 @@ struct LineLimitComponent: AutomaticComponentConvertible {
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
-            ("value", \Self.value)
+            ("rawValue", \Self.value)
         ]
     }
 }
