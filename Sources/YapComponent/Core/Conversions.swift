@@ -177,9 +177,7 @@ public func decodeComponent(_ any: Any) -> ComponentProtocol {
 func convertComponent(_ component: Component) -> ComponentConvertible? {
     switch component.type.lowercased() {
     case AccessibilityLabelComponent.componentName: AccessibilityLabelComponent(component)
-    case AlignmentComponent.componentName: AlignmentComponent(component)
     case AspectRatioComponent.componentName: AspectRatioComponent(component)
-    case AxisSetComponent.componentName: AxisSetComponent(component)
     case BackgroundComponent.componentName: BackgroundComponent(component)
     case BlurComponent.componentName: BlurComponent(component)
     case BoldComponent.componentName: BoldComponent(component)
@@ -190,12 +188,9 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case CircleComponent.componentName: CircleComponent(component)
     case ColorComponent.componentName: ColorComponent(component)
     case CompositingGroupComponent.componentName: CompositingGroupComponent(component)
-    case ContentModeComponent.componentName: ContentModeComponent(component)
     case CornerRadiusComponent.componentName: CornerRadiusComponent(component)
     case DisabledComponent.componentName: DisabledComponent(component)
     case DividerComponent.componentName: DividerComponent(component)
-    case EdgeInsetsComponent.componentName: EdgeInsetsComponent(component)
-    case EdgeSetComponent.componentName: EdgeSetComponent(component)
     case EllipseComponent.componentName: EllipseComponent(component)
     case FlexFrameComponent.componentName: FlexFrameComponent(component)
     case FontDesignComponent.componentName: FontDesignComponent(component)
@@ -205,7 +200,6 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case ForegroundStyleComponent.componentName: ForegroundStyleComponent(component)
     case FrameComponent.componentName: FrameComponent(component)
     case HiddenComponent.componentName: HiddenComponent(component)
-    case HorizontalAlignmentComponent.componentName: HorizontalAlignmentComponent(component)
     case HStackComponent.componentName: HStackComponent(component)
     case IgnoresSafeAreaComponent.componentName: IgnoresSafeAreaComponent(component)
     case ImageComponent.componentName: ImageComponent(component)
@@ -235,8 +229,6 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case SpacerComponent.componentName: SpacerComponent(component)
     case TextComponent.componentName: TextComponent(component)
     case TrackingComponent.componentName: TrackingComponent(component)
-    case UnitPointComponent.componentName: UnitPointComponent(component)
-    case VerticalAlignmentComponent.componentName: VerticalAlignmentComponent(component)
     case VStackComponent.componentName: VStackComponent(component)
     case ZIndexComponent.componentName: ZIndexComponent(component)
     case ZStackComponent.componentName: ZStackComponent(component)
@@ -288,6 +280,10 @@ struct CaseInViewEnum: ComponentVisitor {
     
     mutating func visitBinary(_ binary: Binary) -> ComponentViewEnum? {
         .binary(binary)
+    }
+    
+    mutating func visitEmpty(_ emptyComponent: EmptyComponent) -> ComponentViewEnum? {
+        .empty
     }
     
     mutating func visitComponent(_ component: Component) -> ComponentViewEnum? {

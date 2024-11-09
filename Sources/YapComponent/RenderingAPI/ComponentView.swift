@@ -97,6 +97,9 @@ public struct ComponentView: View {
         
         case .list(let listComponent):
             listComponent
+            
+        case .empty:
+            Color.clear.hidden()
         
         case .none:
             switch component {

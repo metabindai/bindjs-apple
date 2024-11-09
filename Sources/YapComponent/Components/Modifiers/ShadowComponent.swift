@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ShadowComponent: AutomaticComponentConvertible {
-    var color: ColorComponent = .init()
+    var color: ColorComponent = .init(red: 0, green: 0, blue: 0, opacity: 0.5)
     var radius: Double = 0.0
     var x: Double = 0.0
     var y: Double = 0.0

@@ -9,6 +9,7 @@ import Foundation
 
 enum ComponentViewEnum {
     // Primitives and control flow
+    case empty
     case string(String)
     case array([ComponentProtocol])
     case binary(Binary)

@@ -1,11 +1,11 @@
 import SwiftUI
 
 public struct HStackComponent: AutomaticComponentConvertible {
-    public var alignment: VerticalAlignmentComponent = .center
+    public var alignment: String = "center"
     public var spacing: Double?
     public var children: ComponentProtocol = EmptyComponent()
     
-    public init(alignment: VerticalAlignmentComponent, spacing: Double? = nil, children: ComponentProtocol) {
+    public init(alignment: String, spacing: Double? = nil, children: ComponentProtocol) {
         self.alignment = alignment
         self.spacing = spacing
         self.children = children
@@ -24,7 +24,7 @@ public struct HStackComponent: AutomaticComponentConvertible {
 
 extension HStackComponent: View {
     public var body: some View {
-        HStack(alignment: alignment.swiftUI, spacing: spacing.flatMap { CGFloat($0) }) {
+        HStackLayout(alignment: alignment.verticalAlignment, spacing: spacing.flatMap { CGFloat($0) }) {
             ComponentView(children)
         }
     }

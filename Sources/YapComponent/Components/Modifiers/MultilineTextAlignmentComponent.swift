@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MultiLineTextAlignmentComponent: AutomaticComponentConvertible {
-    var alignment: HorizontalAlignmentComponent = .leading
+    var alignment: String = "leading"
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
@@ -13,12 +13,14 @@ struct MultiLineTextAlignmentComponent: AutomaticComponentConvertible {
 extension MultiLineTextAlignmentComponent: ViewModifier {
     var swiftUI: TextAlignment {
         switch self.alignment {
-        case .leading:
+        case "leading":
             return .leading
-        case .center:
+        case "center":
             return .center
-        case .trailing:
+        case "trailing":
             return .trailing
+        default:
+            return .leading
         }
     }
     

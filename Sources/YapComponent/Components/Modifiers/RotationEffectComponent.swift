@@ -2,7 +2,7 @@ import SwiftUI
 
 struct RotationEffectComponent: AutomaticComponentConvertible {
     var angle: Double = 0.0
-    var anchor: UnitPointComponent = .center
+    var anchor: String = "center"
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
@@ -18,7 +18,7 @@ extension RotationEffectComponent: ViewModifier {
     func body(content: Content) -> some View {
         content.rotationEffect(
             .degrees(angle),
-            anchor: anchor.swiftUI
+            anchor: anchor.unitPoint
         )
     }
 }

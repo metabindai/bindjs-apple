@@ -6,12 +6,12 @@ public struct LinearGradientComponent: AutomaticComponentConvertible {
         set { colors = newValue.map(\.component) }
     }
     public var colors: [ComponentProtocol] = []
-    public var startPoint: UnitPointComponent = .topLeading
-    public var endPoint: UnitPointComponent = .bottomTrailing
+    public var startPoint: String = "top"
+    public var endPoint: String = "bottom"
     
     public init() {}
     
-    public init(colors: [ColorComponent], startPoint: UnitPointComponent = .topLeading, endPoint: UnitPointComponent = .bottomTrailing) {
+    public init(colors: [ColorComponent], startPoint: String = "top", endPoint: String = "bottom") {
         self.colors = colors
         self.startPoint = startPoint
         self.endPoint = endPoint
@@ -30,8 +30,8 @@ extension LinearGradientComponent: View {
     var swiftUI: LinearGradient {
         LinearGradient(
             gradient: Gradient(colors: colorComponents.map(\.swiftUI)),
-            startPoint: startPoint.swiftUI,
-            endPoint: endPoint.swiftUI
+            startPoint: startPoint.unitPoint,
+            endPoint: endPoint.unitPoint
         )
     }
     

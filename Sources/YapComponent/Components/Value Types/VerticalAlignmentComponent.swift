@@ -1,36 +1,39 @@
 import SwiftUI
 
-public enum VerticalAlignmentComponent: String {
-    case top
-    case center
-    case bottom
-    case firstTextBaseline
-    case lastTextBaseline
+extension String {
+    var verticalAlignment: VerticalAlignment {
+        switch self.lowercased() {
+        case "top":
+            return .top
+        case "center":
+            return .center
+        case "bottom":
+            return .bottom
+        case "firsttextbaseline", "first-text-baseline", "first_text_baseline":
+            return .firstTextBaseline
+        case "lasttextbaseline", "last-text-baseline", "last_text_baseline":
+            return .lastTextBaseline
+        default:
+            return .center
+        }
+    }
 }
 
-extension VerticalAlignmentComponent: ComponentConvertible {
-    public init(_ component: Component) {
-        self = VerticalAlignmentComponent(rawValue: component.props["rawValue"] as? String ?? "") ?? .center
-    }
-    
-    public var component: Component {
-        Component(type: Self.componentName, props: ["rawValue": rawValue])
-    }
-}
-
-extension VerticalAlignmentComponent {
-    var swiftUI: VerticalAlignment {
+extension VerticalAlignment {
+    var string: String {
         switch self {
         case .top:
-            return .top
+            return "top"
         case .center:
-            return .center
+            return "center"
         case .bottom:
-            return .bottom
+            return "bottom"
         case .firstTextBaseline:
-            return .firstTextBaseline
+            return "firstTextBaseline"
         case .lastTextBaseline:
-            return .lastTextBaseline
+            return "lastTextBaseline"
+        default:
+            return "center"
         }
     }
 }

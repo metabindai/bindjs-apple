@@ -7,7 +7,7 @@ struct FlexFrameComponent: AutomaticComponentConvertible {
     var minHeight: Double?
     var idealHeight: Double?
     var maxHeight: Double?
-    var alignment: AlignmentComponent = .center
+    var alignment: String = "center"
     
     static var keyPaths: [(String, AnyKeyPath)] {
         [
@@ -33,7 +33,7 @@ extension FlexFrameComponent: ViewModifier {
                 minHeight: minHeight.map { CGFloat($0) },
                 idealHeight: idealHeight.map { CGFloat($0) },
                 maxHeight: maxHeight.map { CGFloat($0) },
-                alignment: alignment.swiftUI
+                alignment: alignment.alignment
             )
     }
 }

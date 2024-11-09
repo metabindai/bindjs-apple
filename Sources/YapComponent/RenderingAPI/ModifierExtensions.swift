@@ -1,3 +1,5 @@
+import SwiftUI
+
 public extension ComponentProtocol {
     func modifier(_ m: ComponentProtocol) -> ComponentProtocol {
         ModifiedComponent(content: self, modifier: m)
@@ -31,29 +33,29 @@ public extension ComponentProtocol {
         modifier(MaskComponent(content: content))
     }
     
-    func frame(width: Double? = nil, height: Double? = nil, alignment: AlignmentComponent = .init()) -> ComponentProtocol {
-        modifier(FrameComponent(width: width, height: height, alignment: alignment))
+    func frame(width: Double? = nil, height: Double? = nil, alignment: Alignment = .center) -> ComponentProtocol {
+        modifier(FrameComponent(width: width, height: height, alignment: String(describing: alignment)))
     }
     
     func flexFrame(minWidth: Double? = nil, idealWidth: Double? = nil, maxWidth: Double? = nil,
                    minHeight: Double? = nil, idealHeight: Double? = nil, maxHeight: Double? = nil,
-                   alignment: AlignmentComponent = .init()) -> ComponentProtocol {
+                   alignment: Alignment = .center) -> ComponentProtocol {
         modifier(FlexFrameComponent(minWidth: minWidth, idealWidth: idealWidth, maxWidth: maxWidth,
                                     minHeight: minHeight, idealHeight: idealHeight, maxHeight: maxHeight,
-                                    alignment: alignment))
+                                    alignment: String(describing: alignment)))
     }
     
-    func padding(_ edges: EdgeSetComponent = .all, _ length: Double? = nil) -> ComponentProtocol {
-        let insets = length.map { EdgeInsetsComponent.all($0) }
-        return modifier(PaddingComponent(edges: edges, insets: insets))
+    func padding(_ edges: Edge.Set = .all, _ length: Double? = nil) -> ComponentProtocol {
+        let insets = length.map { [$0] }
+        return modifier(PaddingComponent(edges: edges.array, insets: insets))
     }
     
     func padding(_ length: Double) -> ComponentProtocol {
         padding(.all, length)
     }
     
-    func aspectRatio(_ ratio: Double? = nil, contentMode: ContentModeComponent = .fit) -> ComponentProtocol {
-        modifier(AspectRatioComponent(aspectRatio: ratio ?? 1.0, contentMode: contentMode))
+    func aspectRatio(_ ratio: Double? = nil, contentMode: ContentMode = .fit) -> ComponentProtocol {
+        modifier(AspectRatioComponent(aspectRatio: ratio ?? 1.0, contentMode: String(describing: contentMode)))
     }
     
     func scaledToFit() -> ComponentProtocol {
@@ -108,20 +110,20 @@ public extension ComponentProtocol {
         modifier(ItalicComponent())
     }
     
-    func multilineTextAlignment(_ alignment: HorizontalAlignmentComponent) -> ComponentProtocol {
-        modifier(MultiLineTextAlignmentComponent(alignment: alignment))
+    func multilineTextAlignment(_ alignment: TextAlignment) -> ComponentProtocol {
+        modifier(MultiLineTextAlignmentComponent(alignment: String(describing: alignment)))
     }
     
     func lineLimit(_ limit: Int) -> ComponentProtocol {
         modifier(LineLimitComponent(value: limit))
     }
     
-    func scaleEffect(x: Double = 1.0, y: Double = 1.0, anchor: UnitPointComponent = .center) -> ComponentProtocol {
-        modifier(ScaleEffectComponent(x: x, y: y, anchor: anchor))
+    func scaleEffect(x: Double = 1.0, y: Double = 1.0, anchor: UnitPoint = .center) -> ComponentProtocol {
+        modifier(ScaleEffectComponent(x: x, y: y, anchor: anchor.string))
     }
     
-    func rotationEffect(_ angle: Double, anchor: UnitPointComponent = .center) -> ComponentProtocol {
-        modifier(RotationEffectComponent(angle: angle, anchor: anchor))
+    func rotationEffect(_ angle: Double, anchor: UnitPoint = .center) -> ComponentProtocol {
+        modifier(RotationEffectComponent(angle: angle, anchor: anchor.string))
     }
     
     func offset(x: Double = 0.0, y: Double = 0.0) -> ComponentProtocol {

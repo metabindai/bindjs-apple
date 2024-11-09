@@ -1,10 +1,10 @@
 import SwiftUI
 
 public struct ZStackComponent: AutomaticComponentConvertible {
-    public var alignment: AlignmentComponent = .center
+    public var alignment: String = "center"
     public var children: ComponentProtocol = EmptyComponent()
     
-    public init(alignment: AlignmentComponent, children: ComponentProtocol) {
+    public init(alignment: String, children: ComponentProtocol) {
         self.alignment = alignment
         self.children = children
     }
@@ -21,7 +21,7 @@ public struct ZStackComponent: AutomaticComponentConvertible {
 
 extension ZStackComponent: View {
     public var body: some View {
-        ZStack(alignment: alignment.swiftUI) {
+        ZStackLayout(alignment: alignment.alignment) {
             ComponentView(children)
         }
     }

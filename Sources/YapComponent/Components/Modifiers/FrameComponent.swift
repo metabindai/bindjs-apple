@@ -3,7 +3,7 @@ import SwiftUI
 struct FrameComponent: AutomaticComponentConvertible {
     var width: Double?
     var height: Double?
-    var alignment: AlignmentComponent = .center
+    var alignment: String = "center"
 
     static var keyPaths: [(String, AnyKeyPath)] {
         [
@@ -21,7 +21,7 @@ extension FrameComponent: ViewModifier {
             .frame(
                 width: width.map { CGFloat($0) },
                 height: height.map { CGFloat($0) },
-                alignment: alignment.swiftUI
+                alignment: alignment.alignment
             )
     }
 }

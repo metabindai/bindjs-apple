@@ -1,3 +1,5 @@
+import SwiftUI
+
 @resultBuilder
 public struct ComponentBuilder {
     public static func buildBlock(_ components: ComponentProtocol...) -> [ComponentProtocol] {
@@ -28,31 +30,31 @@ extension ConditionalComponent {
 }
 
 extension VStackComponent {
-    public init(alignment: HorizontalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
-        self.alignment = alignment
+    public init(alignment: HorizontalAlignment = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
+        self.alignment = alignment.string
         self.spacing = spacing
         self.children = children()
     }
 }
 
 extension HStackComponent {
-    public init(alignment: VerticalAlignmentComponent = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
-        self.alignment = alignment
+    public init(alignment: VerticalAlignment = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
+        self.alignment = alignment.string
         self.spacing = spacing
         self.children = children()
     }
 }
 
 extension ZStackComponent {
-    public init(alignment: AlignmentComponent = .init(), @ComponentBuilder children: () -> [ComponentProtocol]) {
-        self.alignment = alignment
+    public init(alignment: Alignment = .center, @ComponentBuilder children: () -> [ComponentProtocol]) {
+        self.alignment = String(describing: alignment)
         self.children = children()
     }
 }
 
 extension ScrollViewComponent {
-    public init(axes: AxisSetComponent = .vertical, showsIndicators: Bool = true, @ComponentBuilder children: () -> [ComponentProtocol]) {
-        self.axes = axes
+    public init(axes: Axis.Set = .vertical, showsIndicators: Bool = true, @ComponentBuilder children: () -> [ComponentProtocol]) {
+        self.axes = axes.string
         self.showsIndicators = showsIndicators
         self.children = children()
     }
