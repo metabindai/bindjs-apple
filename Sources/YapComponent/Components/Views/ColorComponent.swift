@@ -80,49 +80,43 @@ extension ColorComponent: View {
         case .semantic(let semantic):
             switch semantic {
             case "clear":
-                return Color(red: 0, green: 0, blue: 0, opacity: 0)
+                return Color.clear
             case "red":
-                return Color(red: 255/255, green: 59/255, blue: 48/255, opacity: 1)
+                return Color.red
             case "orange":
-                return Color(red: 255/255, green: 149/255, blue: 0/255, opacity: 1)
+                return Color.orange
             case "yellow":
-                return Color(red: 255/255, green: 204/255, blue: 0/255, opacity: 1)
+                return Color.yellow
             case "green":
-                return Color(red: 52/255, green: 199/255, blue: 89/255, opacity: 1)
+                return Color.green
             case "mint":
-                return Color(red: 0/255, green: 199/255, blue: 190/255, opacity: 1)
+                return Color.mint
             case "teal":
-                return Color(red: 48/255, green: 176/255, blue: 199/255, opacity: 1)
+                return Color.teal
             case "cyan":
-                return Color(red: 50/255, green: 173/255, blue: 230/255, opacity: 1)
+                return Color.cyan
             case "blue":
-                return Color(red: 0/255, green: 122/255, blue: 255/255, opacity: 1)
-            case "navy":
-                return Color(red: 0/255, green: 0/255, blue: 128/255, opacity: 1)
+                return Color.blue
             case "indigo":
-                return Color(red: 88/255, green: 86/255, blue: 214/255, opacity: 1)
+                return Color.indigo
             case "purple":
-                return Color(red: 175/255, green: 82/255, blue: 222/255, opacity: 1)
+                return Color.purple
             case "pink":
-                return Color(red: 255/255, green: 45/255, blue: 85/255, opacity: 1)
+                return Color.pink
             case "brown":
-                return Color(red: 162/255, green: 132/255, blue: 94/255, opacity: 1)
+                return Color.brown
             case "black":
-                return Color(red: 0, green: 0, blue: 0, opacity: 1)
+                return Color.black
             case "white":
-                return Color(red: 255/255, green: 255/255, blue: 255/255, opacity: 1)
+                return Color.white
             case "gray":
-                return Color(red: 142/255, green: 142/255, blue: 147/255, opacity: 1)
-            case "gray2":
-                return Color(red: 174/255, green: 174/255, blue: 178/255, opacity: 1)
-            case "gray3":
-                return Color(red: 199/255, green: 199/255, blue: 204/255, opacity: 1)
-            case "gray4":
-                return Color(red: 209/255, green: 209/255, blue: 214/255, opacity: 1)
-            case "gray5":
-                return Color(red: 229/255, green: 229/255, blue: 234/255, opacity: 1)
-            case "gray6":
-                return Color(red: 242/255, green: 242/255, blue: 247/255, opacity: 1)
+                return Color.gray
+            case "primary":
+                return Color.primary
+            case "secondary":
+                return Color.secondary
+            case "accentColor":
+                return Color.accentColor
             default:
                 // Default to primary color (using blue as primary)
                 return Color(red: 0/255, green: 122/255, blue: 255/255, opacity: 1)
