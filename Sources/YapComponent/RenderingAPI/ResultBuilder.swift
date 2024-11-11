@@ -15,20 +15,6 @@ extension ForEachComponent {
     }
 }
 
-extension ConditionalComponent {
-    public init(_ condition: ComponentProtocol, @ComponentBuilder then thenContent: () -> [ComponentProtocol], @ComponentBuilder else elseContent: () -> [ComponentProtocol]) {
-        self.condition = condition
-        self.thenContent = thenContent()
-        self.elseContent = elseContent()
-    }
-    
-    public init(_ condition: ComponentProtocol, @ComponentBuilder then thenContent: () -> [ComponentProtocol]) {
-        self.condition = condition
-        self.thenContent = thenContent()
-        self.elseContent = EmptyComponent()
-    }
-}
-
 extension VStackComponent {
     public init(alignment: HorizontalAlignment = .center, spacing: Double? = nil, @ComponentBuilder children: () -> [ComponentProtocol]) {
         self.alignment = alignment.string
@@ -78,13 +64,6 @@ extension ButtonComponent {
     public init(action: String, @ComponentBuilder label: () -> ComponentProtocol) {
         self.action = action
         self.label = label()
-    }
-}
-
-extension Closure {
-    public init(parameters: [String: ComponentProtocol], @ComponentBuilder body: () -> ComponentProtocol) {
-        self.props = parameters
-        self.body = body()
     }
 }
 

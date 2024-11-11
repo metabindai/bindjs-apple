@@ -12,10 +12,6 @@ enum ComponentViewEnum {
     case empty
     case string(String)
     case array([ComponentProtocol])
-    case binary(Binary)
-    case defaults(Defaults)
-    case variable(Variable)
-    case conditional(ConditionalComponent)
     case forEach(ForEachComponent)
     case component(Component)
     case modified(ModifiedComponent)

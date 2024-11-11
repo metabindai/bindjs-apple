@@ -20,12 +20,7 @@ public protocol ComponentVisitor {
     mutating func visitDictionary(_ dictionary: [String: ComponentProtocol]) -> Result
     mutating func visitComponent(_ component: Component) -> Result
     mutating func visitModifiedComponent(_ modifiedComponent: ModifiedComponent) -> Result
-    mutating func visitVariable(_ variable: Variable) -> Result
-    mutating func visitDefaults(_ defaults: Defaults) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
-    mutating func visitConditional(_ conditional: ConditionalComponent) -> Result
-    mutating func visitClosure(_ closure: Closure) -> Result
-    mutating func visitBinary(_ binary: Binary) -> Result
 }
 
 extension ComponentVisitor {
@@ -39,11 +34,5 @@ extension ComponentVisitor {
     mutating func visitDictionary(_ dictionary: [String: ComponentProtocol]) -> Result { defaultVisit(dictionary) }
     mutating func visitComponent(_ component: Component) -> Result { defaultVisit(component) }
     mutating func visitModifiedComponent(_ modifiedComponent: ModifiedComponent) -> Result { defaultVisit(modifiedComponent) }
-    mutating func visitVariable(_ variable: Variable) -> Result { defaultVisit(variable) }
-    mutating func visitDefaults(_ defaults: Defaults) -> Result { defaultVisit(defaults) }
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result { defaultVisit(forEach) }
-    mutating func visitConditional(_ conditional: ConditionalComponent) -> Result { defaultVisit(conditional) }
-    mutating func visitClosure(_ closure: Closure) -> Result { defaultVisit(closure) }
-    mutating func visitBinary(_ binary: Binary) -> Result { defaultVisit(binary) }
-
 }

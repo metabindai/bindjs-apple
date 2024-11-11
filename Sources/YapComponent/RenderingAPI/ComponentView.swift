@@ -20,18 +20,6 @@ public struct ComponentView: View {
                 ComponentView(array[index])
             }
             
-        case .binary(let binary):
-            BinaryView(binary)
-        
-        case .defaults(let defaults):
-            DefaultsView(defaults)
-        
-        case .variable(let variable):
-            VariableView(variable)
-        
-        case .conditional(let conditionalComponent):
-            ConditionalView(conditionalComponent)
-        
         case .forEach(let forEachComponent):
             ForEachView(forEachComponent)
         

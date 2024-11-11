@@ -5,14 +5,6 @@ public extension ComponentProtocol {
         ModifiedComponent(content: self, modifier: m)
     }
     
-    func defaults(_ key: String, _ value: ComponentProtocol) -> ComponentProtocol {
-        Defaults(constants: [key: value], content: self)
-    }
-    
-    func registration(_ component: Component) -> ComponentProtocol {
-        Defaults(constants: [component.type: Closure(props: component.props, body: component.children)], content: self)
-    }
-    
     func background(_ content: ComponentProtocol) -> ComponentProtocol {
         modifier(BackgroundComponent(content: content))
     }

@@ -36,30 +36,6 @@ private struct JSONConverter: ComponentVisitor {
         return result
     }
     
-    mutating func visitDefaults(_ defaults: Defaults) -> Any {
-        [
-            "type": "Defaults",
-            "constants": defaults.constants.mapValues { $0.accept(&self) },
-            "content": defaults.content.accept(&self),
-        ]
-    }
-    
-    mutating func visitVariable(_ variable: Variable) -> Any {
-        [
-            "type": "Variable",
-            "name": variable.name,
-        ]
-    }
-    
-    mutating func visitBinary(_ binary: Binary) -> Any {
-        [
-            "type": "Binary",
-            "left": binary.left.accept(&self),
-            "right": binary.right.accept(&self),
-            "operator": binary.operator,
-        ]
-    }
-    
     mutating func visitModifiedComponent(_ modifiedComponent: ModifiedComponent) -> Any {
         [
             "type": "ModifiedComponent",
@@ -73,26 +49,6 @@ private struct JSONConverter: ComponentVisitor {
             "type": "ForEach",
             "data": forEach.data.accept(&self),
             "content": forEach.content.accept(&self),
-        ]
-    }
-    
-    mutating func visitConditional(_ conditional: ConditionalComponent) -> Any {
-        var result: [String: Any] = [
-            "type": "Conditional",
-            "condition": conditional.condition.accept(&self),
-            "then": conditional.thenContent.accept(&self)
-        ]
-        if let elseContent = conditional.elseContent {
-            result["else"] = elseContent.accept(&self)
-        }
-        return result
-    }
-    
-    mutating func visitClosure(_ closure: Closure) -> Any {
-        [
-            "type": "Closure",
-            "parameters": closure.props.mapValues { $0.accept(&self) },
-            "body": closure.body.accept(&self),
         ]
     }
 }
@@ -133,28 +89,11 @@ public func decodeComponent(_ any: Any) -> ComponentProtocol {
                 let content = decodeComponent(dictionary["content"] ?? [:])
                 let modifier = decodeComponent(dictionary["modifier"] ?? [:])
                 return ModifiedComponent(content: content, modifier: modifier)
-            case "Variable":
-                let name = dictionary["name"] as? String ?? ""
-                return Variable(name)
-            case "Defaults":
-                let constants = (dictionary["constants"] as? [String: Any] ?? [:]).mapValues(decodeComponent)
-                let content = decodeComponent(dictionary["content"] ?? [:])
-                return Defaults(constants: constants, content: content)
             case "ForEach":
                 let data = decodeComponent(dictionary["data"] ?? [:])
                 let content = decodeComponent(dictionary["content"] ?? [:])
                 let variable = dictionary["variable"] as? String ?? ""
                 return ForEachComponent(variable: variable, data: data, content: content)
-            case "Conditional":
-                let condition = decodeComponent(dictionary["condition"] ?? [:])
-                let thenContent = decodeComponent(dictionary["then"] ?? [:])
-                let elseContent = decodeComponent(dictionary["else"] ?? [:])
-                return ConditionalComponent(condition: condition, thenContent: thenContent, elseContent: elseContent)
-            case "Binary":
-                let left = decodeComponent(dictionary["left"] ?? [:])
-                let right = decodeComponent(dictionary["right"] ?? [:])
-                let `operator` = dictionary["operator"] as? String ?? ""
-                return Binary(left: left, operator: `operator`, right: right)
             default:
                 let props = (dictionary["props"] as? [String: Any] ?? [:]).mapValues(decodeComponent)
                 let component = Component(type: type, props: props)
@@ -246,18 +185,6 @@ struct CaseInViewEnum: ComponentVisitor {
         return nil
     }
     
-    mutating func visitDefaults(_ defaults: Defaults) -> ComponentViewEnum? {
-        .defaults(defaults)
-    }
-    
-    mutating func visitVariable(_ variable: Variable) -> ComponentViewEnum? {
-        .variable(variable)
-    }
-    
-    mutating func visitConditional(_ conditional: ConditionalComponent) -> ComponentViewEnum? {
-        .conditional(conditional)
-    }
-    
     mutating func visitForEach(_ forEach: ForEachComponent) -> ComponentViewEnum? {
         .forEach(forEach)
     }
@@ -272,14 +199,6 @@ struct CaseInViewEnum: ComponentVisitor {
     
     mutating func visitModifiedComponent(_ modifiedComponent: ModifiedComponent) -> ComponentViewEnum? {
         .modified(modifiedComponent)
-    }
-    
-    mutating func visitClosure(_ closure: Closure) -> ComponentViewEnum? {
-        nil
-    }
-    
-    mutating func visitBinary(_ binary: Binary) -> ComponentViewEnum? {
-        .binary(binary)
     }
     
     mutating func visitEmpty(_ emptyComponent: EmptyComponent) -> ComponentViewEnum? {

@@ -14,6 +14,19 @@ public struct Component: ComponentProtocol {
 }
 
 extension Component {
+    func decode<T: ComponentProtocol>(_ prop: String, as: T.Type = T.self) -> T? {
+        if let value = props[prop] {
+            if let asType = value as? T {
+                return asType
+            } else if let lsc = T.self as? any LosslessStringConvertible.Type {
+                return lsc.init(String(describing: value)) as? T
+            }
+        }
+        return nil
+    }
+}
+
+extension Component {
     public init(_ type: String, props: [String: ComponentProtocol] = [:], children: [ComponentProtocol] = []) {
         self.type = type
         self.props = props
