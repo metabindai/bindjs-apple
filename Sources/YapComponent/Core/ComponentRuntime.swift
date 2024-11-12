@@ -1,0 +1,483 @@
+import JavaScriptCore
+
+public class ComponentRuntime: ObservableObject {
+    let context: JSValue
+    
+    public init(context: JSContext = JSContext()!) {
+        
+        context.exceptionHandler = { context, exception in
+            let message = exception
+            print("Error: \(message)")
+        }
+        
+        self.context = context.evaluateScript(script)!
+    }
+    
+    public func register(name: String, script: String) {
+        context.invokeMethod("setComponents", withArguments: [[name: script]])
+    }
+    
+    public func view(forName name: String) -> ComponentView {
+        if let result = context.invokeMethod("call", withArguments: [name, "body"]) {
+            return ComponentView(decodeComponent(from: result.toString()))
+        }
+        return ComponentView(EmptyComponent())
+    }
+    
+    public func setEnvironment(_ environment: [String: Any]) {
+        context.invokeMethod("setEnvironment", withArguments: [environment])
+    }
+    
+    public func reset() {
+        context.invokeMethod("reset", withArguments: [])
+    }
+}
+
+let script = """
+const AST = {}
+
+AST.Directive = (name, args = {}, children) => {
+    var props = {...args}
+    props['children'] = props['children'] ?? children ?? []
+    
+    return {
+        'type': name,
+        'props': props
+        //'children': children ?? []
+    }
+}
+
+AST.ModifiedContent = (modifier, component) => {
+
+    const content = (Array.isArray(component) ? component : [component])
+
+    return {
+        'type': 'ModifiedComponent',
+        'modifier': {...modifier},
+        'content': content
+    }
+}
+
+AST.Variable = (key) => {
+    return {
+        'type' : 'Variable',
+        'name' : key
+    }
+}
+
+AST.ComponentDescription = (name, parameters, body, previews, props) => {
+    return {
+        'type' : 'ComponentDescription',
+        'name' : name,
+        'props' : props,
+        'parameters' : parameters,
+        'body' : body,
+        'previews' : previews,
+    }
+}
+
+AST.Defaults = (variables, content) => {
+    return {
+        'type' : 'defaults',
+        'constants' : variables,
+        'content'   : content
+    }
+}
+
+AST.Conditional = (condition, thenContent, elseContent) => {
+    return {
+        'type' : 'Conditional',
+        'condition' : condition,
+        'then' : thenContent,
+        'else' : elseContent,
+    }
+}
+
+AST.ForEach = (data, content)  => {
+    return {
+        'type' : 'ForEach',
+        'data' : data,
+        'content' : content
+    }
+}
+
+AST.Binary = (operator, lhs, rhs) => {
+    return {
+        'type' : 'Binary',
+        'operator' : operator,
+        'left' : lhs,
+        'right' : rhs,
+    }
+}
+
+const swiftUIComponentNames = [
+    "AngularGradient",
+    "AnyView",
+    "AsyncImage",
+    "Body",
+    "Button",
+    "Canvas",
+    "Circle",
+    "Color",
+    "ColorPicker",
+    "ContentUnavailableView",
+    "ControlGroup",
+    "DatePicker",
+    "DisclosureGroup",
+    "Divider",
+    "EditButton",
+    "EllipticalGradient",
+    "Ellipse",
+    "EmptyModifier",
+    "EmptyView",
+    "EquatableView",
+    "ForEach",
+    "Form",
+    "Gauge",
+    "GeometryReader",
+    "GeometryReader3D",
+    "Grid",
+    "GridRow",
+    "Group",
+    "GroupBox",
+    "HelpLink",
+    "HSplitView",
+    "HStack",
+    "Image",
+    "KeyframeAnimator",
+    "Label",
+    "LazyHGrid",
+    "LazyHStack",
+    "LazyVGrid",
+    "LazyVStack",
+    "LinearGradient",
+    "Link",
+    "List",
+    "Menu",
+    "MenuButton",
+    "MultiDatePicker",
+    "NavigationLink",
+    "NavigationSplitView",
+    "NavigationStack",
+    "NavigationView",
+    "NewDocumentButton",
+    "PasteButton",
+    "Path",
+    "PhaseAnimator",
+    "Picker",
+    "ProgressView",
+    "RadialGradient",
+    "Rectangle",
+    "RenameButton",
+    "RoundedRectangle",
+    "ScrollView",
+    "ScrollViewReader",
+    "Section",
+    "SecureField",
+    "SettingsLink",
+    "ShareLink",
+    "Shape",
+    "SignInWithAppleButton",
+    "Slider",
+    "Spacer",
+    "Stepper",
+    "Table",
+    "TabView",
+    "Text",
+    "TextEditor",
+    "TextField",
+    "TextFieldLink",
+    "Toggle",
+    "ToolbarItem",
+    "ToolbarItemGroup",
+    "ToolbarTitleMenu",
+    "UnevenRoundedRectangle",
+    "ViewThatFits",
+    "VSplitView",
+    "VStack",
+    "WindowVisibilityToggle",
+    "ZStack"
+];
+
+class YapJSRuntime {
+    constructor(options) {
+        this.options = options ?? { expandAll: true }
+        this.reset()
+    }
+
+    reset() {
+        this.context = {}
+        this.components = {}
+        this.functionCache = {}
+        this.modifierFunctions = {}        
+        this.callStack = [] 
+        this.environment = {}
+        this.registerBuiltInCallbacks()
+        this.registerASTComponents(swiftUIComponentNames)
+    }
+
+    resetCache(componentName) {
+        this.functionCache[componentName] = {}  
+    }
+
+    registerASTComponents(componentNames) {
+        // Construct AST functions for inbuilt components.
+        for (const componentName of componentNames) {    
+            this.context[componentName] = (props, children, arg3) => {
+                return this.#makeInBuiltComponent(componentName, props, children)
+            } 
+        }
+    }
+
+    /**
+     * Register the JS of one or more components
+     * @param {*} components 
+     */
+    registerComponents(components, entryPoint = 'body') {    
+        for (const componentName of Object.keys(components)) {
+            this.registerComponent(componentName, components[componentName], entryPoint)    
+        }   
+    }
+
+    registerComponent(componentName, content, entryPoint)  {
+        const name = componentName.replace(/\\s/g, '')
+        this.callStack = [] 
+        this.functionCache[name] = {}
+        this.components[name] = content
+        this.context[name] = (arg1, arg2, ...otherArgs) => {
+            const { props, children } = this.#processComponentArgs(arg1, arg2)
+
+            return this.#makeComponent((props, children) => {
+
+               // Call the body of our registered component
+               let componentFunction = this.call(name, entryPoint, props, children, ...otherArgs)
+
+               // It's assumed a component returns an inbuilt component.
+               // Run the returned function to generate the ast
+               let ast = componentFunction()
+
+               // Wrap the component in a directive so the renderer knows what component generated that part of the AST
+               let componentAst = AST.Directive('ComponentCall', { name: name }, [ ast ])
+
+               // Return
+               return componentAst
+
+            }, props, children)
+
+        }
+    }
+
+     /**
+     * Register callback to be made available to the runtime
+     * @param {*} callbackName
+     * @param {*} callback 
+     */
+    registerCallback(callbackName, callback) {  
+        this.context[callbackName] = callback
+    }
+
+    /**
+     * Register initial environment
+     * @param {*} environment 
+     */
+    registerEnvironment(environment = {}) {  
+        this.environment = environment
+        this.registerCallback('useEnvironment', () => {
+            return this.environment
+        })
+    }
+
+    /**
+     * Register built in callbacks available to components
+     * @param {*} environment 
+     */    
+    registerBuiltInCallbacks() {
+        this.registerCallback('makeComponent', (component) => {
+            // Pass body directly or in dictionary
+            let body = component.body ? component.body : component
+        
+            // Create body function
+            return (props, children) =>   
+                this.#makeComponent((props, children) => body(props, children), props, children)    
+        })  
+    }
+
+    /**
+     * Unregister a component
+     * @param {*} componentName
+     * @returns
+     */
+    unregisterComponent(componentName) {
+        delete this.components[componentName]
+        delete this.functionCache[componentName]
+        delete this.context[componentName]  
+    }
+
+    /**
+     * Calls the body of a component
+     * @param {*} componentName 
+     * @param {*} componentEntryPoint 
+     * @returns 
+     */
+    call(componentName, componentEntryPoint = 'body', params, children, ...args) {
+        const componentKeys = Object.keys(this.context);
+        const functionList = componentKeys.join(', ');
+    
+        let func = null
+        if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {  
+            //console.log(`[cache hit ${componentName}.${componentEntryPoint}]`)
+            func = this.functionCache[componentName][componentEntryPoint]
+        } else {
+            console.log(`[constructing ${componentName}.${componentEntryPoint}]`)
+            func = new Function(`{ ${functionList} }`, `${this.components[componentName]}; return ${componentEntryPoint}`)(this.context);
+            this.functionCache[componentName][componentEntryPoint] = func   
+        }
+
+        return func(params, children, ...args)
+    }
+
+
+    /**
+     * Process arguments for a component
+     * @param {*} arg1 
+     * @param {*} arg2 
+     * @returns 
+     */
+    #processComponentArgs(arg1, arg2) {  
+        // Allow children to be passed as the first argument.
+        // If single value or array is passed then it becomes the children.
+        // TODO: Discuss, single value be children or rawValue/value ?
+        const childrenFirstArg = arg1 != null && arg2 == null && (Array.isArray(arg1))
+        const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg
+
+        const props    = rawValueFirstArg ? { rawValue: arg1 } : (childrenFirstArg ? {} : arg1)
+        const children = childrenFirstArg ? arg1 : arg2
+
+        return { props, children }        
+    }
+
+
+    /**
+     * Creates a modifier function
+     */
+    #makeModifier(name, f) {
+    
+        const makeModifier = this.#makeModifier.bind(this)    
+
+        return (modifierProps) => {
+    
+            const modifierContent = () => {
+    
+                /**
+                 * Capture environment & run content
+                 */
+                const capturedEnvironment = {...this.environment}
+                this.environment[name] = modifierProps
+    
+                // Will be a function to an inbuilt when modifying a custom component
+                let content = f()
+                if (typeof content === 'function') {    
+                    content = content()
+                }
+    
+                this.environment = capturedEnvironment
+    
+                // Handle passing single value
+                var props = modifierProps ?? {}    
+                if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) { 
+                    // If passing a component, execute it to get the ast 
+                    if (typeof props == 'function') {
+                        props = props()
+                    }
+                    props = { rawValue: props }
+                }
+
+                /**
+                 * Construct AST    
+                 */
+                const modifierAST = AST.Directive(name, props, [])
+                const ast = AST.ModifiedContent(modifierAST, content )
+    
+                return ast
+            }
+            
+            return new Proxy(modifierContent, {   
+                get: function(target, prop, receiver) {
+                    if (prop == 'toJSON' || prop == 'type' || prop == 'children' || prop == 'props') {
+                        return target[prop]
+                    } else {
+                        let modifierName = prop
+                        return makeModifier(modifierName, modifierContent, ...arguments)
+                    }
+                }    
+            })
+        }
+    }
+
+    /**
+     * Creates a component
+     */
+    #makeComponent(body, props, children) {
+        const f = () =>
+            body(props, children)
+
+        const makeModifier = this.#makeModifier.bind(this)
+
+        return new Proxy(f, {
+            get: function(target, prop, receiver) {
+                if (prop == 'toJSON' || prop == 'type' || prop == 'children' || prop == 'props') {
+                    return target[prop]
+                }
+                return makeModifier(prop, f, ...arguments)
+            }
+        })
+    }
+
+    /**
+    * Creates a built in component
+    */
+    #makeInBuiltComponent(type, props, children) {
+        return this.#makeComponent((componentProps, componentChildren) => {
+            var {props, children} = this.#processComponentArgs(componentProps, componentChildren)
+
+            props = props ?? {}    
+
+            // If props isnt a dictionary contain within value
+            if (typeof props != 'object') { 
+                props = { rawValue: props }
+            }
+
+            /**
+             * Execute children
+             */
+            const childrenAST = (children ?? []).flatMap(child => {
+                let content = typeof child === 'function' ? child() : child             
+                if (typeof content === 'function') {
+                    content = content()
+                }
+                return content
+            } )
+
+            /**
+             * Component AST
+             */
+            return AST.Directive(type, {...props}, childrenAST)  
+        }, props, children) 
+    }
+}
+
+
+
+
+
+// Export the runtime interface
+const runtime = new YapJSRuntime();
+
+Object.assign(this, {
+    setComponents: (args) => runtime.registerComponents(args),
+    setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
+    call: (args) => JSON.stringify(runtime.call(args)(), null, 2),
+    setEnvironment: (environment) => runtime.registerEnvironment(environment)
+});
+
+"""
