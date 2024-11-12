@@ -1,3 +1,4 @@
+import SwiftUI
 import JavaScriptCore
 
 public class ComponentRuntime: ObservableObject {
@@ -26,6 +27,10 @@ public class ComponentRuntime: ObservableObject {
     
     public func setEnvironment(_ environment: [String: Any]) {
         context.invokeMethod("setEnvironment", withArguments: [environment])
+    }
+    
+    public func setEnvironment(_ environment: EnvironmentValues) {
+        // TODO: Extract Environment Values
     }
     
     public func reset() {
@@ -356,6 +361,29 @@ class YapJSRuntime {
         return { props, children }        
     }
 
+    #processComponentProps(props) { 
+        if (props == null || typeof props != 'object') {  
+            return props
+        }
+        
+        var newProps = {...props}
+        Object.keys(newProps).forEach(key => {
+            let value = newProps[key]
+            
+            // Expand functions in arrays
+            if (Array.isArray(value)) {
+                newProps[key] = value.map(v => 
+                    (typeof v === 'function') ? v() : v
+                )
+
+            // Expand functions if value of key 
+            } if (typeof newProps[key] === 'function') {
+                newProps[key] = newProps[key]()
+            } 
+        })
+        return newProps
+    }
+
 
     /**
      * Creates a modifier function
@@ -418,7 +446,9 @@ class YapJSRuntime {
      * Creates a component
      */
     #makeComponent(body, props, children) {
-        const f = () =>
+        const processComponentProps = this.#processComponentProps.bind(this)
+
+        const f = () => 
             body(props, children)
 
         const makeModifier = this.#makeModifier.bind(this)
@@ -438,14 +468,18 @@ class YapJSRuntime {
     */
     #makeInBuiltComponent(type, props, children) {
         return this.#makeComponent((componentProps, componentChildren) => {
+            
             var {props, children} = this.#processComponentArgs(componentProps, componentChildren)
-
+  
             props = props ?? {}    
-
+            
             // If props isnt a dictionary contain within value
             if (typeof props != 'object') { 
                 props = { rawValue: props }
             }
+
+            // Expand function in props 
+            props = this.#processComponentProps(props)  
 
             /**
              * Execute children
@@ -465,9 +499,6 @@ class YapJSRuntime {
         }, props, children) 
     }
 }
-
-
-
 
 
 // Export the runtime interface
