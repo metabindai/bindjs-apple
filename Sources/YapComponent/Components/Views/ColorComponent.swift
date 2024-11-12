@@ -113,6 +113,8 @@ extension ColorComponent: View {
                 return Color.gray
             case "primary":
                 return Color.primary
+            case "background":
+                return Color(.textBackgroundColor)
             case "secondary":
                 return Color.secondary
             case "accentColor":

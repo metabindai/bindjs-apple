@@ -14,11 +14,12 @@ public class ComponentRuntime: ObservableObject {
         self.context = context.evaluateScript(script)!
     }
     
-    public func register(name: String, script: String) {
+    public func register(name: String, _ script: String) {
+        /// Would be cool if setComponents could return a bool to know if it has changed or not.
         context.invokeMethod("setComponents", withArguments: [[name: script]])
     }
     
-    public func view(forName name: String) -> ComponentView {
+    public func view(_ name: String) -> ComponentView {
         if let result = context.invokeMethod("call", withArguments: [name, "body"]) {
             return ComponentView(decodeComponent(from: result.toString()))
         }
@@ -30,7 +31,28 @@ public class ComponentRuntime: ObservableObject {
     }
     
     public func setEnvironment(_ environment: EnvironmentValues) {
-        // TODO: Extract Environment Values
+        context.invokeMethod("setEnvironment", withArguments: [
+            [
+                // Core Display Properties
+                "displayScale": environment.displayScale,
+                "colorScheme": String(describing: environment.colorScheme),
+                "colorSchemeContrast": String(describing: environment.colorSchemeContrast),
+                "dynamicTypeSize": String(describing: environment.dynamicTypeSize),
+                
+                // Scene State
+                "scenePhase": String(describing: environment.scenePhase),
+                
+                // Accessibility
+                "accessibilityReduceMotion": environment.accessibilityReduceMotion,
+                "accessibilityReduceTransparency": environment.accessibilityReduceTransparency,
+                "accessibilityDifferentiateWithoutColor": environment.accessibilityDifferentiateWithoutColor,
+                "accessibilityInvertColors": environment.accessibilityInvertColors,
+                
+                // Localization
+                "locale": String(describing: environment.locale.identifier),
+                "layoutDirection": String(describing: environment.layoutDirection)
+            ]
+        ])
     }
     
     public func reset() {
