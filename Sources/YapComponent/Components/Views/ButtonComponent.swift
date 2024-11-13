@@ -14,7 +14,8 @@ public struct ButtonComponent: AutomaticComponentConvertible {
     public static var keyPaths: [(String, AnyKeyPath)] {
         [
             ("action", \Self.action),
-            ("label", \Self.label)
+            ("label", \Self.label),
+            ("rawValue", \Self.label)
         ]
     }
 }

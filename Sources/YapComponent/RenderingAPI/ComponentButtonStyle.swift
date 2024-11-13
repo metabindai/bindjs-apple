@@ -1,19 +1,23 @@
 import SwiftUI
+import JavaScriptCore
 
 struct ComponentButtonStyle: ButtonStyle {
     
+    @Environment(\.componentRuntime) var componentRuntime
+    
     let name: String
     
+    func makeButtonFunction() -> JSValue {
+        let function = componentRuntime.value.context.evaluateScript("""
+            makeComponent(() => ({ type: "\(name)" }))
+        """)
+        return function!
+    }
+    
     func makeBody(configuration: Configuration) -> some View {
-        ComponentView(Component(name))
+        componentRuntime.view(name, arguments: ["label": makeButtonFunction(), "isPressed": configuration.isPressed])
             .transformEnvironment(\.componentContext) { context in
-                
-                let newContext = ComponentContext(parent: context)
-                
-                newContext.define("configuration.label", AnyView(configuration.label))
-                newContext.define("configuration.isPressed", configuration.isPressed)
-                
-                context = newContext
+                context.define(name, AnyView(configuration.label))
             }
     }
 }

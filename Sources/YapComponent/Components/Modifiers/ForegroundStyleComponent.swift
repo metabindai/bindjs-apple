@@ -46,6 +46,8 @@ struct ForegroundStyleComponentModifier: ViewModifier {
                     content
                 }
             }
+        } else {
+            content
         }
     }
 }

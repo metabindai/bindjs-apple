@@ -11,8 +11,12 @@ public struct JSComponent {
     }
 }
 
+extension EnvironmentValues {
+    @Entry var componentRuntime = ComponentRuntime()
+}
+
 public class ComponentRuntime: ObservableObject {
-    let context: JSValue
+    let value: JSValue
     
     public init(context: JSContext = JSContext()!) {
         
@@ -21,28 +25,29 @@ public class ComponentRuntime: ObservableObject {
             print("Error: \(message)")
         }
         
-        self.context = context.evaluateScript(script)!
+        self.value = context.evaluateScript(script)!
     }
     
     public func register(_ component: JSComponent) {
-        context.invokeMethod("setComponents", withArguments: [[component.name: component.source]])
+        value.invokeMethod("setComponents", withArguments: [[component.name: component.source]])
         objectWillChange.send()
     }
     
-    public func view(_ name: String, arguments: [String: Any]) -> ComponentView {
-        if let result = context.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: context.context)]]) {
+    public func view(_ name: String, arguments: [String: Any]) -> some View {
+        if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
             return ComponentView(decodeComponent(from: result.toString()))
-                // set the runtime in the environment.
+                .environment(\.componentRuntime, self)
         }
         return ComponentView(EmptyComponent())
+            .environment(\.componentRuntime, self)
     }
     
     public func setEnvironment(_ environment: [String: Any]) {
-        context.invokeMethod("setEnvironment", withArguments: [environment])
+        value.invokeMethod("setEnvironment", withArguments: [environment])
     }
     
     public func setEnvironment(_ environment: EnvironmentValues) {
-        context.invokeMethod("setEnvironment", withArguments: [
+        value.invokeMethod("setEnvironment", withArguments: [
             [
                 // Core Display Properties
                 "displayScale": environment.displayScale,
@@ -67,7 +72,7 @@ public class ComponentRuntime: ObservableObject {
     }
     
     public func reset() {
-        context.invokeMethod("reset", withArguments: [])
+        value.invokeMethod("reset", withArguments: [])
     }
 }
 
@@ -496,6 +501,10 @@ class YapJSRuntime {
         })
     }
 
+    makeComponent(body, props, children) {
+        return this.#makeComponent(body, props, children)
+    }
+
     /**
     * Creates a built in component
     */
@@ -541,7 +550,10 @@ Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
     call: (args) => JSON.stringify(runtime.call(...args)(), null, 2),
-    setEnvironment: (environment) => runtime.registerEnvironment(environment)
+    setEnvironment: (environment) => runtime.registerEnvironment(environment),
+    makeComponent: (body, props, children) => { 
+        return runtime.makeComponent(body, props, children)    
+    }
 });
 
 """

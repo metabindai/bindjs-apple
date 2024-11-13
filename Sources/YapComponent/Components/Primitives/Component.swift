@@ -56,6 +56,8 @@ struct CustomView: View {
     var body: some View {
         if let definition = context.get(component.type) as? Callable {
             ComponentView(definition.callAsFunction(component.props, context: context))
+        } else if let definition = context.get(component.type) {
+            ComponentView(definition)
         } else {
             ComponentView(component.children)
         }
@@ -70,6 +72,8 @@ extension Evaluator {
         
         if let definition = context.get(component.type) as? Callable {
             return definition.callAsFunction(props, context: context)
+        } else if let definition = context.get(component.type) {
+            return definition
         } else if let converted = convertComponent(component) {
             return converted
         }
