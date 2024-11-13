@@ -1,6 +1,16 @@
 import SwiftUI
 import JavaScriptCore
 
+public struct JSComponent {
+    let name: String
+    let source: String
+    
+    public init(name: String, source: String) {
+        self.name = name
+        self.source = source
+    }
+}
+
 public class ComponentRuntime: ObservableObject {
     let context: JSValue
     
@@ -14,14 +24,15 @@ public class ComponentRuntime: ObservableObject {
         self.context = context.evaluateScript(script)!
     }
     
-    public func register(name: String, _ script: String) {
-        /// Would be cool if setComponents could return a bool to know if it has changed or not.
-        context.invokeMethod("setComponents", withArguments: [[name: script]])
+    public func register(_ component: JSComponent) {
+        context.invokeMethod("setComponents", withArguments: [[component.name: component.source]])
+        objectWillChange.send()
     }
     
-    public func view(_ name: String) -> ComponentView {
-        if let result = context.invokeMethod("call", withArguments: [name, "body"]) {
+    public func view(_ name: String, arguments: [String: Any]) -> ComponentView {
+        if let result = context.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: context.context)]]) {
             return ComponentView(decodeComponent(from: result.toString()))
+                // set the runtime in the environment.
         }
         return ComponentView(EmptyComponent())
     }
@@ -529,7 +540,7 @@ const runtime = new YapJSRuntime();
 Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
-    call: (args) => JSON.stringify(runtime.call(args)(), null, 2),
+    call: (args) => JSON.stringify(runtime.call(...args)(), null, 2),
     setEnvironment: (environment) => runtime.registerEnvironment(environment)
 });
 
