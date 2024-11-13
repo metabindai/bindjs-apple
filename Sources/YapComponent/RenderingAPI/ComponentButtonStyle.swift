@@ -7,9 +7,11 @@ struct ComponentButtonStyle: ButtonStyle {
     
     let name: String
     
+    let uuid = UUID().uuidString
+    
     func makeButtonFunction() -> JSValue {
         let function = componentRuntime.value.context.evaluateScript("""
-            makeComponent(() => ({ type: "\(name)" }))
+            makeComponent(() => ({ type: "\(uuid)" }))
         """)
         return function!
     }
@@ -17,7 +19,7 @@ struct ComponentButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         componentRuntime.view(name, arguments: ["label": makeButtonFunction(), "isPressed": configuration.isPressed])
             .transformEnvironment(\.componentContext) { context in
-                context.define(name, AnyView(configuration.label))
+                context.define(uuid, AnyView(configuration.label))
             }
     }
 }
