@@ -34,7 +34,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case DividerConvertible.componentName: DividerConvertible(component)
     case EllipseConvertible.componentName: EllipseConvertible(component)
     case FontConvertible.componentName: FontConvertible(component)
-    case FontConvertible.componentName: FontConvertible(component)
+    case FontConvertible.fontSizeName: FontConvertible(component)
     case FontDesignConvertible.componentName: FontDesignConvertible(component)
     case FontWeightConvertible.componentName: FontWeightConvertible(component)
     case ForegroundStyleConvertible.componentName: ForegroundStyleConvertible(component)

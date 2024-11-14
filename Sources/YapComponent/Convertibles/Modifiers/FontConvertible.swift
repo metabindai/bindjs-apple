@@ -6,6 +6,10 @@ struct FontConvertible: ComponentConvertible {
         case name(String)
     }
     
+    static var fontSizeName: String {
+        "fontsize"
+    }
+    
     let storage: Storage?
     
     init(_ component: Component) {
