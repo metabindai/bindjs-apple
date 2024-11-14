@@ -27,6 +27,10 @@ public struct LinearGradientConvertible: ComponentConvertible {
 extension UnitPoint {
     init(stringValue: String) {
         switch stringValue {
+        case "center":
+            self = .center
+        case "zero":
+            self = .zero
         case "top":
             self = .top
         case "bottom":
