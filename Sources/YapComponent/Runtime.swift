@@ -57,6 +57,13 @@ public class ComponentRuntime: ObservableObject {
         return nil
     }
     
+    public func callRestoreFunction(id: String, element: JSValue, index: Int32) -> JSValue? {
+        if let result = value.invokeMethod("callRestoreFunction", withArguments: [id, element, index]) {
+            return result
+        }
+        return nil
+    }
+    
     public func restoreData(id: String) -> JSValue? {
         if let result = value.invokeMethod("restoreData", withArguments: [id]) {
             return result
@@ -632,6 +639,11 @@ Object.assign(this, {
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
     restoreFunction: (functionId) => runtime.restoreFunction(functionId),
+    callRestoreFunction: (functionId, element, index) => {
+        let f = runtime.restoreFunction(functionId)
+        let result = f(element, index)
+        return JSON.stringify(result(), null, 2)
+    },
     restoreData: (dataId) => runtime.restoreData(dataId),
 });
 

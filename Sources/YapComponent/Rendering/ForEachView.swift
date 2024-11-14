@@ -6,12 +6,11 @@ struct ForEachView: View {
     let forEachComponent: ForEachComponent
     
     var body: some View {
-        if let data = componentRuntime.restoreData(id: forEachComponent.dataId),
-           let callback = componentRuntime.restoreFunction(id: forEachComponent.functionId)
-        {
+        if let data = componentRuntime.restoreData(id: forEachComponent.dataId) {
             ForEach(0..<forEachComponent.count, id: \.self) { index in
                 if let item = data.atIndex(index),
-                   let result = callback.call(withArguments: [item, Int32(index)]), !result.isUndefined {
+                   let result = componentRuntime.callRestoreFunction(id: forEachComponent.functionId, element: item, index: Int32(index))
+                {
                     ComponentView(decode(from: result.toString()))
                 }
             }
