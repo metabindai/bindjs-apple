@@ -1,0 +1,56 @@
+import SwiftUI
+
+struct ScrollViewConvertible: ComponentConvertible {
+    let axes: String
+    let showsIndicators: Bool
+    let children: AST
+    
+    init(_ component: Component) {
+        axes = component.decode("axis") ?? Axis.Set.vertical.stringValue
+        showsIndicators = component.decode("showsIndicators") ?? true
+        children = component.children
+    }
+    
+    var component: Component {
+        Component(type: Self.componentName, props: [
+            "axis": axes,
+            "showsIndicators": showsIndicators
+        ])
+    }
+}
+
+extension ScrollViewConvertible: View {
+    var body: some View {
+        ScrollView(.init(stringValue: axes), showsIndicators: showsIndicators) {
+            ComponentView(children)
+        }
+    }
+}
+
+extension Axis.Set {
+    var stringValue: String {
+        switch self {
+        case .horizontal:
+            return "horizontal"
+        case .vertical:
+            return "vertical"
+        case [.horizontal, .vertical]:
+            return "both"
+        default:
+            return "vertical"
+        }
+    }
+    
+    init(stringValue: String) {
+        switch stringValue {
+        case "horizontal":
+            self = .horizontal
+        case "vertical":
+            self = .vertical
+        case "both":
+            self = [.horizontal, .vertical]
+        default:
+            self = .vertical
+        }
+    }
+}
