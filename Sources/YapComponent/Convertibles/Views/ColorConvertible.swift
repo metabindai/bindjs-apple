@@ -83,7 +83,11 @@ extension ColorConvertible: View {
             case "primary":
                 return Color.primary
             case "background":
+            #if os(macOS)
                 return Color(.textBackgroundColor)
+            #else
+                return Color(.systemBackground)
+            #endif
             case "secondary":
                 return Color.secondary
             case "accentColor":

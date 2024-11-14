@@ -50,7 +50,11 @@ extension ButtonStyleConvertible: ViewModifier {
         case .borderless:
             content.buttonStyle(BorderlessButtonStyle())
         case .link:
+            #if os(macOS)
             content.buttonStyle(LinkButtonStyle())
+            #else
+            content.buttonStyle(PlainButtonStyle()) 
+            #endif
         case .custom(let value):
             content.buttonStyle(ComponentButtonStyle(name: value))
         }
