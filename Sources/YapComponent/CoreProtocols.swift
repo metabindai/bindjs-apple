@@ -84,6 +84,14 @@ struct Component: AST {
         set { props["children"] = newValue }
     }
     
+    init(type: String, props: [String: AST] = [:], children: [AST] = []) {
+        self.type = type
+        self.props = props
+        if !children.isEmpty {
+            self.props["children"] = children
+        }
+    }
+    
     func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitComponent(self)
     }

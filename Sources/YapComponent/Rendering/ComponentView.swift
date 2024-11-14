@@ -63,6 +63,9 @@ public struct ComponentView: View {
         case let progress as ProgressViewConvertible:
             progress
             
+        case let list as ListConvertible:
+            list
+            
         case let hStack as HStackConvertible:
             hStack
             
@@ -71,6 +74,12 @@ public struct ComponentView: View {
             
         case let zStack as ZStackConvertible:
             zStack
+            
+        case let lazyHStack as LazyHStackConvertible:
+            lazyHStack
+            
+        case let lazyVStack as LazyVStackConvertible:
+            lazyVStack
             
         case let spacer as SpacerConvertible:
             spacer

@@ -53,6 +53,39 @@ extension VerticalAlignment {
     }
 }
 
+struct LazyHStackConvertible: ComponentConvertible {
+    let alignment: String
+    let spacing: Double?
+    let children: AST
+    
+    init(_ component: Component) {
+        alignment = component.decode("alignment") ?? "center"
+        spacing = component.decode("spacing")
+        children = component.children
+    }
+    
+    var component: Component {
+        
+        var props: [String: AST] = [
+            "alignment": alignment,
+            "children": children
+        ]
+        if let spacing = spacing {
+            props["spacing"] = spacing
+        }
+        
+        return Component(type: Self.componentName, props: props)
+    }
+}
+
+extension LazyHStackConvertible: View {
+    
+    var body: some View {
+        LazyHStack(alignment: .init(stringValue: alignment), spacing: spacing.map { CGFloat($0) }) {
+            ComponentView(children)
+        }
+    }
+}
 
 
 struct VStackConvertible: ComponentConvertible {
@@ -100,6 +133,40 @@ extension HorizontalAlignment {
             self = .center
         default:
             self = .center
+        }
+    }
+}
+
+struct LazyVStackConvertible: ComponentConvertible {
+    let alignment: String
+    let spacing: Double?
+    let children: AST
+    
+    init(_ component: Component) {
+        alignment = component.decode("alignment") ?? "center"
+        spacing = component.decode("spacing")
+        children = component.children
+    }
+    
+    var component: Component {
+        
+        var props: [String: AST] = [
+            "alignment": alignment,
+            "children": children
+        ]
+        if let spacing = spacing {
+            props["spacing"] = spacing
+        }
+        
+        return Component(type: Self.componentName, props: props)
+    }
+}
+
+extension LazyVStackConvertible: View {
+    
+    var body: some View {
+        LazyVStack(alignment: .init(stringValue: alignment), spacing: spacing.map { CGFloat($0) }) {
+            ComponentView(children)
         }
     }
 }

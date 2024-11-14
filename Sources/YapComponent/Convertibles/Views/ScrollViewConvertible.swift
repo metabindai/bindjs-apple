@@ -14,7 +14,8 @@ struct ScrollViewConvertible: ComponentConvertible {
     var component: Component {
         Component(type: Self.componentName, props: [
             "axis": axes,
-            "showsIndicators": showsIndicators
+            "showsIndicators": showsIndicators,
+            "children": children
         ])
     }
 }
