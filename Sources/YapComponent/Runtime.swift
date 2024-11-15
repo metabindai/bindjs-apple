@@ -33,7 +33,7 @@ public class ComponentRuntime: ObservableObject {
         objectWillChange.send()
     }
     
-    public func view(_ name: String, arguments: [String: Any]) -> some View {
+    public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
         if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
@@ -42,7 +42,7 @@ public class ComponentRuntime: ObservableObject {
             .environment(\.componentRuntime, self)
     }
     
-    public func setEnvironment(_ environment: [String: Any]) {
+    public func environment(_ environment: [String: Any]) {
         value.invokeMethod("setEnvironment", withArguments: [environment])
     }
     
@@ -71,7 +71,8 @@ public class ComponentRuntime: ObservableObject {
         return nil
     }
     
-    public func setEnvironment(_ environment: EnvironmentValues) {
+    @discardableResult
+    public func environmentValues(_ environment: EnvironmentValues) -> Self {
         value.invokeMethod("setEnvironment", withArguments: [
             [
                 // Core Display Properties
@@ -94,6 +95,7 @@ public class ComponentRuntime: ObservableObject {
                 "layoutDirection": String(describing: environment.layoutDirection)
             ]
         ])
+        return self
     }
     
     public func reset() {

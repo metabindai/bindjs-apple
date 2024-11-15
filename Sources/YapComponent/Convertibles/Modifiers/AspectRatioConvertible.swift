@@ -3,9 +3,11 @@ import SwiftUI
 struct AspectRatioConvertible: ComponentConvertible {
     
     let aspectRatio: Double?
+    let contentMode: String
     
     init(_ component: Component) {
         aspectRatio = component.decode("aspectRatio") ?? component.decode("value")
+        contentMode = component.decode("contentMode") ?? "fit"
     }
     
     var component: Component {
@@ -27,10 +29,19 @@ struct AspectRatioConvertible: ComponentConvertible {
 extension AspectRatioConvertible: ViewModifier {
     
     public func body(content: Content) -> some View {
-        if let aspectRatio = aspectRatio {
-            content.aspectRatio(CGFloat(aspectRatio), contentMode: .fit)
-        } else {
-            content
+        content.aspectRatio(aspectRatio.map { CGFloat($0) }, contentMode: .init(stringValue: contentMode))
+    }
+}
+
+extension ContentMode {
+    init(stringValue: String) {
+        switch stringValue {
+        case "fit":
+            self = .fit
+        case "fill":
+            self = .fill
+        default:
+            self = .fit
         }
     }
 }
