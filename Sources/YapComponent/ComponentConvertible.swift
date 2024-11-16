@@ -50,6 +50,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case ImageConvertible.componentName: ImageConvertible(component)
     case ItalicConvertible.componentName: ItalicConvertible(component)
     case KerningConvertible.componentName: KerningConvertible(component)
+    case LabelConvertible.componentName: LabelConvertible(component)
     case LazyHStackConvertible.componentName: LazyHStackConvertible(component)
     case LazyVStackConvertible.componentName: LazyVStackConvertible(component)
     case LinearGradientConvertible.componentName: LinearGradientConvertible(component)

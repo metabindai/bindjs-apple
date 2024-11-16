@@ -98,6 +98,10 @@ public struct ComponentView: View {
             
         case let toggle as ToggleConvertible:
             toggle
+         
+        case let label as LabelConvertible:
+            label
+            
         default:
             EmptyView()
         }
