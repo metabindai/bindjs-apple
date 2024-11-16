@@ -15,7 +15,7 @@ enum ProgressViewStyleConvertible: ComponentConvertible {
             default: self = .custom(value)
             }
         } else {
-            self = .linear
+            self = .circular
         }
     }
     
