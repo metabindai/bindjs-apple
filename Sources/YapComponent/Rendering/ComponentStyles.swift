@@ -51,8 +51,7 @@ struct ComponentToggleStyle: ToggleStyle {
             // Calling this is calling a view, returning an AST which can be rendered.
             componentRuntime.view(name, arguments: [
                 "label": makeLabel(),
-                "isOn": configuration.isOn,
-                "isMixed": configuration.isMixed
+                "isOn": configuration.isOn
             ])
             
             // But we first place the swift ui view in the environment so that it can get

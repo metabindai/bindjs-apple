@@ -125,6 +125,11 @@ struct ComponentViewModifier: ViewModifier {
         case let padding as PaddingConvertible:
             content.modifier(padding)
             
+        case let labelStyle as LabelStyleConvertible:
+            content.modifier(labelStyle)
+            
+        case let progressViewStyle as ProgressViewStyleConvertible:
+            content.modifier(progressViewStyle)
             
         default:
             content
