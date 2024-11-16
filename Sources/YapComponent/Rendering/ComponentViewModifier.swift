@@ -26,6 +26,9 @@ struct ComponentViewModifier: ViewModifier {
         case let buttonStyle as ButtonStyleConvertible:
             content.modifier(buttonStyle)
             
+        case let toggleStyle as ToggleStyleConvertible:
+            content.modifier(toggleStyle)
+            
         case let scaleEffect as ScaleEffectConvertible:
             content.modifier(scaleEffect)
             

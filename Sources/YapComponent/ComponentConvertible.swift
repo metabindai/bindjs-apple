@@ -74,6 +74,8 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case ShadowConvertible.componentName: ShadowConvertible(component)
     case SpacerConvertible.componentName: SpacerConvertible(component)
     case TextConvertible.componentName: TextConvertible(component)
+    case ToggleConvertible.componentName: ToggleConvertible(component)
+    case ToggleStyleConvertible.componentName: ToggleStyleConvertible(component)
     case TrackingConvertible.componentName: TrackingConvertible(component)
     case VStackConvertible.componentName: VStackConvertible(component)
     case ZIndexConvertible.componentName: ZIndexConvertible(component)
