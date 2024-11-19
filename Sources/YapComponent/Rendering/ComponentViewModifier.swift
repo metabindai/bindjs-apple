@@ -43,6 +43,9 @@ struct ComponentViewModifier: ViewModifier {
         
         case let compositingGroup as CompositingGroupConvertible:
             content.modifier(compositingGroup)
+            
+        case let drawingGroup as DrawingGroupConvertible:
+            content.modifier(drawingGroup)
         
         case let cornerRadius as CornerRadiusConvertible:
             content.modifier(cornerRadius)

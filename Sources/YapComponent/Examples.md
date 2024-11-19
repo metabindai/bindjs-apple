@@ -1,11 +1,3 @@
-// @description Creates components from low-level AST
-AST.Directive(name: string, props: object, children?: any[])
-AST.ModifiedContent(modifier: object, component: object | object[])
-AST.ForEach(dataId: string, functionId: string, count: number)
-
-// @description Creates reusable components
-makeComponent((props: any, children: Component[]) => Component)
-
 // @description Accesses environment values
 useEnvironment(): {
   displayScale: number,
@@ -343,7 +335,7 @@ const Card = (props, children) => {
   .shadow({ radius: 4 })
 }
 
-// ALWAYS INCLUDE CONST BODY
+// ALWAYS include const body
 const body = () => Card({ 
   icon: "star.fill",
   color: "blue", 
@@ -351,3 +343,4 @@ const body = () => Card({
 }, [
   Text({ value: "Additional content" })
 ])
+```

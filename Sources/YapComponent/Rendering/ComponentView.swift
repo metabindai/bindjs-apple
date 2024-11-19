@@ -45,6 +45,9 @@ public struct ComponentView: View {
         case let circle as CircleConvertible:
             circle
             
+        case let triangle as TriangleConvertible:
+            triangle
+            
         case let rectangle as RectangleConvertible:
             rectangle
             
@@ -101,6 +104,9 @@ public struct ComponentView: View {
          
         case let label as LabelConvertible:
             label
+            
+        case let polygon as PolygonConvertible:
+            polygon
             
         default:
             EmptyView()
