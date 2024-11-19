@@ -136,6 +136,9 @@ struct ComponentViewModifier: ViewModifier {
         
         case let zIndex as ZIndexConvertible:
             content.modifier(zIndex)
+            
+        case let onTap as OnTapConvertible:
+            content.modifier(onTap)
         
         default:
             content

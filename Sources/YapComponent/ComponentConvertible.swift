@@ -63,6 +63,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case MaterialConvertible.componentName: MaterialConvertible(component)
     case MultilineTextAlignmentConvertible.componentName: MultilineTextAlignmentConvertible(component)
     case OffsetConvertible.componentName: OffsetConvertible(component)
+    case OnTapConvertible.componentName: OnTapConvertible(component)
     case OpacityConvertible.componentName: OpacityConvertible(component)
     case OverlayConvertible.componentName: OverlayConvertible(component)
     case PaddingConvertible.componentName: PaddingConvertible(component)

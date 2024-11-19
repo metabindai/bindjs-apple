@@ -98,7 +98,7 @@ struct PolygonConvertible: ComponentConvertible {
     let sides: Int
     
     init(_ component: Component) {
-        sides = Int(component.decode("sides") ?? component.decode("value") ?? 3)
+        sides = Int(min(100, component.decode("sides") ?? component.decode("value") ?? 3))
     }
     
     var component: Component {
