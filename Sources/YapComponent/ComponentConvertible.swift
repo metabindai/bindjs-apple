@@ -20,6 +20,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case AccessibilityLabelConvertible.componentName: AccessibilityLabelConvertible(component)
     case AspectRatioConvertible.componentName: AspectRatioConvertible(component)
     case BackgroundConvertible.componentName: BackgroundConvertible(component)
+    case BlendModeConvertible.componentName: BlendModeConvertible(component)
     case BlurConvertible.componentName: BlurConvertible(component)
     case BoldConvertible.componentName: BoldConvertible(component)
     case BorderConvertible.componentName: BorderConvertible(component)

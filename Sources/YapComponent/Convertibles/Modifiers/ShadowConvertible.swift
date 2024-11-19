@@ -7,7 +7,7 @@ public struct ShadowConvertible: ComponentConvertible {
     let y: Double
     
     init(_ component: Component) {
-        color = component.decode("color") ?? .black
+        color = component.decode("color") ?? .shadow
         radius = component.decode("radius") ?? component.decode("value") ?? 10.0
         x = component.decode("x") ?? 0.0
         y = component.decode("y") ?? 0.0
