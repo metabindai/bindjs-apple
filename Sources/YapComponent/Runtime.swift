@@ -12,7 +12,7 @@ public struct JSComponent {
 }
 
 extension EnvironmentValues {
-    @Entry var componentRuntime = ComponentRuntime()
+    @Entry public var componentRuntime = ComponentRuntime()
 }
 
 public class ComponentRuntime: ObservableObject {
