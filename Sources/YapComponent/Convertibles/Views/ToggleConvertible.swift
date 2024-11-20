@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ToggleConvertible: ComponentConvertible {
-    let isOn: Bool
+    @State var isOn: Bool
     let label: AST
     
     init(_ component: Component) {
@@ -21,7 +21,7 @@ struct ToggleConvertible: ComponentConvertible {
 
 extension ToggleConvertible: View {
     var body: some View {
-        Toggle(isOn: .constant(isOn)) {
+        Toggle(isOn: $isOn) {
             ComponentView(label)
         }
     }
