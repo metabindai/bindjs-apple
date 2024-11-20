@@ -42,6 +42,7 @@ public class ComponentRuntime: ObservableObject {
     
     public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
         if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
+            print(result)
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
         }
@@ -191,7 +192,6 @@ class YapJSRuntime {
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
-        this.storedEventHandlers = {}
         this.registerBuiltInCallbacks()
         this.registerASTComponents(swiftUIComponentNames)
         this.registerModifierDefaults()
@@ -201,7 +201,6 @@ class YapJSRuntime {
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
-        this.storedEventHandlers = {}
     }
     
     resetCache(componentName) {
@@ -473,12 +472,12 @@ class YapJSRuntime {
 
     #storeEventHandler(handler) {
         const id = this.#generateUniqueID()
-        this.storedEventHandlers[id] = handler
+        this.storedFunctions[id] = handler
         return id
     }
 
     restoreEventHandler(handlerId) {
-        return this.storedEventHandlers[handlerId] || null
+        return this.storedFunctions[handlerId] || null
     }
 
     callEventHandler(handlerId, ...args) {
