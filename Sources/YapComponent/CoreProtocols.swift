@@ -1,10 +1,10 @@
 import SwiftUI
 
-protocol AST {
+public protocol AST {
     func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result
 }
 
-protocol ASTVisitor {
+public protocol ASTVisitor {
     associatedtype Result
     mutating func visit(_ node: AST) -> Self.Result
     mutating func defaultVisit(_ node: AST) -> Self.Result
@@ -35,48 +35,48 @@ extension ASTVisitor {
 }
 
 extension Bool: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitBool(self)
     }
 }
 
 extension Double: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitDouble(self)
     }
 }
 
 extension String: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitString(self)
     }
 }
 
-struct EmptyComponent: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+public struct EmptyComponent: AST {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitEmptyComponent(self)
     }
 }
 
 extension [AST]: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitArray(self)
     }
 }
 
 extension [String: AST]: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitDictionary(self)
     }
 }
 
 extension AnyView: AST {
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitAnyView(self)
     }
 }
 
-struct Component: AST {
+public struct Component: AST {
     var type: String
     var props: [String: AST] = [:]
     var children: [AST] {
@@ -92,7 +92,7 @@ struct Component: AST {
         }
     }
     
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitComponent(self)
     }
     
@@ -110,21 +110,21 @@ struct Component: AST {
     }
 }
 
-struct ModifiedComponent: AST {
+public struct ModifiedComponent: AST {
     let content : AST
     let modifier: AST
     
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitModifiedComponent(self)
     }
 }
 
-struct ForEachComponent: AST {
+public struct ForEachComponent: AST {
     let dataId: String
     let count: Int
     let functionId: String
     
-    func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
+    public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitForEach(self)
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-func decode(from json: String) -> AST {
+public func decode(from json: String) -> AST {
     let data = json.data(using: .utf8)!
     do {
         let any = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed, .json5Allowed])
@@ -10,7 +10,7 @@ func decode(from json: String) -> AST {
     }
 }
 
-func decode(_ any: Any) -> AST {
+public func decode(_ any: Any) -> AST {
     switch any {
     case is NSNull:
         return EmptyComponent()

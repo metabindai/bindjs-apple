@@ -4,7 +4,7 @@ protocol ComponentConvertible: AST {
 }
 
 extension ComponentConvertible {
-    func accept<V>(_ visitor: inout V) -> V.Result where V: ASTVisitor {
+    public func accept<V>(_ visitor: inout V) -> V.Result where V: ASTVisitor {
         component.accept(&visitor)
     }
 }
