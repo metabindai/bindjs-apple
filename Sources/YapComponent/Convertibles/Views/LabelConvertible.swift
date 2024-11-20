@@ -1,11 +1,11 @@
 import SwiftUI
 
 struct LabelConvertible: ComponentConvertible {
-    let title: String
+    let title: AST
     let icon: AST
     
     init(_ component: Component) {
-        title = component.decode("title") ?? ""
+        title = component.decodeAny("title") ?? EmptyComponent()
         icon = component.decodeAny("icon") ?? EmptyComponent()
     }
     
@@ -23,7 +23,7 @@ struct LabelConvertible: ComponentConvertible {
 extension LabelConvertible: View {
     var body: some View {
         Label(title: {
-            Text(title)
+            ComponentView(title)
         }, icon: {
             ComponentView(icon)
         })
