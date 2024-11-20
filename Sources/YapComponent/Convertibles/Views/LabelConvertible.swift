@@ -6,7 +6,7 @@ struct LabelConvertible: ComponentConvertible {
     
     init(_ component: Component) {
         title = component.decode("title") ?? ""
-        icon = component.decode("icon") ?? EmptyComponent()
+        icon = component.decodeAny("icon") ?? EmptyComponent()
     }
     
     var component: Component {

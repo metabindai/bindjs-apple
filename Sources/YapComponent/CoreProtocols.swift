@@ -108,6 +108,10 @@ public struct Component: AST {
         }
         return nil
     }
+    
+    func decodeAny(_ key: String) -> AST? {
+        props[key]
+    }
 }
 
 public struct ModifiedComponent: AST {
