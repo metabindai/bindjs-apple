@@ -3,7 +3,7 @@ import SwiftUI
 public struct ComponentView: View {
     var component: AST
     
-    init(_ component: AST) {
+    public init(_ component: AST) {
         self.component = component
     }
     
