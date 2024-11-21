@@ -42,7 +42,7 @@ public class ComponentRuntime: ObservableObject {
     
     public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
         if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
-            print(result)
+//            print(result)
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
         }
