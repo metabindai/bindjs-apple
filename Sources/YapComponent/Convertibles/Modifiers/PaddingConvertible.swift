@@ -7,12 +7,12 @@ struct PaddingConvertible: ComponentConvertible {
     var trailing: Double?
     
     init(_ component: Component) {
-        top = component.decode("top")
-        leading = component.decode("leading")
-        bottom = component.decode("bottom")
-        trailing = component.decode("trailing")
+        top = component.decode("top") ?? component.decode("vertical")
+        leading = component.decode("leading") ?? component.decode("horizontal")
+        bottom = component.decode("bottom") ?? component.decode("vertical")
+        trailing = component.decode("trailing") ?? component.decode("horizontal")
         
-        if let value: Double = component.decode("value") {
+        if let value: Double = component.decode("all") ?? component.decode("value") {
             top = value
             leading = value
             bottom = value
