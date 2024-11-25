@@ -29,7 +29,9 @@ public class ComponentRuntime: ObservableObject {
         let printFunction: @convention(block) (String) -> Void = { message in
             print(message)
         }
-        context.setObject(printFunction, forKeyedSubscript: "print" as NSString)
+
+        let console = ["log": printFunction]
+        context.setObject(console, forKeyedSubscript: "console" as NSString)
         
         // Evaluate the main script
         self.value = context.evaluateScript(script)!
@@ -42,7 +44,6 @@ public class ComponentRuntime: ObservableObject {
     
     public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
         if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
-//            print(result)
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
         }
@@ -366,9 +367,9 @@ class YapJSRuntime {
                             const handlerId = this.#storeEventHandler(modifierProps.handler)
                             props = {
                                 ...modifierProps,
-                                handler: undefined, // Remove the function
                                 handlerId // Add the handler ID
                             }
+                            delete(props.handler)
                         } else {
                             props = this.#processProps(modifierProps)
                         }
