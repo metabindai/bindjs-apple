@@ -422,7 +422,7 @@ class YapJSRuntime {
             }
 
             // Get current state
-            var hooks = this.hookState.currentComponent.hookStorage ?? []
+            var hooks = this.hookState.currentComponent.hookStorage
             const hookIndex = this.hookState.currentComponent.hookIndex
 
             
@@ -668,9 +668,11 @@ class YapJSRuntime {
             let hookKey = path.join('.')
 
             // Get hook storage for this component
-            let hookStorage = componentHookStore[hookKey] ?? (componentHookStore[hookKey] = []);
-
-            
+            let hookStorage = componentHookStore[hookKey];
+            if (hookStorage == null) {
+                componentHookStore[hookKey] = []
+                hookStorage = componentHookStore[hookKey]
+            }
 
             // Setup component hook state for the component we're about to call
             currentComponent.hookStorage = hookStorage            
