@@ -29,12 +29,24 @@ public class ComponentRuntime: ObservableObject {
         let printFunction: @convention(block) (String) -> Void = { message in
             print(message)
         }
-
+        
         let console = ["log": printFunction]
         context.setObject(console, forKeyedSubscript: "console" as NSString)
         
         // Evaluate the main script
         self.value = context.evaluateScript(script)!
+        
+        // After runtime is created, bridge the needsRerender function
+        let needsRerenderFunction: @convention(block) () -> Void = { [weak self] in
+            DispatchQueue.main.async {
+                self?.objectWillChange.send()
+            }
+        }
+        
+        context.setObject(needsRerenderFunction, forKeyedSubscript: "needsRerender" as NSString)
+                        
+        // Set up the needsRerender function
+        context.evaluateScript("runtime.needsRerender = needsRerender")
     }
     
     public func register(_ component: JSComponent) {
@@ -43,6 +55,7 @@ public class ComponentRuntime: ObservableObject {
     }
     
     public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
+        willRender()
         if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
@@ -92,6 +105,10 @@ public class ComponentRuntime: ObservableObject {
             return result
         }
         return nil
+    }
+    
+    public func willRender() {
+        value.invokeMethod("willRender", withArguments: [])
     }
     
     @discardableResult
@@ -179,11 +196,13 @@ AST.ForEach = (dataId, functionId, count) => {
 
 class YapJSRuntime {
     constructor(options) {
-        this.options = options ?? { expandAll: true }
+        console.log('JSRuntime: init')
+        this.options = options ?? { }
         this.reset()
     }
 
     reset() {
+        console.log('JSRuntime: reset')
         this.context = {}
         this.components = {}
         this.functionCache = {}
@@ -193,21 +212,72 @@ class YapJSRuntime {
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
+        this.hookState = {}
+        this.resetState()
         this.registerBuiltInCallbacks()
         this.registerASTComponents(swiftUIComponentNames)
         this.registerModifierDefaults()
+        this.needsRerender = () => { 
+            console.log('Needs rerender not implemented')   
+        }
+    }
+
+    willRender() {
+        this.hookState.makeComponentIndex = 0 
+        this.hookState.childIndex = 0 
+        this.hookState.modifierId = null
+        console.log(JSON.stringify(this.hookState))
+    }
+
+    resetState() {
+
+        console.log('JSRuntime: resetState')
+
+        // Hook state needs to keep track of two things
+        // - Component path. A unique path for the current component that's consistent across renders.
+        // - Component hook storage. Storage for the hooks based on the component path.
+        // - Component hook index. The current index of the hook that is being called
+        this.hookState = {
+            // Current component path
+            path: [],
+
+            // Current index in an array of children. Used to create the path if no id 
+            childIndex : 0,
+
+            // Current id set by a modifier. Used to create the path if set.
+            modifierId : null,
+
+            // Index of the number of calls to makeComponent. Used to generate a unique id for a component if a name isnt available (if called from code)
+            makeComponentIndex: 0,
+
+            // Stores the hooks for each component, keyed by path.
+            componentHookStore: {},
+
+            // State of the individual for current component
+            currentComponent: {
+                hookStorage: [],
+                hookIndex: 0
+            }
+        }
     }
 
     resetStorage() {
+        console.log('JSRuntime: resetStorage')
+
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
     }
     
     resetCache(componentName) {
+        console.log('JSRuntime: resetCache ', componentName)
+
         this.functionCache[componentName] = {}  
     }
 
+    /**
+     * Register the default values for a modifier
+     */
     registerModifierDefaults() {
         this.modifierDefaults = {
             'disabled': true,
@@ -215,6 +285,7 @@ class YapJSRuntime {
     }
 
     registerASTComponents(componentNames) {
+        // Construct AST functions for inbuilt components.
         for (const componentName of componentNames) {    
             this.context[componentName] = (props, children, arg3) => {
                 return this.#makeInBuiltComponent(componentName, props, children)
@@ -226,17 +297,22 @@ class YapJSRuntime {
         }
     }
 
+    /**
+     * Register the JS of one or more components
+     * @param {*} components 
+     */
     registerComponents(components, entryPoint = 'body') {    
         for (const componentName of Object.keys(components)) {
             this.registerComponent(componentName, components[componentName], entryPoint)    
         }   
     }
 
-    registerComponent(componentName, content, entryPoint) {
+    registerComponent(componentName, content, entryPoint)  {
         const name = componentName.replace(/\\s/g, '')
         this.callStack = [] 
         this.functionCache[name] = {}
         this.components[name] = content
+
         this.context[name] = (arg1, arg2, ...otherArgs) => {
             const { props, children } = this.#processComponentArgs(arg1, arg2)
 
@@ -249,21 +325,34 @@ class YapJSRuntime {
                // Run the returned function to generate the ast
                let ast = componentFunction()
 
+               if (typeof ast === 'function') {
+                    ast = ast()
+                }
+
                // Wrap the component in a directive so the renderer knows what component generated that part of the AST
                let componentAst = AST.Directive('ComponentCall', { name: name }, [ ast ])
 
                // Return
                return componentAst
 
-            }, props, children)
+            }, props, children, name)
 
         }
     }
 
+     /**
+     * Register callback to be made available to the runtime
+     * @param {*} callbackName
+     * @param {*} callback 
+     */
     registerCallback(callbackName, callback) {  
         this.context[callbackName] = callback
     }
 
+    /**
+     * Register initial environment
+     * @param {*} environment 
+     */
     registerEnvironment(environment = {}) {  
         this.storedEnvironments = {}
         this.environment = environment
@@ -272,6 +361,10 @@ class YapJSRuntime {
         })
     }
 
+    /**
+     * Restores an environment by id
+     * @param {*} environmentId 
+     */
     restoreEnvironment(environmentId) { 
         let env = this.storedEnvironments[environmentId]
         if (env) {
@@ -285,29 +378,116 @@ class YapJSRuntime {
         console.log(' - Stored: ', this.storedEnvironments)
     }
 
-    registerBuiltInCallbacks() {
-        this.registerCallback('makeComponent', (component) => {
-            let body = component.body ? component.body : component
-            return (props, children) =>   
-                this.#makeComponent((props, children) => body(props, children), props, children)    
-        })  
+
+    /**
+     * Register built in callbacks available to components
+     * @param {*} environment 
+     */    
+    registerBuiltInCallbacks() {       
+        this.registerUseState()
+        this.registerMakeComponent()    
     }
 
+    /**
+     * Register the 'makeComponent' function available to user code to create a component
+     */
+    registerMakeComponent() {
+        let makeComponent = (component) => {
+
+            // Pass body directly or in dictionary
+            let body = component.body ? component.body : component
+
+            // As the name isnt passed in, generate one from the call order
+            const componentIndex = this.hookState.makeComponentIndex++
+
+            console.log('registerCallback - makeComponent ', component, componentIndex)
+
+            // Create body function
+            return (props, children) =>   
+                this.#makeComponent((props, children) => body(props, children), props, children, componentIndex)  
+        }
+
+        this.registerCallback('makeComponent', makeComponent)  
+    }
+
+    /**
+     * Register the useState hook   
+     */
+    registerUseState() {
+        
+        const useState = (initialValue) => {
+            // Sanity check
+            if (this.hookState.currentComponent == null) {
+                return [initialValue, () => {}]
+            }
+
+            // Get current state
+            var hooks = this.hookState.currentComponent.hookStorage ?? []
+            const hookIndex = this.hookState.currentComponent.hookIndex
+
+            
+            console.log(`useState index ${this.hookState.currentComponent.hookIndex} value ${hooks[hookIndex]} hookIndex: ${hookIndex} initialValue ${initialValue}`);
+            
+            // Initialise hook with initialValue if needed
+            hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex]
+
+            const rerenderCallback = this.needsRerender
+
+            // Create setState callback
+            let callback = (value) => {
+
+                this.hookState.componentHookStore.Ollie_0 = (this.hookState.componentHookStore.Ollie_0 ?? 0) + 1
+
+                console.log(`Updating state at index ${hookIndex} to value: ${value}`);
+
+                // Update state
+                hooks[hookIndex] = value       
+
+                console.log(`After update: hook storage =` + JSON.stringify(hooks)); 
+                console.log(hooks[hookIndex])        
+
+                // Trigger a re-render is required due to state changing
+                rerenderCallback()
+                return value                
+            }
+
+            let value = hooks[this.hookState.currentComponent.hookIndex++]
+
+            console.log(value)
+
+            return [value, callback]    
+        }
+
+        this.registerCallback('useState', useState.bind(this))
+    }
+
+    /**
+     * Unregister a component
+     * @param {*} componentName
+     * @returns
+     */
     unregisterComponent(componentName) {
         delete this.components[componentName]
         delete this.functionCache[componentName]
         delete this.context[componentName]  
     }
 
+    /**
+     * Calls the body of a component
+     * @param {*} componentName 
+     * @param {*} componentEntryPoint 
+     * @returns 
+     */
     call(componentName, componentEntryPoint = 'body', params, children, ...args) {
         const componentKeys = Object.keys(this.context);
         const functionList = componentKeys.join(', ');
     
         let func = null
         if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {  
+            //console.log(`[cache hit ${componentName}.${componentEntryPoint}]`)
             func = this.functionCache[componentName][componentEntryPoint]
         } else {
-            console.log(`[constructing ${componentName}.${componentEntryPoint}]`)
+            //console.log(`[constructing ${componentName}.${componentEntryPoint}]`)
             func = new Function(`{ ${functionList} }`, `${this.components[componentName]}; return ${componentEntryPoint}`)(this.context);
             this.functionCache[componentName][componentEntryPoint] = func   
         }
@@ -315,7 +495,17 @@ class YapJSRuntime {
         return func(params, children, ...args)
     }
 
+
+    /**
+     * Process arguments for a component
+     * @param {*} arg1 
+     * @param {*} arg2 
+     * @returns 
+     */
     #processComponentArgs(arg1, arg2) {  
+        // Allow children to be passed as the first argument.
+        // If single value or array is passed then it becomes the children.
+        // TODO: Discuss, single value be children or rawValue/value ?
         const childrenFirstArg = arg1 != null && arg2 == null && (Array.isArray(arg1))
         const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg
 
@@ -325,6 +515,11 @@ class YapJSRuntime {
         return { props, children }        
     }
 
+    /**
+     * Process the props for a component or a modifier ,expanding functions in arrays or values
+     * @param {*} props 
+     * @returns 
+     */
     #processProps(props) { 
         if (props == null || typeof props != 'object') {  
             return props
@@ -339,19 +534,27 @@ class YapJSRuntime {
                 newProps[key] = value.map(v => 
                     (typeof v === 'function') ? v() : v
                 )
+
             // Expand functions if value of key 
-            } else if (typeof value === 'function') {
-                newProps[key] = value()
+            } if (typeof newProps[key] === 'function') {
+                newProps[key] = newProps[key]()
             } 
         })
         return newProps
     }
 
+
+    /**
+     * Creates a modifier function
+     */
     #makeModifier(name, f) {
+    
         const makeModifier = this.#makeModifier.bind(this)    
 
         return (modifierProps) => {
+    
             const modifierContent = () => {
+    
                 // Special handling for event modifiers (on*)
                 if (name.startsWith('on')) {
                     let props = {}
@@ -359,17 +562,18 @@ class YapJSRuntime {
                     // Handle different argument patterns
                     if (typeof modifierProps === 'function') {
                         // Just a handler function
-                        const handlerId = this.#storeEventHandler(modifierProps)
+                        const handlerId = this.#storeFunction(modifierProps)
                         props = { handlerId }
                     } else if (typeof modifierProps === 'object') {
                         // Object with handler and additional props
                         if (typeof modifierProps.handler === 'function') {
-                            const handlerId = this.#storeEventHandler(modifierProps.handler)
+                            const handlerId = this.#storeFunction(modifierProps.handler)
                             props = {
                                 ...modifierProps,
+                                handler: undefined,
                                 handlerId // Add the handler ID
                             }
-                            delete(props.handler)
+                            delete props.handler  // Remove the function
                         } else {
                             props = this.#processProps(modifierProps)
                         }
@@ -381,29 +585,52 @@ class YapJSRuntime {
                 }
 
                 // Regular modifier handling remains the same
+
+                // If no props are passed, assume a value true
                 var props = modifierProps == null ? this.modifierDefaults[name] : modifierProps
+
+                /**
+                 * Capture environment & run content
+                 */
                 const capturedEnvironment = {...this.environment}
                 this.environment[name] = props
+    
+                // If this modifier is an id, store the name into the hook state so it can be used 
+                // for the hook path
+                if (name == 'id') {
+                    this.hookState.modifierId = props
+                }
 
+                // Will be a function to an inbuilt when modifying a custom component
                 let content = f()
                 if (typeof content === 'function') {    
                     content = content()
                 }
-
+    
                 this.environment = capturedEnvironment
-                
-                props = this.#processProps(props ?? {})
 
+                // Reset hook state id
+                this.hookState.modifierId = null
+
+                
+                props = this.#processProps(props ?? { })
+
+                // Handle passing single value
                 if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) { 
+                    // If passing a component, execute it to get the ast 
                     if (typeof props == 'function') {
                         props = props()
                     }
                     props = { value: props }
                 }
+                
 
+                /**
+                 * Construct AST    
+                 */
                 const modifierAST = AST.Directive(name, props, [])
-                const ast = AST.ModifiedContent(modifierAST, content)
-
+                const ast = AST.ModifiedContent(modifierAST, content )
+    
                 return ast
             }
             
@@ -424,8 +651,40 @@ class YapJSRuntime {
         return this.#makeComponent(body, props, children)
     }
     
-    #makeComponent(body, props, children) {
-        const f = () => body(props, children)
+    /**
+     * Creates a component
+     */
+    #makeComponent(body, props, children, componentName) {
+        
+        const f = () => {
+
+            let { path, modifierId, childIndex, componentHookStore, currentComponent } = this.hookState
+
+            // Push on to hook state path
+            // Use id if specified otherwise use child index + component name to create a deterministct path to that item.
+            path.push(modifierId ? modifierId : (componentName + '_' + childIndex))
+
+            // Create path key. This is a unique key consistent across renders
+            let hookKey = path.join('.')
+
+            // Get hook storage for this component
+            let hookStorage = componentHookStore[hookKey] ?? (componentHookStore[hookKey] = []);
+
+            
+
+            // Setup component hook state for the component we're about to call
+            currentComponent.hookStorage = hookStorage            
+            currentComponent.hookIndex = 0
+
+            // Call the content function
+            let r = body(props, children)
+
+            // Reset
+            currentComponent.hookStorage = null
+            path.pop()
+
+            return r
+        }
 
         const makeModifier = this.#makeModifier.bind(this)
 
@@ -471,58 +730,67 @@ class YapJSRuntime {
         return id
     }
 
-    #storeEventHandler(handler) {
-        const id = this.#generateUniqueID()
-        this.storedFunctions[id] = handler
-        return id
-    }
-
-    restoreEventHandler(handlerId) {
-        return this.storedFunctions[handlerId] || null
-    }
-
-    callEventHandler(handlerId, ...args) {
-        const handler = this.restoreEventHandler(handlerId)
-        if (handler) {
-            return handler(...args)
-        }
-        return null
-    }
-
+    /**
+     * Create a ForEach component
+     */
     #makeForEachComponent(data, callback) {
         return this.#makeComponent((data, callback) => {
+            
             let functionId = this.#storeFunction(callback)
-            let dataId = this.#storeData(data)
-            let count = Array.isArray(data) ? data.length : 0   
+            let dataId     = this.#storeData(data)
+            let count      = Array.isArray(data) ? data.length : 0   
+
             return AST.ForEach(dataId, functionId, count)  
-        }, data, callback)
+
+        }, data, callback, 'ForEach')   
     }
 
+    /**
+    * Creates a built in component
+    */
     #makeInBuiltComponent(type, props, children) {
+        
         return this.#makeComponent((componentProps, componentChildren) => {
+            
             var {props, children} = this.#processComponentArgs(componentProps, componentChildren)
+  
             props = props ?? {}    
             
             var environmentId = this.#storeEnvironment(type)
 
+            // If props isnt a dictionary contain within value
             if (typeof props != 'object' || typeof props == 'function') { 
                 props = { value: props }
             }
 
+            // Expand function in props 
             props = this.#processProps(props)  
+            
+            /**
+             * Execute children
+             */
+            const childrenAST = (children ?? []).flatMap((child, index) => {
+                this.hookState.childIndex = index
 
-            const childrenAST = (children ?? []).flatMap(child => {
                 let content = typeof child === 'function' ? child() : child             
                 if (typeof content === 'function') {
                     content = content()
                 }
                 return content
-            })
+            } )
 
+            // Reset
+            this.hookState.childIndex = 0
+
+            /**
+             * Component AST
+             */
             return AST.Directive(type, {...props, environmentId: environmentId}, childrenAST)  
-        }, props, children) 
+        }, props, children, type) 
     }
 }
+
+
 
 const runtime = new YapJSRuntime();
 
@@ -541,6 +809,13 @@ Object.assign(this, {
     },
     restoreData: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
-    callEventHandler: (handlerId, ...args) => runtime.callEventHandler(handlerId, ...args)
+    callEventHandler: (handlerId, ...args) => {
+        const handler = runtime.storedFunctions[handlerId]
+        if (handler) {
+            return handler(...args)
+        }
+        return null
+    },
+    willRender: () => runtime.willRender()
 });
 """
