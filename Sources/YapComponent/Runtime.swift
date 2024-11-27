@@ -15,6 +15,10 @@ extension EnvironmentValues {
     @Entry public var componentRuntime = ComponentRuntime()
 }
 
+struct ComponentRuntimeKey: EnvironmentKey {
+    static let defaultValue = ComponentRuntime()
+}
+
 public class ComponentRuntime: ObservableObject {
     let value: JSValue
     
@@ -66,8 +70,9 @@ public class ComponentRuntime: ObservableObject {
             .environment(\.componentRuntime, self)
     }
     
-    public func environment(_ environment: [String: Any]) {
+    public func environment(_ environment: [String: Any]) -> Self {
         value.invokeMethod("setEnvironment", withArguments: [environment])
+        return self
     }
     
     public func restoreEnvironment(id: String) {
@@ -134,7 +139,7 @@ public class ComponentRuntime: ObservableObject {
                 
                 // Localization
                 "locale": String(describing: environment.locale.identifier),
-                "layoutDirection": String(describing: environment.layoutDirection)
+                "layoutDirection": String(describing: environment.layoutDirection),
             ]
         ])
         return self
