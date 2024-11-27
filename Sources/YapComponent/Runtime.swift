@@ -56,7 +56,7 @@ public class ComponentRuntime: ObservableObject {
     
     public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
         willRender()
-        if let result = value.invokeMethod("call", withArguments: [[name, "body", JSValue(object: arguments, in: value.context)]]) {
+        if let result = value.invokeMethod("callComponent", withArguments: [[name,  JSValue(object: arguments, in: value.context)]]) {
             return ComponentView(decode(from: result.toString()))
                 .environment(\.componentRuntime, self)
         }
@@ -194,6 +194,7 @@ AST.ForEach = (dataId, functionId, count) => {
     }
 }
 
+
 class YapJSRuntime {
     constructor(options) {
         console.log('JSRuntime: init')
@@ -212,6 +213,7 @@ class YapJSRuntime {
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
+        this.storedHookStates = {}
         this.hookState = {}
         this.resetState()
         this.registerBuiltInCallbacks()
@@ -223,10 +225,11 @@ class YapJSRuntime {
     }
 
     willRender() {
+        this.hookState.path = []
         this.hookState.makeComponentIndex = 0 
         this.hookState.childIndex = 0 
         this.hookState.modifierId = null
-        console.log(JSON.stringify(this.hookState))
+        this.hookState.forEachElementId = null
     }
 
     resetState() {
@@ -246,6 +249,9 @@ class YapJSRuntime {
 
             // Current id set by a modifier. Used to create the path if set.
             modifierId : null,
+
+            // Current id in a ForEach loop. Used to create the path if set.
+            forEachElementId: null,
 
             // Index of the number of calls to makeComponent. Used to generate a unique id for a component if a name isnt available (if called from code)
             makeComponentIndex: 0,
@@ -267,6 +273,7 @@ class YapJSRuntime {
         this.storedEnvironments = {}
         this.storedFunctions = {}   
         this.storedData = {}
+        this.storedHookStates = {}
     }
     
     resetCache(componentName) {
@@ -325,9 +332,9 @@ class YapJSRuntime {
                // Run the returned function to generate the ast
                let ast = componentFunction()
 
-               if (typeof ast === 'function') {
+               if (ast && ast._component) {
                     ast = ast()
-                }
+               }
 
                // Wrap the component in a directive so the renderer knows what component generated that part of the AST
                let componentAst = AST.Directive('ComponentCall', { name: name }, [ ast ])
@@ -370,6 +377,11 @@ class YapJSRuntime {
         if (env) {
             this.environment = env
         }
+
+        let hookState = this.storedHookStates[environmentId]    
+        if (hookState) {
+            this.hookState.path = [...hookState.path]            
+        }
     }
 
     debugEnvironment() {
@@ -403,8 +415,10 @@ class YapJSRuntime {
             console.log('registerCallback - makeComponent ', component, componentIndex)
 
             // Create body function
-            return (props, children) =>   
+            let f = (props, children) =>   
                 this.#makeComponent((props, children) => body(props, children), props, children, componentIndex)  
+            f._component = true
+            return f
         }
 
         this.registerCallback('makeComponent', makeComponent)  
@@ -425,8 +439,7 @@ class YapJSRuntime {
             var hooks = this.hookState.currentComponent.hookStorage
             const hookIndex = this.hookState.currentComponent.hookIndex
 
-            
-            console.log(`useState index ${this.hookState.currentComponent.hookIndex} value ${hooks[hookIndex]} hookIndex: ${hookIndex} initialValue ${initialValue}`);
+            //console.log(`useState index ${currentHook} value ${hooks[currentHook]} initialValue ${initialValue}`);
             
             // Initialise hook with initialValue if needed
             hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex]
@@ -436,26 +449,17 @@ class YapJSRuntime {
             // Create setState callback
             let callback = (value) => {
 
-                this.hookState.componentHookStore.Ollie_0 = (this.hookState.componentHookStore.Ollie_0 ?? 0) + 1
-
-                console.log(`Updating state at index ${hookIndex} to value: ${value}`);
+                //console.log(`useState callback value [${value}]`)
 
                 // Update state
-                hooks[hookIndex] = value       
-
-                console.log(`After update: hook storage =` + JSON.stringify(hooks)); 
-                console.log(hooks[hookIndex])        
+                hooks[hookIndex] = value                
 
                 // Trigger a re-render is required due to state changing
                 rerenderCallback()
                 return value                
             }
 
-            let value = hooks[this.hookState.currentComponent.hookIndex++]
-
-            console.log(value)
-
-            return [value, callback]    
+            return [hooks[this.hookState.currentComponent.hookIndex++], callback]    
         }
 
         this.registerCallback('useState', useState.bind(this))
@@ -473,7 +477,21 @@ class YapJSRuntime {
     }
 
     /**
-     * Calls the body of a component
+     * Calls the main body of a component for rendering the AST
+     */
+    callComponent(componentName, params, children, ...args) {
+        let body = this.context[componentName];
+        if (body) {
+            let b = body(params, children, ...args);  
+            if (typeof b === 'function' && b._component) {
+                return b()
+            }
+        } 
+        return null
+    } 
+
+    /**
+     * Calls a function within a registered component
      * @param {*} componentName 
      * @param {*} componentEntryPoint 
      * @returns 
@@ -532,13 +550,13 @@ class YapJSRuntime {
             // Expand functions in arrays
             if (Array.isArray(value)) {
                 newProps[key] = value.map(v => 
-                    (typeof v === 'function') ? v() : v
+                    (typeof v === 'function' && v._component) ? v() : v
                 )
 
             // Expand functions if value of key 
-            } if (typeof newProps[key] === 'function') {
+            } if (typeof newProps[key] === 'function' && newProps[key]._component) {
                 newProps[key] = newProps[key]()
-            } 
+            }  
         })
         return newProps
     }
@@ -658,21 +676,25 @@ class YapJSRuntime {
         
         const f = () => {
 
-            let { path, modifierId, childIndex, componentHookStore, currentComponent } = this.hookState
+            let { path, modifierId, childIndex, componentHookStore, currentComponent, forEachElementId } = this.hookState
 
             // Push on to hook state path
             // Use id if specified otherwise use child index + component name to create a deterministct path to that item.
-            path.push(modifierId ? modifierId : (componentName + '_' + childIndex))
+            var id = null
+            if (modifierId) {
+                id = modifierId
+            } else if (forEachElementId) {
+                id = forEachElementId
+            } else {
+                id = componentName + '_' + childIndex
+            }
+            path.push(id)
 
             // Create path key. This is a unique key consistent across renders
             let hookKey = path.join('.')
 
             // Get hook storage for this component
-            let hookStorage = componentHookStore[hookKey];
-            if (hookStorage == null) {
-                componentHookStore[hookKey] = []
-                hookStorage = componentHookStore[hookKey]
-            }
+            let hookStorage = componentHookStore[hookKey] ?? (componentHookStore[hookKey] = []);
 
             // Setup component hook state for the component we're about to call
             currentComponent.hookStorage = hookStorage            
@@ -687,6 +709,8 @@ class YapJSRuntime {
 
             return r
         }
+
+        f._component = true
 
         const makeModifier = this.#makeModifier.bind(this)
 
@@ -708,6 +732,9 @@ class YapJSRuntime {
         const id = this.#generateUniqueID()
         if (this.environment) {
             this.storedEnvironments[id] = {...this.environment}
+        }
+        if (this.hookState) {
+            this.storedHookStates[id] = { path: [...this.hookState.path] } 
         }
         return id
     }
@@ -732,17 +759,22 @@ class YapJSRuntime {
         return id
     }
 
+    setForEachElementId(id) {
+        this.hookState.forEachElementId = id
+    }
+
     /**
      * Create a ForEach component
      */
     #makeForEachComponent(data, callback) {
         return this.#makeComponent((data, callback) => {
             
+            let environmentId = this.#storeEnvironment()
             let functionId = this.#storeFunction(callback)
             let dataId     = this.#storeData(data)
             let count      = Array.isArray(data) ? data.length : 0   
 
-            return AST.ForEach(dataId, functionId, count)  
+            return AST.ForEach(dataId, functionId, count, environmentId)  
 
         }, data, callback, 'ForEach')   
     }
@@ -794,12 +826,14 @@ class YapJSRuntime {
 
 
 
+
 const runtime = new YapJSRuntime();
 
 Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
     call: (args) => JSON.stringify(runtime.call(...args)(), null, 2),
+    callComponent: (args) => JSON.stringify(runtime.callComponent(...args), null, 2),
     setEnvironment: (environment) => runtime.registerEnvironment(environment),
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
