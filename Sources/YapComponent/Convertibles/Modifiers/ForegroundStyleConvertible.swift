@@ -59,3 +59,27 @@ extension ForegroundStyleConvertible: ViewModifier {
         }
     }
 }
+
+struct ForegroundColorConvertible: ComponentConvertible {
+    var color: ColorConvertible
+    
+    init(_ component: Component) {
+        color = component.decode("value") ?? ColorConvertible.primary
+    }
+    
+    var component: Component {
+        Component(
+            type: Self.componentName,
+            props: [
+                "value": color.component
+            ]
+        )
+    }
+}
+
+extension ForegroundColorConvertible: ViewModifier {
+    
+    func body(content: Content) -> some View {
+        content.foregroundColor(color.swiftUI)
+    }
+}

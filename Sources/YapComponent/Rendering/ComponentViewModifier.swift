@@ -67,7 +67,10 @@ struct ComponentViewModifier: ViewModifier {
         
         case let foregroundStyle as ForegroundStyleConvertible:
             content.modifier(foregroundStyle)
-        
+            
+        case let foregroundColor as ForegroundColorConvertible:
+            content.modifier(foregroundColor)
+            
         case let frame as FrameConvertible:
             content.modifier(frame)
         

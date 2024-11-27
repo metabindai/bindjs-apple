@@ -39,6 +39,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case FontConvertible.fontSizeName: FontConvertible(component)
     case FontDesignConvertible.componentName: FontDesignConvertible(component)
     case FontWeightConvertible.componentName: FontWeightConvertible(component)
+    case ForegroundColorConvertible.componentName: ForegroundColorConvertible(component)
     case ForegroundStyleConvertible.componentName: ForegroundStyleConvertible(component)
     case FrameConvertible.componentName:
         if Set(component.props.keys).isDisjoint(with: FlexFrameConvertible.keys) {

@@ -39,7 +39,9 @@ public class ComponentRuntime: ObservableObject {
         // After runtime is created, bridge the needsRerender function
         let needsRerenderFunction: @convention(block) () -> Void = { [weak self] in
             DispatchQueue.main.async {
-                self?.objectWillChange.send()
+                withAnimation {
+                    self?.objectWillChange.send()
+                }
             }
         }
         
