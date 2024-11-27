@@ -835,7 +835,7 @@ Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
     call: (args) => JSON.stringify(runtime.call(...args)(), null, 2),
-    callComponent: (args) => JSON.stringify(runtime.callComponent(...args), null, 2),
+    callComponent: (args) => JSON.stringify(runtime.callComponent(...args)(), null, 2),
     setEnvironment: (environment) => runtime.registerEnvironment(environment),
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
