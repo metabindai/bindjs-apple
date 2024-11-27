@@ -859,6 +859,7 @@ Object.assign(this, {
         }
         return null
     },
-    willRender: () => runtime.willRender()
+    willRender: () => runtime.willRender(),
+    debug: () => console.log(JSON.stringify(runtime.context))
 });
 """
