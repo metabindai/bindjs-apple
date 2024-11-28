@@ -443,7 +443,7 @@ class YapJSRuntime {
             }
 
             // Get current state
-            var hooks = this.hookState.currentComponent.hookStorage
+            var hooks = this.hookState.currentComponent.hookStorage ?? []
             const hookIndex = this.hookState.currentComponent.hookIndex
 
             //console.log(`useState index ${currentHook} value ${hooks[currentHook]} initialValue ${initialValue}`);
@@ -563,7 +563,7 @@ class YapJSRuntime {
             // Expand functions if value of key 
             } if (typeof newProps[key] === 'function' && newProps[key]._component) {
                 newProps[key] = newProps[key]()
-            }  
+            } 
         })
         return newProps
     }
@@ -716,7 +716,7 @@ class YapJSRuntime {
 
             return r
         }
-
+        
         f._component = true
 
         const makeModifier = this.#makeModifier.bind(this)
