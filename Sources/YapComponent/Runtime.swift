@@ -2,8 +2,8 @@ import SwiftUI
 import JavaScriptCore
 
 public struct JSComponent {
-    let name: String
-    let source: String
+    public let name: String
+    public let source: String
     
     public init(name: String, source: String) {
         self.name = name
@@ -13,10 +13,6 @@ public struct JSComponent {
 
 extension EnvironmentValues {
     @Entry public var componentRuntime = ComponentRuntime()
-}
-
-struct ComponentRuntimeKey: EnvironmentKey {
-    static let defaultValue = ComponentRuntime()
 }
 
 public class ComponentRuntime: ObservableObject {
@@ -60,14 +56,12 @@ public class ComponentRuntime: ObservableObject {
         objectWillChange.send()
     }
     
-    public func view(_ name: String, arguments: [String: Any] = [:]) -> some View {
+    public func view(_ name: String, arguments: [String: Any] = [:]) -> ComponentView {
         willRender()
         if let result = value.invokeMethod("callComponent", withArguments: [[name,  JSValue(object: arguments, in: value.context)]]) {
-            return ComponentView(decode(from: result.toString()))
-                .environment(\.componentRuntime, self)
+            return ComponentView(decode(from: result.toString())).runtime(self)
         }
-        return ComponentView(EmptyComponent())
-            .environment(\.componentRuntime, self)
+        return ComponentView(EmptyComponent()).runtime(self)
     }
     
     public func environment(_ environment: [String: Any]) -> Self {
@@ -86,8 +80,8 @@ public class ComponentRuntime: ObservableObject {
         return nil
     }
     
-    public func callRestoreFunction(id: String, element: JSValue, index: Int32) -> JSValue? {
-        if let result = value.invokeMethod("callRestoreFunction", withArguments: [id, element, index]) {
+    public func callForEachFunction(id: String, element: JSValue, index: Int32) -> JSValue? {
+        if let result = value.invokeMethod("callForEachFunction", withArguments: [id, element, index]) {
             return result
         }
         return nil
@@ -107,8 +101,8 @@ public class ComponentRuntime: ObservableObject {
         return nil
     }
     
-    public func restoreData(id: String) -> JSValue? {
-        if let result = value.invokeMethod("restoreData", withArguments: [id]) {
+    public func restoreForEachData(id: String) -> JSValue? {
+        if let result = value.invokeMethod("restoreForEachData", withArguments: [id]) {
             return result
         }
         return nil
@@ -845,12 +839,12 @@ Object.assign(this, {
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
     restoreFunction: (functionId) => runtime.restoreFunction(functionId),
-    callRestoreFunction: (functionId, element, index) => {
+    callForEachFunction: (functionId, element, index) => {
         let f = runtime.restoreFunction(functionId)
         let result = f(element, index)
         return JSON.stringify(result(), null, 2)
     },
-    restoreData: (dataId) => runtime.restoreData(dataId),
+    restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]

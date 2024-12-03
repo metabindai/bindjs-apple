@@ -2,12 +2,29 @@ import SwiftUI
 
 public struct ComponentView: View {
     var component: AST
+    var runtime: ComponentRuntime?
     
     public init(_ component: AST) {
         self.component = component
     }
     
     public var body: some View {
+        if let runtime {
+            componentView
+                .environment(\.componentRuntime, runtime)
+        } else {
+            componentView
+        }
+    }
+    
+    public func runtime(_ runtime: ComponentRuntime) -> ComponentView {
+        var copy = self
+        copy.runtime = runtime
+        return copy
+    }
+    
+    @ViewBuilder
+    public var componentView: some View {
         switch component {
             
         case is EmptyComponent:
