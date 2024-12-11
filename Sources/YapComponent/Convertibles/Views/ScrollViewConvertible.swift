@@ -22,8 +22,15 @@ struct ScrollViewConvertible: ComponentConvertible {
 
 extension ScrollViewConvertible: View {
     var body: some View {
-        ScrollView(.init(stringValue: axes), showsIndicators: showsIndicators) {
-            ComponentView(children)
+        if #available(iOS 17.0, macOS 14.0, *) {
+            ScrollView(.init(stringValue: axes), showsIndicators: showsIndicators) {
+                ComponentView(children)
+            }
+            .scrollClipDisabled()
+        } else {
+            ScrollView(.init(stringValue: axes), showsIndicators: showsIndicators) {
+                ComponentView(children)
+            }
         }
     }
 }
