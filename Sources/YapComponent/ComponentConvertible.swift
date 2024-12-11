@@ -75,6 +75,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case RectangleConvertible.componentName: RectangleConvertible(component)
     case RectangleConvertible.roundedRectangleName: RectangleConvertible(component)
     case RotationEffectConvertible.componentName: RotationEffectConvertible(component)
+    case SectionConvertible.componentName: SectionConvertible(component)
     case ScaledToFillConvertible.componentName: ScaledToFillConvertible(component)
     case ScaledToFitConvertible.componentName: ScaledToFitConvertible(component)
     case ScaleEffectConvertible.componentName: ScaleEffectConvertible(component)

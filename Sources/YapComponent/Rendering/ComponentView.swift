@@ -116,6 +116,9 @@ public struct ComponentView: View {
         case let image as ImageConvertible:
             image
             
+        case let section as SectionConvertible:
+            section
+            
         case let toggle as ToggleConvertible:
             toggle
          
