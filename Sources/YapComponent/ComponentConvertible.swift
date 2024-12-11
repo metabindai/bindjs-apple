@@ -28,6 +28,7 @@ func convertComponent(_ component: Component) -> ComponentConvertible? {
     case ButtonStyleConvertible.componentName: ButtonStyleConvertible(component)
     case CapsuleConvertible.componentName: CapsuleConvertible(component)
     case CircleConvertible.componentName: CircleConvertible(component)
+    case ClippedConvertible.componentName: ClippedConvertible(component)
     case ColorConvertible.componentName: ColorConvertible(component)
     case CompositingGroupConvertible.componentName: CompositingGroupConvertible(component)
     case CornerRadiusConvertible.componentName: CornerRadiusConvertible(component)

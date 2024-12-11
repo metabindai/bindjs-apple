@@ -40,6 +40,9 @@ struct ComponentViewModifier: ViewModifier {
         
         case let buttonStyle as ButtonStyleConvertible:
             content.modifier(buttonStyle)
+            
+        case let clipped as ClippedConvertible:
+            content.modifier(clipped)
         
         case let compositingGroup as CompositingGroupConvertible:
             content.modifier(compositingGroup)
