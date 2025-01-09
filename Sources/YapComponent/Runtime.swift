@@ -147,6 +147,21 @@ public class ComponentRuntime: ObservableObject {
     
     public func reset() {
         value.invokeMethod("reset", withArguments: [])
+        
+        
+        // After runtime is created, bridge the needsRerender function
+        let needsRerenderFunction: @convention(block) () -> Void = { [weak self] in
+            DispatchQueue.main.async {
+                withAnimation {
+                    self?.objectWillChange.send()
+                }
+            }
+        }
+        
+        value.context.setObject(needsRerenderFunction, forKeyedSubscript: "needsRerender" as NSString)
+                        
+        // Set up the needsRerender function
+        value.context.evaluateScript("runtime.needsRerender = needsRerender")
     }
 }
 
