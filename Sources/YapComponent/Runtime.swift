@@ -81,10 +81,16 @@ public class ComponentRuntime: ObservableObject {
     }
     
     public func callForEachFunction(id: String, element: JSValue, index: Int32) -> JSValue? {
+        setForEachElementId(id: "\(index)")
+        
         if let result = value.invokeMethod("callForEachFunction", withArguments: [id, element, index]) {
             return result
         }
         return nil
+    }
+    
+    public func setForEachElementId(id: String) -> Void {
+        value.invokeMethod("setForEachElementId", withArguments: [id])
     }
     
     public func restoreEventHandler(id: String) -> JSValue? {
@@ -178,7 +184,9 @@ AST.Directive = (name, args = {}, children) => {
 }
 
 AST.ModifiedContent = (modifier, component) => {
+
     const content = (Array.isArray(component) ? component : [component])
+
     return {
         'type': 'ModifiedComponent',
         'modifier': {...modifier},
@@ -186,12 +194,14 @@ AST.ModifiedContent = (modifier, component) => {
     }
 }
 
-AST.ForEach = (dataId, functionId, count) => {
+AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
     return {
-        'type': 'ForEach',
-        'dataId': dataId,
-        'count': count,
-        'functionId': functionId
+        'type' : 'ForEach',
+        'dataId' : dataId,
+        'count' : count,
+        'functionId' : functionId,
+        'environmentId' : environmentId,
+        'children' : children
     }
 }
 
@@ -199,7 +209,7 @@ AST.ForEach = (dataId, functionId, count) => {
 class YapJSRuntime {
     constructor(options) {
         console.log('JSRuntime: init')
-        this.options = options ?? { }
+        this.options = options ?? { expandForEach: false }
         this.reset()
     }
 
@@ -397,6 +407,7 @@ class YapJSRuntime {
      * @param {*} environment 
      */    
     registerBuiltInCallbacks() {       
+        this.registerEnvironment()
         this.registerUseState()
         this.registerMakeComponent()    
     }
@@ -768,15 +779,28 @@ class YapJSRuntime {
      * Create a ForEach component
      */
     #makeForEachComponent(data, callback) {
+        let expand = this.options.expandForEach
         return this.#makeComponent((data, callback) => {
-            
-            let environmentId = this.#storeEnvironment()
-            let functionId = this.#storeFunction(callback)
-            let dataId     = this.#storeData(data)
+
             let count      = Array.isArray(data) ? data.length : 0   
 
-            return AST.ForEach(dataId, functionId, count, environmentId)  
+            if (expand) {
+                let children = data.map((element, index) => {   
+                    this.setForEachElementId(index)
+                    let result = callback(element, index)
+                    while(result && result._component) {
+                        result = result()
+                    }
+                    return result
+                })
+                return AST.ForEach(null, null, count, null, children)  
+            } else {
+                let environmentId = this.#storeEnvironment()
+                let functionId = this.#storeFunction(callback)
+                let dataId     = this.#storeData(data)
 
+                return AST.ForEach(dataId, functionId, count, environmentId)  
+            }
         }, data, callback, 'ForEach')   
     }
 
@@ -823,7 +847,29 @@ class YapJSRuntime {
             return AST.Directive(type, {...props, environmentId: environmentId}, childrenAST)  
         }, props, children, type) 
     }
+
+    /**
+     * 
+     * Calls the contents of a ForEach function with a specific element and index.
+     * 
+     * @param {string} functionId 
+     * @param {string?} environmentId 
+     * @param {any} element 
+     * @param {number} index 
+     * @returns 
+     */
+    callForEachFunction(functionId, element, index) {
+        let f = this.restoreFunction(functionId)
+        let result = f(element, index)
+        while(result && result._component) {
+            result = result()
+        }
+        return result
+    }
+
 }
+
+
 
 
 
@@ -839,11 +885,8 @@ Object.assign(this, {
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
     restoreFunction: (functionId) => runtime.restoreFunction(functionId),
-    callForEachFunction: (functionId, element, index) => {
-        let f = runtime.restoreFunction(functionId)
-        let result = f(element, index)
-        return JSON.stringify(result(), null, 2)
-    },
+    setForEachElementId: (id) => runtime.setForEachElementId(id),
+    callForEachFunction: (functionId, element, index) => JSON.stringify(runtime.callForEachFunction(functionId, element, index), null, 2),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
@@ -854,6 +897,7 @@ Object.assign(this, {
         return null
     },
     willRender: () => runtime.willRender(),
-    debug: () => console.log(JSON.stringify(runtime.components))
+    debug: () => console.log(JSON.stringify(runtime.components)),
+    reset: () => runtime.reset(),
 });
 """
