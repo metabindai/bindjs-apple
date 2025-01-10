@@ -127,7 +127,8 @@ public struct ForEachComponent: AST {
     let dataId: String
     let count: Int
     let functionId: String
-    
+    let environmentId: String
+
     public func accept<V: ASTVisitor>(_ visitor: inout V) -> V.Result {
         visitor.visitForEach(self)
     }

@@ -33,7 +33,8 @@ public func decode(_ any: Any) -> AST {
                 let dataId = dictionary["dataId"] as? String ?? ""
                 let count = dictionary["count"] as? Int ?? 0
                 let functionId = dictionary["functionId"] as? String ?? ""
-                return ForEachComponent(dataId: dataId, count: count, functionId: functionId)
+                let environmentId = dictionary["environmentId"] as? String ?? ""
+                return ForEachComponent(dataId: dataId, count: count, functionId: functionId, environmentId: environmentId)
             case "ModifiedComponent":
                 let content = decode(dictionary["content"] ?? [:])
                 let modifier = decode(dictionary["modifier"] ?? [:])

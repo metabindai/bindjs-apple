@@ -6,6 +6,7 @@ struct ForEachView: View {
     let forEachComponent: ForEachComponent
     
     var body: some View {
+
         if let data = componentRuntime.restoreForEachData(id: forEachComponent.dataId) {
             ForEach(0..<forEachComponent.count, id: \.self) { index in
                 if let item = data.atIndex(index),
@@ -13,6 +14,9 @@ struct ForEachView: View {
                 {
                     ComponentView(decode(from: result.toString()))
                 }
+            }
+            .transformEnvironment(\.componentRuntime) { runtime in
+                runtime.restoreEnvironment(id: forEachComponent.environmentId)
             }
         }
     }

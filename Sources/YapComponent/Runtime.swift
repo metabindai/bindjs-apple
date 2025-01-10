@@ -879,6 +879,7 @@ class YapJSRuntime {
         while(result && result._component) {
             result = result()
         }
+        this.hookState.forEachElementId = null
         return result
     }
 
