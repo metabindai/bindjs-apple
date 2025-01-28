@@ -86,6 +86,9 @@ public struct ComponentView: View {
         case let list as ListConvertible:
             list
             
+        case let map as MapViewConvertible:
+            map
+            
         case let hStack as HStackConvertible:
             hStack
             
@@ -127,6 +130,18 @@ public struct ComponentView: View {
             
         case let polygon as PolygonConvertible:
             polygon
+            
+        case let scene as Model3DConvertible:
+            scene
+            
+        case let ellipticalGradient as EllipticalGradientConvertible:
+            ellipticalGradient
+            
+        case let angularGradient as AngularGradientConvertible:
+            angularGradient
+            
+        case let unevenRoundedRectangle as UnevenRoundedRectangleConvertible:
+            unevenRoundedRectangle
             
         default:
             EmptyView()

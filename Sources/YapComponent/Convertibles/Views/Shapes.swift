@@ -136,3 +136,53 @@ extension PolygonConvertible: Shape {
         }
     }
 }
+
+struct UnevenRoundedRectangleConvertible: ComponentConvertible {
+    let topLeadingRadius: Double
+    let topTrailingRadius: Double
+    let bottomLeadingRadius: Double
+    let bottomTrailingRadius: Double
+    
+    init(_ component: Component) {
+        // If a single value is provided, use it for all corners
+        if let value: Double = component.decode("value") {
+            self.topLeadingRadius = value
+            self.topTrailingRadius = value
+            self.bottomLeadingRadius = value
+            self.bottomTrailingRadius = value
+        } else {
+            // Otherwise use individual corner values with 0 as default
+            self.topLeadingRadius = component.decode("topLeading") ?? 0
+            self.topTrailingRadius = component.decode("topTrailing") ?? 0
+            self.bottomLeadingRadius = component.decode("bottomLeading") ?? 0
+            self.bottomTrailingRadius = component.decode("bottomTrailing") ?? 0
+        }
+    }
+    
+    var component: Component {
+        Component(type: Self.componentName, props: [
+            "topLeading": topLeadingRadius,
+            "topTrailing": topTrailingRadius,
+            "bottomLeading": bottomLeadingRadius,
+            "bottomTrailing": bottomTrailingRadius
+        ])
+    }
+}
+
+extension UnevenRoundedRectangleConvertible: View {
+    var body: some View {
+        if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+            UnevenRoundedRectangle(
+                topLeadingRadius: topLeadingRadius,
+                bottomLeadingRadius: bottomLeadingRadius,
+                bottomTrailingRadius: bottomTrailingRadius,
+                topTrailingRadius: topTrailingRadius,
+                style: .continuous
+            )
+        } else {
+            // Fallback for older versions - use regular RoundedRectangle with average radius
+            let averageRadius = (topLeadingRadius + topTrailingRadius + bottomLeadingRadius + bottomTrailingRadius) / 4
+            RoundedRectangle(cornerRadius: averageRadius, style: .continuous)
+        }
+    }
+}
