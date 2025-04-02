@@ -56,12 +56,12 @@ public class ComponentRuntime: ObservableObject {
         objectWillChange.send()
     }
     
-    public func view(_ name: String, arguments: [String: Any] = [:]) -> ComponentView {
+    public func view(_ name: String, arguments: [String: Any] = [:]) -> ComponentView? {
         willRender()
         if let result = value.invokeMethod("callComponent", withArguments: [[name,  JSValue(object: arguments, in: value.context)]]) {
             return ComponentView(decode(from: result.toString())).runtime(self)
         }
-        return ComponentView(EmptyComponent()).runtime(self)
+        return nil
     }
     
     public func environment(_ environment: [String: Any]) -> Self {

@@ -134,25 +134,25 @@ class Coordinator: NSObject, SCNSceneRendererDelegate {
         let maxDistance: CGFloat = radius * 5.0
         
         // Calculate current distance from center
-        let distance = sqrt(
+        let distance = CGFloat(sqrt(
             pow(camera.position.x, 2) +
             pow(camera.position.y, 2) +
             pow(camera.position.z, 2)
-        )
+        ))
         
         // Constrain distance
-        if distance < minDistance || distance > maxDistance {
+        if CGFloat(distance) < minDistance || CGFloat(distance) > maxDistance {
             let normalizedDirection = SCNVector3(
-                camera.position.x / CGFloat(distance),
-                camera.position.y / CGFloat(distance),
-                camera.position.z / CGFloat(distance)
+                CGFloat(camera.position.x) / CGFloat(distance),
+                CGFloat(camera.position.y) / CGFloat(distance),
+                CGFloat(camera.position.z) / CGFloat(distance)
             )
             
             let constrainedDistance = min(max(distance, minDistance), maxDistance)
             camera.position = SCNVector3(
-                normalizedDirection.x * CGFloat(constrainedDistance),
-                normalizedDirection.y * CGFloat(constrainedDistance),
-                normalizedDirection.z * CGFloat(constrainedDistance)
+                CGFloat(normalizedDirection.x) * CGFloat(constrainedDistance),
+                CGFloat(normalizedDirection.y) * CGFloat(constrainedDistance),
+                CGFloat(normalizedDirection.z) * CGFloat(constrainedDistance)
             )
         }
     }
@@ -225,11 +225,19 @@ private extension SceneContainer {
                     // Calculate initial camera position based on bounding sphere
                     let radius = boundingSphere.radius
                     let initialDistance = radius * 2.5
+                    #if os(iOS)
                     cameraNode.position = SCNVector3(
-                        x: CGFloat(initialDistance),
-                        y: CGFloat(initialDistance * 0.5),
-                        z: CGFloat(initialDistance)
+                        x: Float(initialDistance),
+                        y: Float(initialDistance * 0.5),
+                        z: Float(initialDistance)
                     )
+                    #elseif os(macOS)
+                    cameraNode.position = SCNVector3(
+                        x: Double(initialDistance),
+                        y: Double(initialDistance * 0.5),
+                        z: Double(initialDistance)
+                    )
+                    #endif
                     
                     // Look at the center of the model
                     cameraNode.look(at: boundingSphere.center)

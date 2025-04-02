@@ -84,7 +84,7 @@ public struct Component: AST {
         set { props["children"] = newValue }
     }
     
-    init(type: String, props: [String: AST] = [:], children: [AST] = []) {
+    public init(type: String, props: [String: AST] = [:], children: [AST] = []) {
         self.type = type
         self.props = props
         if !children.isEmpty {
