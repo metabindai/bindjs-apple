@@ -90,7 +90,7 @@ public class ComponentRuntime: ObservableObject {
         return nil
     }
     
-    public func callEventHandler(id: String, arguments: [Any]) -> JSValue? {
+    public func callEventHandler(id: String, arguments: Any) -> JSValue? {
         if let result = runtime.invokeMethod("callEventHandler", withArguments: [id, arguments]) {
             return result
         }
