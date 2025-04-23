@@ -1,0 +1,58 @@
+import SwiftUI
+
+struct FontComponent: Component {
+    static var directiveName: String = "font"
+    
+    enum Storage {
+        case textStyle(Font.TextStyle)
+        case size(CGFloat)
+    }
+    
+    let storage: Storage
+}
+
+extension FontComponent {
+    init?(from directive: Directive) {
+        guard directive.type == Self.directiveName else { return nil }
+        
+        if let size: CGFloat = directive.rawValue() {
+            storage = .size(size)
+        } else if let textStyle: Font.TextStyle = directive.rawValue() {
+            storage = .textStyle(textStyle)
+        } else {
+            return nil
+        }
+    }
+}
+
+extension Font.TextStyle {
+    var font: Font {
+        switch self {
+        case .caption2: .caption2
+        case .largeTitle: .largeTitle
+        case .title: .title
+        case .title2: .title2
+        case .title3: .title3
+        case .headline: .headline
+        case .subheadline: .subheadline
+        case .body: .body
+        case .callout: .callout
+        case .footnote: .footnote
+        case .caption: .caption
+        @unknown default: .body
+        }
+    }
+}
+
+extension FontComponent: ViewModifier {
+    func body(content: Content) -> some View {
+        switch storage {
+        case .textStyle(let textStyle):
+            content
+                .font(textStyle.font)
+        case .size(let size):
+            content
+                .font(.system(size: size))
+        }
+    }
+}

@@ -1,0 +1,201 @@
+import SwiftUI
+
+func makeComponent(_ directive: Directive) -> Component? {
+    switch directive.type {
+    case SectionComponent.directiveName: SectionComponent(from: directive)
+    case SpacerComponent.directiveName: SpacerComponent(from: directive)
+    case VStackComponent.directiveName: VStackComponent(from: directive)
+    case HStackComponent.directiveName: HStackComponent(from: directive)
+    case ZStackComponent.directiveName: ZStackComponent(from: directive)
+    case TextComponent.directiveName: TextComponent(from: directive)
+    case GroupComponent.directiveName: GroupComponent(from: directive)
+    case DividerComponent.directiveName: DividerComponent(from: directive)
+    case ColorComponent.directiveName: ColorComponent(from: directive)
+    case ImageComponent.directiveName: ImageComponent(from: directive)
+    case ScrollViewComponent.directiveName: ScrollViewComponent(from: directive)
+    case ProgressViewComponent.directiveName: ProgressViewComponent(from: directive)
+    case MaterialComponent.directiveName: MaterialComponent(from: directive)
+    case ButtonComponent.directiveName: ButtonComponent(from: directive)
+    case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
+    case AngularGradientComponent.directiveName: AngularGradientComponent(from: directive)
+    case RadialGradientComponent.directiveName: RadialGradientComponent(from: directive)
+    case EllipticalGradientComponent.directiveName: EllipticalGradientComponent(from: directive)
+    case CircleComponent.directiveName: CircleComponent(from: directive)
+    case EllipseComponent.directiveName: EllipseComponent(from: directive)
+    case RectangleComponent.directiveName: RectangleComponent(from: directive)
+    case RoundedRectangleComponent.directiveName: RoundedRectangleComponent(from: directive)
+    case CapsuleComponent.directiveName: CapsuleComponent(from: directive)
+    case EmptyComponent.directiveName: EmptyComponent(from: directive)
+    case ModifiedComponent.directiveName: ModifiedComponent(from: directive)
+    case ForEachComponent.directiveName: ForEachComponent(from: directive)
+    
+    // Modifiers
+        
+    case AccessibilityHiddenComponent.directiveName: AccessibilityHiddenComponent(from: directive)
+    case AccessibilityHintComponent.directiveName: AccessibilityHintComponent(from: directive)
+    case AccessibilityLabelComponent.directiveName: AccessibilityLabelComponent(from: directive)
+    case AccessibilityRepresentationComponent.directiveName: AccessibilityRepresentationComponent(from: directive)
+    case AllowsHitTestingComponent.directiveName: AllowsHitTestingComponent(from: directive)
+    case BoldComponent.directiveName: BoldComponent(from: directive)
+    case BlurComponent.directiveName: BlurComponent(from: directive)
+    case BlendModeComponent.directiveName: BlendModeComponent(from: directive)
+    case BrightnessComponent.directiveName: BrightnessComponent(from: directive)
+    case ColorInvertComponent.directiveName: ColorInvertComponent(from: directive)
+    case ColorSchemeComponent.directiveName: ColorSchemeComponent(from: directive)
+    case CornerRadiusComponent.directiveName: CornerRadiusComponent(from: directive)
+    case ControlSizeComponent.directiveName: ControlSizeComponent(from: directive)
+    case DynamicTypeSizeComponent.directiveName: DynamicTypeSizeComponent(from: directive)
+    case DisabledComponent.directiveName: DisabledComponent(from: directive)
+    case GrayscaleComponent.directiveName: GrayscaleComponent(from: directive)
+    case HiddenComponent.directiveName: HiddenComponent(from: directive)
+    case IDComponent.directiveName: IDComponent(from: directive)
+    case OpacityComponent.directiveName: OpacityComponent(from: directive)
+    case ItalicComponent.directiveName: ItalicComponent(from: directive)
+    case SaturationComponent.directiveName: SaturationComponent(from: directive)
+    case TrackingComponent.directiveName: TrackingComponent(from: directive)
+    case TextSelectionComponent.directiveName: TextSelectionComponent(from: directive)
+    case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
+    case ZIndexComponent.directiveName: ZIndexComponent(from: directive)
+    case TextCaseComponent.directiveName: TextCaseComponent(from: directive)
+    case StrikethroughComponent.directiveName: StrikethroughComponent(from: directive)
+    case PaddingComponent.directiveName: PaddingComponent(from: directive)
+    case OffsetComponent.directiveName: OffsetComponent(from: directive)
+    case FontDesignComponent.directiveName: FontDesignComponent(from: directive)
+    case FontWeightComponent.directiveName: FontWeightComponent(from: directive)
+    case FontWidthComponent.directiveName: FontWidthComponent(from: directive)
+    case LineLimitComponent.directiveName: LineLimitComponent(from: directive)
+    case MultilineTextAlignmentComponent.directiveName: MultilineTextAlignmentComponent(from: directive)
+    case MonospacedComponent.directiveName: MonospacedComponent(from: directive)
+    case ContrastComponent.directiveName: ContrastComponent(from: directive)
+    case LineSpacingComponent.directiveName: LineSpacingComponent(from: directive)
+    case ScaleEffectComponent.directiveName: ScaleEffectComponent(from: directive)
+    case RotationEffectComponent.directiveName: RotationEffectComponent(from: directive)
+    case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
+    case FrameComponent.directiveName: if Set(directive.props.keys).isDisjoint(with: ["minWidth", "minHeight", "maxWidth", "maxHeight"]) {
+        FrameComponent(from: directive)
+    } else {
+        FlexibleFrameComponent(from: directive)
+    }
+    case ShadowComponent.directiveName: ShadowComponent(from: directive)
+    case OnAppearComponent.directiveName: OnAppearComponent(from: directive)
+    case OnDisappearComponent.directiveName: OnDisappearComponent(from: directive)
+    case OnTapGestureComponent.directiveName: OnTapGestureComponent(from: directive)
+    case FontComponent.directiveName: FontComponent(from: directive)
+    case ForegroundStyleComponent.directiveName: ForegroundStyleComponent(from: directive)
+    case BackgroundComponent.directiveName: BackgroundComponent(from: directive)
+    case BorderComponent.directiveName: BorderComponent(from: directive)
+    case ScaledToFillComponent.directiveName: ScaledToFillComponent(from: directive)
+    case ScaledToFitComponent.directiveName: ScaledToFitComponent(from: directive)
+    default: UnknownComponent(from: directive)
+    }
+}
+
+struct ComponentView: View {
+    let component: Component
+    
+    init(_ component: Component) {
+        self.component = component
+    }
+    
+    var body: some View {
+        switch component {
+        case let angularGradient as AngularGradientComponent: angularGradient
+        case let button as ButtonComponent: button
+        case let capsule as CapsuleComponent: capsule
+        case let circle as CircleComponent: circle
+        case let color as ColorComponent: color
+        case let divider as DividerComponent: divider
+        case let ellipse as EllipseComponent: ellipse
+        case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
+        case let empty as EmptyComponent: empty
+        case let forEach as ForEachComponent: forEach
+        case let group as GroupComponent: group
+        case let hStack as HStackComponent: hStack
+        case let image as ImageComponent: image
+        case let linearGradient as LinearGradientComponent: linearGradient
+        case let material as MaterialComponent: material
+        case let modified as ModifiedComponent: modified
+        case let progressView as ProgressViewComponent: progressView
+        case let radialGradient as RadialGradientComponent: radialGradient
+        case let rectangle as RectangleComponent: rectangle
+        case let roundedRectangle as RoundedRectangleComponent: roundedRectangle
+        case let scrollView as ScrollViewComponent: scrollView
+        case let section as SectionComponent: section
+        case let spacer as SpacerComponent: spacer
+        case let text as TextComponent: text
+        case let unknown as UnknownComponent: unknown
+        case let vStack as VStackComponent: vStack
+        case let zStack as ZStackComponent: zStack
+        default: Text("Unsupported: \(type(of: component).directiveName)")
+        }
+    }
+}
+
+struct ComponentViewModifier: ViewModifier {
+    let component: Component
+
+    init(_ component: Component) {
+        self.component = component
+    }
+
+    func body(content: Content) -> some View {
+        switch component {
+        case let m as AccessibilityHiddenComponent: content.modifier(m)
+        case let m as AccessibilityHintComponent: content.modifier(m)
+        case let m as AccessibilityLabelComponent: content.modifier(m)
+        case let m as AccessibilityRepresentationComponent: content.modifier(m)
+        case let m as AllowsHitTestingComponent: content.modifier(m)
+        case let m as BackgroundComponent: content.modifier(m)
+        case let m as BlendModeComponent: content.modifier(m)
+        case let m as BlurComponent: content.modifier(m)
+        case let m as BoldComponent: content.modifier(m)
+        case let m as BorderComponent: content.modifier(m)
+        case let m as BrightnessComponent: content.modifier(m)
+        case let m as ColorInvertComponent: content.modifier(m)
+        case let m as ColorSchemeComponent: content.modifier(m)
+        case let m as ContrastComponent: content.modifier(m)
+        case let m as ControlSizeComponent: content.modifier(m)
+        case let m as CornerRadiusComponent: content.modifier(m)
+        case let m as DisabledComponent: content.modifier(m)
+        case let m as DynamicTypeSizeComponent: content.modifier(m)
+        case let m as FlexibleFrameComponent: content.modifier(m)
+        case let m as FontComponent: content.modifier(m)
+        case let m as FontDesignComponent: content.modifier(m)
+        case let m as FontWeightComponent: content.modifier(m)
+        case let m as FontWidthComponent: content.modifier(m)
+        case let m as ForegroundStyleComponent: content.modifier(m)
+        case let m as FrameComponent: content.modifier(m)
+        case let m as GrayscaleComponent: content.modifier(m)
+        case let m as HiddenComponent: content.modifier(m)
+        case let m as IDComponent: content.modifier(m)
+        case let m as ItalicComponent: content.modifier(m)
+        case let m as LineLimitComponent: content.modifier(m)
+        case let m as LineSpacingComponent: content.modifier(m)
+        case let m as MonospacedComponent: content.modifier(m)
+        case let m as MultilineTextAlignmentComponent: content.modifier(m)
+        case let m as OffsetComponent: content.modifier(m)
+        case let m as OnAppearComponent: content.modifier(m)
+        case let m as OnDisappearComponent: content.modifier(m)
+        case let m as OnTapGestureComponent: content.modifier(m)
+        case let m as OpacityComponent: content.modifier(m)
+        case let m as PaddingComponent: content.modifier(m)
+        case let m as RotationEffectComponent: content.modifier(m)
+        case let m as SaturationComponent: content.modifier(m)
+        case let m as ScaledToFillComponent: content.modifier(m)
+        case let m as ScaledToFitComponent: content.modifier(m)
+        case let m as ScaleEffectComponent: content.modifier(m)
+        case let m as ShadowComponent: content.modifier(m)
+        case let m as StrikethroughComponent: content.modifier(m)
+        case let m as TextCaseComponent: content.modifier(m)
+        case let m as TextSelectionComponent: content.modifier(m)
+        case let m as TrackingComponent: content.modifier(m)
+        case let m as TransformEffectComponent: content.modifier(m)
+        case let m as UnderlineComponent: content.modifier(m)
+        case let m as ZIndexComponent: content.modifier(m)
+        
+        // Any other modifier
+        default:
+            content
+        }
+    }
+}

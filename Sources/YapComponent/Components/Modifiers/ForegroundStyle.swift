@@ -1,0 +1,36 @@
+import SwiftUI
+
+struct ForegroundStyleComponent: Component {
+    static var directiveName: String = "foregroundStyle"
+    
+    let style: Component
+}
+
+extension ForegroundStyleComponent {
+    init?(from directive: Directive) {
+        guard directive.type == Self.directiveName else { return nil }
+        
+        style = directive.rawValue().flatMap { makeComponent($0) } ?? EmptyComponent()
+    }
+}
+
+extension ForegroundStyleComponent: ViewModifier {
+    func body(content: Content) -> some View {
+        switch style {
+        case let color as ColorComponent:
+            content.foregroundStyle(color.swiftUI)
+        case let linearGradient as LinearGradientComponent:
+            content.foregroundStyle(linearGradient.swiftUI)
+        case let angularGradient as AngularGradientComponent:
+            content.foregroundStyle(angularGradient.swiftUI)
+        case let radialGradient as RadialGradientComponent:
+            content.foregroundStyle(radialGradient.swiftUI)
+        case let ellipticalGradient as EllipticalGradientComponent:
+            content.foregroundStyle(ellipticalGradient.swiftUI)
+        case let material as MaterialComponent:
+            content.foregroundStyle(material.swiftUI)
+        default:
+            content
+        }
+    }
+}
