@@ -16,7 +16,11 @@ extension FontDesignComponent {
 
 extension FontDesignComponent: ViewModifier {
     func body(content: Content) -> some View {
-        content
-            .fontDesign(fontDesign)
+        if #available(iOS 16.1, *) {
+            content
+                .fontDesign(fontDesign)
+        } else {
+            content
+        }
     }
 }

@@ -151,7 +151,7 @@ extension ControlSize: ParsableArgument {
         case "small": self = .small
         case "regular": self = .regular
         case "large": self = .large
-        case "extraLarge": if #available(macOS 14.0, *) {
+        case "extraLarge": if #available(macOS 14.0, iOS 17.0, *) {
             self = .extraLarge
         } else {
             self = .large

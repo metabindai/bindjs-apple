@@ -7,7 +7,7 @@ let package = Package(
     name: "YapUI",
     platforms: [
         .macOS(.v13),
-        .iOS(.v15),
+        .iOS(.v16),
         .watchOS(.v6),
         .tvOS(.v13),
         .visionOS(.v1)

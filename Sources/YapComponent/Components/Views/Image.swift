@@ -16,7 +16,7 @@ extension ImageComponent {
         name = directive["name"]
         url = directive["url"]
         systemImage = directive["systemImage"]
-        resizable = directive["resizable"] ?? false
+        resizable = directive["resizable"] ?? true
     }
 }
 
