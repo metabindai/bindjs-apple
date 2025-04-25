@@ -37,7 +37,7 @@ struct OnDragGestureWrapper<Content: View>: View {
     @EnvironmentObject private var runtime: ComponentRuntime
 
     private func callHandler(_ newPhase: GesturePhase) {
-        runtime.callEventHandler(
+        _ = runtime.callEventHandler(
             id: configuration.handlerId,
             arguments: [
                 "phase": newPhase.rawValue,

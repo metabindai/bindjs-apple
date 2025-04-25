@@ -5,7 +5,7 @@ struct ImageComponent: Component {
     
     let name: String?
     let url: URL?
-    let systemImage: String?
+    let systemName: String?
     let resizable: Bool
 }
 
@@ -15,7 +15,7 @@ extension ImageComponent {
         
         name = directive["name"]
         url = directive["url"]
-        systemImage = directive["systemImage"]
+        systemName = directive["systemName"]
         resizable = directive["resizable"] ?? true
     }
 }
@@ -40,8 +40,8 @@ extension ImageComponent: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(.secondary)
             }
-        } else if let systemImage = systemImage {
-            Image(systemName: systemImage)
+        } else if let systemName = systemName {
+            Image(systemName: systemName)
         }
     }
 }

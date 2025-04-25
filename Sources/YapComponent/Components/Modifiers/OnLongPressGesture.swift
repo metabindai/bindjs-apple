@@ -33,7 +33,7 @@ struct OnLongPressGestureWrapper<Content: View>: View {
     @EnvironmentObject private var runtime: ComponentRuntime
     
     private func callHandler(_ newPhase: GesturePhase) {
-        runtime.callEventHandler(
+        _ = runtime.callEventHandler(
             id: configuration.handlerId,
             arguments: [
                 "phase": newPhase.rawValue,
@@ -72,7 +72,7 @@ struct OnLongPressGestureWrapper<Content: View>: View {
                 // Final end/cancel
                     .onEnded { value in
                         switch value {
-                        case .second(true, let drag?):
+                        case .second(true, _):
                             // ended normally
                             callHandler(.ended)
                         default:

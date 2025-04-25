@@ -66,6 +66,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case LineLimitComponent.directiveName: LineLimitComponent(from: directive)
     case MultilineTextAlignmentComponent.directiveName: MultilineTextAlignmentComponent(from: directive)
     case MonospacedComponent.directiveName: MonospacedComponent(from: directive)
+    case OverlayComponent.directiveName: OverlayComponent(from: directive)
     case ContrastComponent.directiveName: ContrastComponent(from: directive)
     case LineSpacingComponent.directiveName: LineSpacingComponent(from: directive)
     case ScaleEffectComponent.directiveName: ScaleEffectComponent(from: directive)
@@ -92,14 +93,14 @@ func makeComponent(_ directive: Directive) -> Component? {
     }
 }
 
-struct ComponentView: View {
+public struct ComponentView: View {
     let component: Component
     
     init(_ component: Component) {
         self.component = component
     }
     
-    var body: some View {
+    public var body: some View {
         switch component {
         case let angularGradient as AngularGradientComponent: angularGradient
         case let button as ButtonComponent: button
@@ -182,6 +183,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as OnLongPressGestureComponent: content.modifier(m)
         case let m as OnTapGestureComponent: content.modifier(m)
         case let m as OpacityComponent: content.modifier(m)
+        case let m as OverlayComponent: content.modifier(m)
         case let m as PaddingComponent: content.modifier(m)
         case let m as RotationEffectComponent: content.modifier(m)
         case let m as SaturationComponent: content.modifier(m)

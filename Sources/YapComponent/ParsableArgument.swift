@@ -52,8 +52,7 @@ extension HorizontalAlignment: ParsableArgument {
         case "leading": self = .leading
         case "center": self = .center
         case "trailing": self = .trailing
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -66,8 +65,7 @@ extension VerticalAlignment: ParsableArgument {
         case "bottom": self = .bottom
         case "firstTextBaseline": self = .firstTextBaseline
         case "lastTextBaseline": self = .lastTextBaseline
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -84,8 +82,7 @@ extension Alignment: ParsableArgument {
         case "topTrailing": self = .topTrailing
         case "bottomLeading": self = .bottomLeading
         case "bottomTrailing": self = .bottomTrailing
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -95,8 +92,7 @@ extension ColorScheme: ParsableArgument {
         switch rawValue {
         case "light": self = .light
         case "dark": self = .dark
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -115,8 +111,7 @@ extension DynamicTypeSize: ParsableArgument {
         case "accessibility3": self = .accessibility3
         case "accessibility4": self = .accessibility4
         case "accessibility5": self = .accessibility5
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -127,8 +122,7 @@ extension TextAlignment: ParsableArgument {
         case "leading": self = .leading
         case "center": self = .center
         case "trailing": self = .trailing
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -138,8 +132,7 @@ extension Text.Case: ParsableArgument {
         switch rawValue {
         case "uppercase": self = .uppercase
         case "lowercase": self = .lowercase
-        default:
-            return nil
+        default: return nil
         }
     }
 }
@@ -169,14 +162,13 @@ extension Font.Design: ParsableArgument {
         case "serif": self = .serif
         case "monospaced": self = .monospaced
         case "rounded": self = .rounded
-        default:
-            return nil
+        default: return nil
         }
     }
 }
 
 extension Font.Weight: ParsableArgument {
-    init (rawValue: String) {
+    init?(rawValue: String) {
         switch rawValue {
         case "ultraLight": self = .ultraLight
         case "thin": self = .thin
@@ -187,13 +179,13 @@ extension Font.Weight: ParsableArgument {
         case "bold": self = .bold
         case "heavy": self = .heavy
         case "black": self = .black
-        default: self = .regular
+        default: return nil
         }
     }
 }
 
 extension Font.Width: ParsableArgument {
-    init (rawValue: String) {
+    init?(rawValue: String) {
         switch rawValue {
         case "compressed": self = .compressed
         case "condensed": self = .condensed
@@ -203,14 +195,14 @@ extension Font.Width: ParsableArgument {
             if let doubleValue = Double(rawValue) {
                 self = .init(doubleValue)
             } else {
-                self = .standard
+                return nil
             }
         }
     }
 }
 
 extension Font.TextStyle: ParsableArgument {
-    init (rawValue: String) {
+    init?(rawValue: String) {
         switch rawValue {
         case "caption2": self = .caption2
         case "caption": self = .caption
@@ -223,7 +215,7 @@ extension Font.TextStyle: ParsableArgument {
         case "title": self = .title
         case "title2": self = .title2
         case "title3": self = .title3
-        default: self = .body
+        default: return nil
         }
     }
 }
@@ -252,8 +244,7 @@ extension BlendMode: ParsableArgument {
         case "destinationOut": self = .destinationOut
         case "plusDarker": self = .plusDarker
         case "plusLighter": self = .plusLighter
-        default:
-            self = .normal
+        default: return nil
         }
     }
 }
@@ -266,7 +257,7 @@ extension Material: ParsableArgument {
         case "regular": self = .regular
         case "thick": self = .thick
         case "ultraThick": self = .ultraThick
-        default: self = .regular
+        default: return nil
         }
     }
 }
@@ -283,7 +274,7 @@ extension UnitPoint: ParsableArgument {
         case "bottomLeading": self = .bottomLeading
         case "bottomTrailing": self = .bottomTrailing
         case "center": self = .center
-        default: self = .center
+        default: return nil
         }
     }
 }
@@ -294,7 +285,7 @@ extension Axis.Set: ParsableArgument {
         case "horizontal": self = .horizontal
         case "vertical": self = .vertical
         case "both": self = [.horizontal, .vertical]
-        default: self = .vertical
+        default: return nil
         }
     }
 }

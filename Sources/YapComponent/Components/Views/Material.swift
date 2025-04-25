@@ -9,8 +9,9 @@ struct MaterialComponent: Component {
 extension MaterialComponent {
     init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+        guard let material: Material = directive.rawValue() else { return nil }
         
-        material = directive.rawValue() ?? .regular
+        self.material = material
     }
 }
 

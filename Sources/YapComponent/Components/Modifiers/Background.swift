@@ -29,7 +29,7 @@ extension BackgroundComponent: ViewModifier {
             content.background(ellipticalGradient.swiftUI)
         case let material as MaterialComponent:
             content.background(material.swiftUI)
-        case let empty as EmptyComponent:
+        case is EmptyComponent:
             content.background()
         default:
             content.background(ComponentView(style))

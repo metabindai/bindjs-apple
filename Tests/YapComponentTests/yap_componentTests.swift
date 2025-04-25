@@ -1,6 +1,4 @@
 import Testing
+import SwiftUI
 import QuartzCore
 @testable import YapComponent
-
-// MARK: - Basic Component Tests
-
