@@ -24,10 +24,20 @@ public class ComponentRuntime: ObservableObject {
         
         // Bridge needsRerender → objectWillChange (on main queue)
         let rerender: @convention(block) () -> Void = { [weak self] in
-            DispatchQueue.main.async { withAnimation { self?.objectWillChange.send() } }
+            self?.objectWillChange.send()
         }
         context.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
         _ = context.evaluateScript("runtime.needsRerender = needsRerender")
+        
+        let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, options in
+            DispatchQueue.main.async {
+                withAnimation {
+                    _ = self?.callEventHandler(id: callback.toString()!, arguments: [])
+                }
+            }
+        }
+        context.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
+        _ = context.evaluateScript("runtime.withAnimation = withAnimation")
     }
     
     public func register(name: String, source: String) {
@@ -47,6 +57,7 @@ public class ComponentRuntime: ObservableObject {
                 .environmentObject(self)
         }
         return ComponentView(EmptyComponent())
+            .environmentObject(self)
     }
     
     public func debug() {

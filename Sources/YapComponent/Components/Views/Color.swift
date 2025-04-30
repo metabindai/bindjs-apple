@@ -19,10 +19,10 @@ extension ColorComponent {
         if let name: String = directive.rawValue() {
             storage = .name(name)
         } else {
-            let red: Double = directive["red"] ?? 0
-            let green: Double = directive["green"] ?? 0
-            let blue: Double = directive["blue"] ?? 0
-            let alpha: Double = directive["alpha"] ?? 1
+            let red: Double = (directive["r"] ?? 0) / 255
+            let green: Double = (directive["g"] ?? 0) / 255
+            let blue: Double = (directive["b"] ?? 0) / 255
+            let alpha: Double = directive["a"] ?? 1
             storage = .rgba(red, green, blue, alpha)
         }
         opacity = directive["opacity"] ?? 1
