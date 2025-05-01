@@ -4,51 +4,80 @@ import JavaScriptCore
 public class ComponentRuntime: ObservableObject {
     private let context: JSContext
     private let runtime: JSValue
-    
+
     public init() {
-        self.context = JSContext()!
-        
-        context.exceptionHandler = { context, exception in
+        context = JSContext()!
+        context.exceptionHandler = { _, exception in
             if let exception = exception {
                 print("JS Error: \(exception)")
             }
         }
-        
-        // Swift print bridge
-        let printFunction: @convention(block) (String) -> Void = { message in print(message) }
-        let console = ["log": printFunction]
-        context.setObject(console, forKeyedSubscript: "console" as NSString)
-        
-        // Evaluate the main JS script (provided as 'script')
-        self.runtime = context.evaluateScript(Self.loadRuntime())
-        
-        // Bridge needsRerender → objectWillChange (on main queue)
+        runtime = context.evaluateScript(Self.loadRuntime())
+        setupConsoleLog()
+        setupNeedsRerender()
+        setupWithAnimation()
+    }
+
+    private func setupConsoleLog() {
+        let logBlock: @convention(block) () -> Void = {
+            guard
+                let args = JSContext.currentArguments(),
+                let ctx = JSContext.current(),
+                let json = ctx.objectForKeyedSubscript("JSON")
+            else { return }
+
+            let output = args.map { raw -> String in
+                guard let jsVal = raw as? JSValue else {
+                    return String(describing: raw)
+                }
+                if jsVal.isNull        { return "null" }
+                if jsVal.isUndefined   { return "undefined" }
+                if jsVal.isString      { return jsVal.toString() ?? "" }
+                if jsVal.isBoolean     { return jsVal.toBool() ? "true" : "false" }
+                if jsVal.isNumber      { return String(jsVal.toDouble()) }
+                return json
+                    .invokeMethod("stringify", withArguments: [jsVal])?
+                    .toString() ?? "[object]"
+            }.joined(separator: " ")
+            print(output)
+        }
+
+        let console = JSValue(newObjectIn: context)!
+        console.setObject(logBlock, forKeyedSubscript: "log" as NSString)
+        context.globalObject.setValue(console, forProperty: "console")
+    }
+
+    private func setupNeedsRerender() {
         let rerender: @convention(block) () -> Void = { [weak self] in
             self?.objectWillChange.send()
         }
         context.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
         _ = context.evaluateScript("runtime.needsRerender = needsRerender")
-        
-        let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, options in
+    }
+
+    private func setupWithAnimation() {
+        let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, _ in
             DispatchQueue.main.async {
                 withAnimation {
-                    _ = self?.callEventHandler(id: callback.toString()!, arguments: [])
+                    _ = self?.callEventHandler(id: callback.toString() ?? "", arguments: [])
                 }
             }
         }
         context.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
         _ = context.evaluateScript("runtime.withAnimation = withAnimation")
     }
-    
+
     public func register(name: String, source: String) {
         runtime.invokeMethod("setComponents", withArguments: [[name: source]])
         objectWillChange.send()
     }
-    
+
     public func makeView(_ name: String, arguments: [String: Any] = [:]) -> some View {
         willRender()
         if
-            let json = runtime.invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]]).toString(),
+            let json = runtime
+                .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
+                .toString(),
             let data = json.data(using: .utf8),
             let directive = try? JSONDecoder().decode(Directive.self, from: data),
             let component = makeComponent(directive)
@@ -59,71 +88,52 @@ public class ComponentRuntime: ObservableObject {
         return ComponentView(EmptyComponent())
             .environmentObject(self)
     }
-    
+
     public func debug() {
         let debugInfo = runtime.invokeMethod("debug", withArguments: [])
         print(debugInfo ?? "No debug info")
     }
-    
+
     public func environment(_ environment: [String: Any]) -> Self {
         runtime.invokeMethod("setEnvironment", withArguments: [environment])
         return self
     }
-    
+
     public func restoreFunction(id: String) -> JSValue? {
-        if let result = runtime.invokeMethod("restoreFunction", withArguments: [id]) {
-            return result
-        }
-        return nil
+        runtime.invokeMethod("restoreFunction", withArguments: [id])
     }
-    
+
     public func restoreEnvironment(id: String) {
         runtime.invokeMethod("restoreEnvironment", withArguments: [id])
     }
-    
+
     public func callForEachFunction(id: String, element: JSValue, index: Int32) -> JSValue? {
         setForEachElementId(id: "\(index)")
-        
-        if let result = runtime.invokeMethod("callForEachFunction", withArguments: [id, element, index]) {
-            return result
-        }
-        return nil
+        return runtime.invokeMethod("callForEachFunction", withArguments: [id, element, index])
     }
-    
-    public func setForEachElementId(id: String) -> Void {
+
+    public func setForEachElementId(id: String) {
         runtime.invokeMethod("setForEachElementId", withArguments: [id])
     }
-    
+
     public func restoreEventHandler(id: String) -> JSValue? {
-        if let result = runtime.invokeMethod("restoreEventHandler", withArguments: [id]) {
-            return result
-        }
-        return nil
+        runtime.invokeMethod("restoreEventHandler", withArguments: [id])
     }
-    
+
     public func callEventHandler(id: String, arguments: Any) -> JSValue? {
-        if let result = runtime.invokeMethod("callEventHandler", withArguments: [id, arguments]) {
-            return result
-        }
-        return nil
+        runtime.invokeMethod("callEventHandler", withArguments: [id, arguments])
     }
-    
+
     public func restoreForEachData(id: String) -> JSValue? {
-        if let result = runtime.invokeMethod("restoreForEachData", withArguments: [id]) {
-            return result
-        }
-        return nil
+        runtime.invokeMethod("restoreForEachData", withArguments: [id])
     }
-    
+
     public func willRender() {
         runtime.invokeMethod("willRender", withArguments: [])
     }
-    
+
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
-        
-        
-        // After runtime is created, bridge the needsRerender function
         let needsRerenderFunction: @convention(block) () -> Void = { [weak self] in
             DispatchQueue.main.async {
                 withAnimation {
@@ -131,25 +141,18 @@ public class ComponentRuntime: ObservableObject {
                 }
             }
         }
-        
         runtime.context.setObject(needsRerenderFunction, forKeyedSubscript: "needsRerender" as NSString)
-                        
-        // Set up the needsRerender function
         runtime.context.evaluateScript("runtime.needsRerender = needsRerender")
     }
-    
-    /// Loads the file JSRuntime.js in the project
+
     private static func loadRuntime() -> String {
-        guard let url = Bundle.module.url(forResource: "JSRuntime", withExtension: "js") else {
+        guard
+            let url = Bundle.module.url(forResource: "JSRuntime", withExtension: "js"),
+            let jsCode = try? String(contentsOf: url, encoding: .utf8)
+        else {
+            print("Error loading JSRuntime.js")
             return ""
         }
-        
-        do {
-            let jsCode = try String(contentsOf: url, encoding: .utf8)
-            return jsCode
-        } catch {
-            print("Error loading JS file: \(error)")
-            return ""
-        }
+        return jsCode
     }
 }

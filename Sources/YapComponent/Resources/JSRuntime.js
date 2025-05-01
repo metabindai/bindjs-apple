@@ -11,8 +11,9 @@ AST.Directive = (name, args = {}, children) => {
 };
 
 AST.ModifiedContent = (modifier, component) => {
+
     const content = (Array.isArray(component) ? component : [component]);
-    
+
     return {
         'type': 'ModifiedComponent',
         'props': {
@@ -24,11 +25,11 @@ AST.ModifiedContent = (modifier, component) => {
 
 AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
     return {
-        'type': 'ForEach',
+        'type' : 'ForEach',
         'props': {
             'dataId': dataId,
-            'count': count,
             'functionId': functionId,
+            'count': count,
             'environmentId': environmentId,
             'children': children
         }
@@ -37,7 +38,7 @@ AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
 
 AST.Representable = (functionId, environmentId) => {
     return {
-        'type': 'Representable',
+        'type' : 'Representable',
         'props': {
             'functionId': functionId,
             'environmentId': environmentId
@@ -453,7 +454,7 @@ function Opacity({ args, content }) {
             colorProps.a *= opacity;
         } else {
             // Otherwise, we set the alpha value to the first argument
-            colorProps.opacity = opacity;
+            colorProps.opacity = colorProps.opacity ? colorProps.opacity * opacity : opacity;
         }
 
         // Return the Color directly
@@ -467,6 +468,56 @@ function Opacity({ args, content }) {
             props: { rawValue: opacity },
             children: content
         }
+    }
+}
+
+// Just like Opacity, this will check to see if the content is a Shape (Circle, Rectangle, etc), if it is, it will set the props on the shape.
+// If it is not, it will return the content unchanged.
+
+function Stroke({ args, content }) {
+    // Get the stroke properties from args
+    const strokeProps = args[0];
+    const lineWidth = args[1] || 1;
+
+    // List of supported shape types
+    const shapeTypes = ['Circle', 'Capsule', 'Rectangle', 'RoundedRectangle', 'Ellipse'];
+
+    // If content is a shape component, apply stroke properties directly
+    if (content && shapeTypes.includes(content.type)) {
+        // Apply stroke properties to the shape's props
+        const shapeProps = content.props || {};
+        shapeProps.stroke = strokeProps;
+        shapeProps.lineWidth = lineWidth;
+        
+        // Return the shape with updated props
+        return { ast: { ...content, props: shapeProps } };
+    } else {
+        // If content is not a shape, return it unchanged
+        return { ast: content };
+    }
+}
+
+// Just like Stroke, this will check to see if the content is a Shape (Circle, Rectangle, etc), if it is, it will set the props on the shape.
+// If it is not, it will return the content unchanged.
+
+function Fill({ args, content }) {
+    // Get the fill properties from args
+    const fillProps = args[0];
+
+    // List of supported shape types
+    const shapeTypes = ['Circle', 'Capsule', 'Rectangle', 'RoundedRectangle', 'Ellipse'];
+
+    // If content is a shape component, apply fill properties directly
+    if (content && shapeTypes.includes(content.type)) {
+        // Apply fill properties to the shape's props
+        const shapeProps = content.props || {};
+        shapeProps.fill = fillProps;
+        
+        // Return the shape with updated props
+        return { ast: { ...content, props: shapeProps } };
+    } else {
+        // If content is not a shape, return it unchanged
+        return { ast: content };
     }
 }
 
@@ -666,6 +717,7 @@ function useState(initialValue) {
     hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex];
 
     const rerenderCallback = this.needsRerender;
+    const rendererId = this.rendererId;
 
     // Create setState callback
     let callback = (value) => {
@@ -676,7 +728,7 @@ function useState(initialValue) {
         hooks[hookIndex] = value;
 
         // Trigger a re-render is required due to state changing
-        rerenderCallback();
+        rerenderCallback(rendererId);
         return value
     };
 
@@ -700,16 +752,6 @@ function makeComponent (component) {
     f._component = true;
 
     return f
-}
-
-function withAnimation(arg1, arg2) {
-    let [options, callback] = (typeof arg1 === 'object' && arg2 != null) ? [arg1, arg2] : [{}, arg1];
-    let handlerId = this.storeFunction(callback, this.currentPathId('withAnimation'));
-    if (this.withAnimation) {
-        this.withAnimation(handlerId, options);
-    } else {
-        console.warn('withAnimation is not supported in this environment');
-    }
 }
 
 let funcs = {};
@@ -776,18 +818,6 @@ class YapJSRuntime {
         this.registerASTComponents(componentNames);
         this.needsRerender = () => {
             console.log('Needs rerender not implemented');
-        };
-        
-        this.withAnimation = (handlerId) => {
-            console.log('With animation not implemented', handlerId);
-            // Provide default implementation.
-            //
-            // this.withAnimation should be overridden by the renderer to wrap the animation in a context
-            // that will cause the state change to animate
-            let animationBlock = this.restoreFunction(handlerId);
-            if (animationBlock) {
-                animationBlock();
-            }
         };
     }
 
@@ -863,6 +893,8 @@ class YapJSRuntime {
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
         this.#registerBuiltInModifier('opacity', Opacity);
+        this.#registerBuiltInModifier('stroke', Stroke);
+        this.#registerBuiltInModifier('fill', Fill);
         
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
@@ -870,36 +902,6 @@ class YapJSRuntime {
         // Regster environment value modiifer
         this.#registerBuiltInModifier('environment', EnvironmentValue);
     }
-
-    /**
-     * Register built in callbacks available to components
-     * @param {*} environment
-     */
-    registerBuiltInCallbacks() {
-        console.log('registerBuiltInCallbacks');
-
-        this.registerCallback('useEnvironment', () => {
-            return this.environment
-        });
-
-        // Standard library functions
-        for (const key in funcs) {
-            this.registerCallback(key, funcs[key]);
-        }
-
-        // useState
-        this.registerCallback('useState', useState.bind(this));
-
-        // makeComponent
-        this.registerCallback('makeComponent', makeComponent.bind(this));
-
-        // Prevent top in browser from being interpreted as a function
-        this.registerCallback('top', () => { });
-
-        // With animation callback
-        this.registerCallback('withAnimation', withAnimation.bind(this));
-    }
-
 
     /**
      * Creates a built in component.
@@ -1005,6 +1007,33 @@ class YapJSRuntime {
         console.log(' - Stored: ', this.storedEnvironments);
     }
 
+
+    /**
+     * Register built in callbacks available to components
+     * @param {*} environment
+     */
+    registerBuiltInCallbacks() {
+        console.log('registerBuiltInCallbacks');
+
+        this.registerCallback('useEnvironment', () => {
+            return this.environment
+        });
+
+        // Standard library functions
+        for (const key in funcs) {
+            this.registerCallback(key, funcs[key]);
+        }
+
+        // useState
+        this.registerCallback('useState', useState.bind(this));
+
+        // makeComponent
+        this.registerCallback('makeComponent', makeComponent.bind(this));
+
+        // Prevent top in browser from being interpreted as a function
+        this.registerCallback('top', () => { });
+    }
+
     /**
      * Unregister a component
      * @param {*} componentName
@@ -1014,6 +1043,10 @@ class YapJSRuntime {
         delete this.components[componentName];
         delete this.functionCache[componentName];
         delete this.context[componentName];
+    }
+
+    setRendererId(id) {
+        this.rendererId = id;
     }
 
     /**
@@ -1144,8 +1177,11 @@ class YapJSRuntime {
                 const processedArgs = args.map(arg => {
                     if (typeof arg === 'object' && !Array.isArray(arg)) {
                         return this.processProps(arg)
+                    } else if (typeof arg === 'function' && arg._component) {
+                        // Evaluate top-level component factories
+                        return arg();
                     } else {
-                        return arg
+                        return arg;
                     }
                 });
 
@@ -1343,6 +1379,7 @@ class YapJSRuntime {
     }
 
 }
+
 
 
 // MARK: - After the runtime...
