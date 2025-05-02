@@ -37,8 +37,8 @@ extension ImageComponent: View {
                     image
                 }
             } placeholder: {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.secondary)
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(.quaternary)
             }
         } else if let systemName = systemName {
             Image(systemName: systemName)
