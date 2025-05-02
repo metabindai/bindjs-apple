@@ -57,10 +57,9 @@ public class ComponentRuntime: ObservableObject {
 
     private func setupWithAnimation() {
         let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, _ in
-            DispatchQueue.main.async {
-                withAnimation {
-                    _ = self?.callEventHandler(id: callback.toString() ?? "", arguments: [])
-                }
+            let callbackId = callback.toString() ?? ""
+            withAnimation {
+                _ = self?.callEventHandler(id: callbackId, arguments: [])
             }
         }
         context.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
