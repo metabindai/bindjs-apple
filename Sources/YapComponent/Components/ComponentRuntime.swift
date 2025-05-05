@@ -56,10 +56,31 @@ public class ComponentRuntime: ObservableObject {
     }
 
     private func setupWithAnimation() {
-        let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, _ in
+        let withAnimationFunction: @convention(block) (JSValue, JSValue) -> Void = { [weak self] callback, options in
+            guard let self = self else { return }
             let callbackId = callback.toString() ?? ""
-            withAnimation {
-                _ = self?.callEventHandler(id: callbackId, arguments: [])
+
+            // 1. JSON-stringify the JSValue options dictionary:
+            let ctx = JSContext.current() ?? self.context
+            guard let jsonString = jsonStringify(options),
+                  let data = jsonString.data(using: .utf8) else {
+                // Fallback: No or invalid options; just animate with default
+                withAnimation {
+                    _ = self.callEventHandler(id: callbackId, arguments: [])
+                }
+                return
+            }
+
+            // 2. Decode and apply JSAnimation
+            if let jsAnimation = try? JSONDecoder().decode(JSAnimation.self, from: data) {
+                jsAnimation.apply {
+                    _ = self.callEventHandler(id: callbackId, arguments: [])
+                }
+            } else {
+                // Could not decode, fallback to default
+                withAnimation {
+                    _ = self.callEventHandler(id: callbackId, arguments: [])
+                }
             }
         }
         context.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
@@ -153,5 +174,17 @@ public class ComponentRuntime: ObservableObject {
             return ""
         }
         return jsCode
+    }
+    
+    /// JSON-encodes a JSValue using the JavaScript JSON.stringify function.
+    /// - Parameters:
+    ///   - value: The JSValue (dictionary/object/array/anything) to stringify.
+    ///   - context: Context to use (defaults to self.context).
+    /// - Returns: JSON string if successful, otherwise nil.
+    private func jsonStringify(_ value: JSValue?, in context: JSContext? = nil) -> String? {
+        let ctx = context ?? self.context
+        guard let value = value else { return nil }
+        guard let json = ctx.objectForKeyedSubscript("JSON") else { return nil }
+        return json.invokeMethod("stringify", withArguments: [value])?.toString()
     }
 }

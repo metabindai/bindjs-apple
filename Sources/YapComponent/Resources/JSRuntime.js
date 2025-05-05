@@ -471,56 +471,6 @@ function Opacity({ args, content }) {
     }
 }
 
-// Just like Opacity, this will check to see if the content is a Shape (Circle, Rectangle, etc), if it is, it will set the props on the shape.
-// If it is not, it will return the content unchanged.
-
-function Stroke({ args, content }) {
-    // Get the stroke properties from args
-    const strokeProps = args[0];
-    const lineWidth = args[1] || 1;
-
-    // List of supported shape types
-    const shapeTypes = ['Circle', 'Capsule', 'Rectangle', 'RoundedRectangle', 'Ellipse'];
-
-    // If content is a shape component, apply stroke properties directly
-    if (content && shapeTypes.includes(content.type)) {
-        // Apply stroke properties to the shape's props
-        const shapeProps = content.props || {};
-        shapeProps.stroke = strokeProps;
-        shapeProps.lineWidth = lineWidth;
-        
-        // Return the shape with updated props
-        return { ast: { ...content, props: shapeProps } };
-    } else {
-        // If content is not a shape, return it unchanged
-        return { ast: content };
-    }
-}
-
-// Just like Stroke, this will check to see if the content is a Shape (Circle, Rectangle, etc), if it is, it will set the props on the shape.
-// If it is not, it will return the content unchanged.
-
-function Fill({ args, content }) {
-    // Get the fill properties from args
-    const fillProps = args[0];
-
-    // List of supported shape types
-    const shapeTypes = ['Circle', 'Capsule', 'Rectangle', 'RoundedRectangle', 'Ellipse'];
-
-    // If content is a shape component, apply fill properties directly
-    if (content && shapeTypes.includes(content.type)) {
-        // Apply fill properties to the shape's props
-        const shapeProps = content.props || {};
-        shapeProps.fill = fillProps;
-        
-        // Return the shape with updated props
-        return { ast: { ...content, props: shapeProps } };
-    } else {
-        // If content is not a shape, return it unchanged
-        return { ast: content };
-    }
-}
-
 function OnHandler({ args , name }) {
 
     // If arg is a function, store it and return handler id
@@ -660,6 +610,40 @@ function processComponentArgs(arg1, arg2) {
     return { props, children };
 }
 
+function AnimationComponent({ args, name }) {
+    const typeMap = {
+        'Spring' : 'spring',
+        'EaseIn' : 'easeIn',
+        'EaseOut' : 'easeOut',
+        'EaseInOut' : 'easeInOut',
+        'Linear' : 'linear',
+        'Bouncy' : 'bouncy',
+        'Snappy' : 'snappy',
+        'InterpolatingSpring' : 'interpolatingSpring',
+    };
+
+    console.log('AnimationComponent', name, args);
+
+    const props = {
+        type: typeMap[name] ?? 'unknown',
+        ...(args[0] ?? {})
+    };
+
+    return { props }
+}
+
+function AnimationModifier({ args,  name, content }) {
+
+    const value = args[0];
+    
+    // Add the value directly to the props of the content
+    const props = content.props;
+    props[name] = value;
+    
+    // Return the AnimationComponent directly to squash the modifier.
+    return { ast: content }
+}
+
 function EnvironmentValue({ args }) {
     const props = { environmentKey: args[0], value: args[1] };
     return { props }
@@ -754,6 +738,31 @@ function makeComponent (component) {
     return f
 }
 
+function withAnimation(arg1, arg2) {
+    let [component, callback] = (arg1 != null && arg2 != null) ? [arg1, arg2] : [{}, arg1];
+
+    let options = {};
+    if (typeof component === 'function' && component._component) {
+        let componentAST = component();
+        options = {
+            type: componentAST.type,
+            ...componentAST.props
+        };
+        delete options.children;
+    } else if (typeof component === 'object') {
+        options = component;
+    }
+
+    console.log('withAnimation', options);
+
+    let handlerId = this.storeFunction(callback, this.currentPathId('withAnimation'));
+    if (this.withAnimation) {
+        this.withAnimation(handlerId, options);
+    } else {
+        console.warn('withAnimation is not supported in this environment');
+    }
+}
+
 let funcs = {};
 funcs.capitalize = (s) => {
     return s.charAt(0).toUpperCase() + s.slice(1)
@@ -818,6 +827,18 @@ class YapJSRuntime {
         this.registerASTComponents(componentNames);
         this.needsRerender = () => {
             console.log('Needs rerender not implemented');
+        };
+        
+        this.withAnimation = (handlerId) => {
+            console.log('With animation not implemented', handlerId);
+            // Provide default implementation.
+            //
+            // this.withAnimation should be overridden by the renderer to wrap the animation in a context
+            // that will cause the state change to animate
+            let animationBlock = this.restoreFunction(handlerId);
+            if (animationBlock) {
+                animationBlock();
+            }
         };
     }
 
@@ -893,15 +914,49 @@ class YapJSRuntime {
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
         this.#registerBuiltInModifier('opacity', Opacity);
-        this.#registerBuiltInModifier('stroke', Stroke);
-        this.#registerBuiltInModifier('fill', Fill);
         
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 
+        // Register animation components
+        ['Spring', 'Linear', 'EaseIn', 'EaseOut', 'EaseInOut', 'Bouncy', 'Snappy', 'InterpolatingSpring'].map(name => this.#registerBuiltInComponent(name, AnimationComponent));
+
+        // Register animation modifiers
+        ['delay', 'speed', 'repeatCount', 'repeatForever'].map(name => this.#registerBuiltInModifier(name, AnimationModifier));
+
         // Regster environment value modiifer
         this.#registerBuiltInModifier('environment', EnvironmentValue);
     }
+
+    /**
+     * Register built in callbacks available to components
+     * @param {*} environment
+     */
+    registerBuiltInCallbacks() {
+        console.log('registerBuiltInCallbacks');
+
+        this.registerCallback('useEnvironment', () => {
+            return this.environment
+        });
+
+        // Standard library functions
+        for (const key in funcs) {
+            this.registerCallback(key, funcs[key]);
+        }
+
+        // useState
+        this.registerCallback('useState', useState.bind(this));
+
+        // makeComponent
+        this.registerCallback('makeComponent', makeComponent.bind(this));
+
+        // Prevent top in browser from being interpreted as a function
+        this.registerCallback('top', () => { });
+
+        // With animation callback
+        this.registerCallback('withAnimation', withAnimation.bind(this));
+    }
+
 
     /**
      * Creates a built in component.
@@ -1005,33 +1060,6 @@ class YapJSRuntime {
         console.log('Envionment:');
         console.log(' - Current:', this.environment);
         console.log(' - Stored: ', this.storedEnvironments);
-    }
-
-
-    /**
-     * Register built in callbacks available to components
-     * @param {*} environment
-     */
-    registerBuiltInCallbacks() {
-        console.log('registerBuiltInCallbacks');
-
-        this.registerCallback('useEnvironment', () => {
-            return this.environment
-        });
-
-        // Standard library functions
-        for (const key in funcs) {
-            this.registerCallback(key, funcs[key]);
-        }
-
-        // useState
-        this.registerCallback('useState', useState.bind(this));
-
-        // makeComponent
-        this.registerCallback('makeComponent', makeComponent.bind(this));
-
-        // Prevent top in browser from being interpreted as a function
-        this.registerCallback('top', () => { });
     }
 
     /**
@@ -1177,11 +1205,8 @@ class YapJSRuntime {
                 const processedArgs = args.map(arg => {
                     if (typeof arg === 'object' && !Array.isArray(arg)) {
                         return this.processProps(arg)
-                    } else if (typeof arg === 'function' && arg._component) {
-                        // Evaluate top-level component factories
-                        return arg();
                     } else {
-                        return arg;
+                        return arg
                     }
                 });
 
@@ -1345,7 +1370,7 @@ class YapJSRuntime {
         return this.#makeComponent((...componentArgs) => {
 
             const handler = this.componentRegistry[type] ?? this.componentRegistry['GenericComponent'];
-            const { props, children, ast } = handler.bind(this)({ args: componentArgs });
+            const { props, children, ast } = handler.bind(this)({ args: componentArgs, name: type });
 
             /**
              * Component AST
@@ -1379,7 +1404,6 @@ class YapJSRuntime {
     }
 
 }
-
 
 
 // MARK: - After the runtime...
