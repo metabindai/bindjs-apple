@@ -3,7 +3,7 @@ import SwiftUI
 struct ButtonComponent: Component {
     static var directiveName: String = "Button"
     
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
     
     let label: Component
     let handlerId: String
@@ -21,7 +21,7 @@ extension ButtonComponent {
 extension ButtonComponent: View {
     var body: some View {
         Button(action: {
-            _ = runtime.callEventHandler(id: handlerId, arguments: [])
+            _ = context.callEventHandler(id: handlerId, arguments: [])
         }) {
             ComponentView(label)
         }

@@ -30,10 +30,10 @@ struct OnLongPressGestureWrapper<Content: View>: View {
     
     @GestureState private var phase: GesturePhase = .possible
     @GestureState private var location: CGPoint = .zero
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
     
     private func callHandler(_ newPhase: GesturePhase) {
-        _ = runtime.callEventHandler(
+        _ = context.callEventHandler(
             id: configuration.handlerId,
             arguments: [
                 "phase": newPhase.rawValue,

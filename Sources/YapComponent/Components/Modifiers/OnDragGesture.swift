@@ -34,10 +34,10 @@ struct OnDragGestureWrapper<Content: View>: View {
     @GestureState private var translation: CGSize = .zero
     @GestureState private var velocity: CGSize = .zero
 
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
 
     private func callHandler(_ newPhase: GesturePhase) {
-        _ = runtime.callEventHandler(
+        _ = context.callEventHandler(
             id: configuration.handlerId,
             arguments: [
                 "phase": newPhase.rawValue,

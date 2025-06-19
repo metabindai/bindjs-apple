@@ -1,7 +1,7 @@
 import SwiftUI
 import JavaScriptCore
 
-public class ComponentRuntime: ObservableObject {
+public class ComponentContext: ObservableObject {
     private let context: JSContext
     private let runtime: JSValue
 

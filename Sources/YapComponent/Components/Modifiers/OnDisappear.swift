@@ -3,7 +3,7 @@ import SwiftUI
 struct OnDisappearComponent: Component {
     static var directiveName: String = "onDisappear"
     
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
     
     let handlerId: String
 }
@@ -20,7 +20,7 @@ extension OnDisappearComponent: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onDisappear {
-                _ = runtime.callEventHandler(id: handlerId, arguments: [])
+                _ = context.callEventHandler(id: handlerId, arguments: [])
             }
     }
 }

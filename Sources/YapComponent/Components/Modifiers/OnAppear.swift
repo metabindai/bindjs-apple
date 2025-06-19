@@ -3,7 +3,7 @@ import SwiftUI
 struct OnAppearComponent: Component {
     static var directiveName: String = "onAppear"
     
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
     
     let handlerId: String
 }
@@ -20,7 +20,7 @@ extension OnAppearComponent: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onAppear {
-                _ = runtime.callEventHandler(id: handlerId, arguments: [])
+                _ = context.callEventHandler(id: handlerId, arguments: [])
             }
     }
 }

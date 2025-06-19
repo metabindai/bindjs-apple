@@ -3,7 +3,7 @@ import SwiftUI
 struct OnTapGestureComponent: Component {
     static var directiveName: String = "onTapGesture"
     
-    @EnvironmentObject private var runtime: ComponentRuntime
+    @EnvironmentObject private var context: ComponentContext
     
     let count: Int
     let handlerId: String
@@ -21,7 +21,7 @@ extension OnTapGestureComponent {
 extension OnTapGestureComponent: ViewModifier {
     func body(content: Content) -> some View {
         content.onTapGesture(count: count) {
-            _ = runtime.callEventHandler(id: handlerId, arguments: [])
+            _ = context.callEventHandler(id: handlerId, arguments: [])
         }
     }
 }

@@ -20,9 +20,12 @@ extension EnvironmentValues {
 }
 
 extension View {
-    public func component<C: View>(_ name: String, @ViewBuilder build: @escaping (_ props: [String: Any], _ content: [Component]) -> C) -> some View {
+    public func component<R: ComponentRepresentable>(_ component: R) -> some View {
         transformEnvironment(\.componentRegistry) { registry in
-            registry.register(name, build: build)
+            registry.register(component.name) { props, children in
+                component.makeView(context: .init(children: children, props: props))
+            }
         }
     }
 }
+
