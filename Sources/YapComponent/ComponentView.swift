@@ -28,6 +28,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case EmptyComponent.directiveName: EmptyComponent(from: directive)
     case ModifiedComponent.directiveName: ModifiedComponent(from: directive)
     case ForEachComponent.directiveName: ForEachComponent(from: directive)
+    case CallComponent.directiveName: CallComponent(from: directive)
     
     // Modifiers
         
@@ -89,14 +90,14 @@ func makeComponent(_ directive: Directive) -> Component? {
     case BorderComponent.directiveName: BorderComponent(from: directive)
     case ScaledToFillComponent.directiveName: ScaledToFillComponent(from: directive)
     case ScaledToFitComponent.directiveName: ScaledToFitComponent(from: directive)
-    default: UnknownComponent(from: directive)
+    default: UnresolvedComponent(from: directive)
     }
 }
 
 public struct ComponentView: View {
     let component: Component
     
-    init(_ component: Component) {
+    public init(_ component: Component) {
         self.component = component
     }
     
@@ -104,6 +105,7 @@ public struct ComponentView: View {
         switch component {
         case let angularGradient as AngularGradientComponent: angularGradient
         case let button as ButtonComponent: button
+        case let callComponent as CallComponent: callComponent
         case let capsule as CapsuleComponent: capsule
         case let circle as CircleComponent: circle
         case let color as ColorComponent: color
@@ -126,7 +128,7 @@ public struct ComponentView: View {
         case let section as SectionComponent: section
         case let spacer as SpacerComponent: spacer
         case let text as TextComponent: text
-        case let unknown as UnknownComponent: unknown
+        case let unresolved as UnresolvedComponent: unresolved
         case let vStack as VStackComponent: vStack
         case let zStack as ZStackComponent: zStack
         default: Text("Unsupported: \(type(of: component).directiveName)")

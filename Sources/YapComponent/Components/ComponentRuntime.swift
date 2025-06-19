@@ -65,7 +65,7 @@ public class ComponentRuntime: ObservableObject {
             guard let jsonString = jsonStringify(options),
                   let data = jsonString.data(using: .utf8) else {
                 // Fallback: No or invalid options; just animate with default
-                withAnimation {
+                withAnimation(.smooth) {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
                 }
                 return
@@ -78,7 +78,7 @@ public class ComponentRuntime: ObservableObject {
                 }
             } else {
                 // Could not decode, fallback to default
-                withAnimation {
+                withAnimation(.smooth) {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
                 }
             }
@@ -92,14 +92,19 @@ public class ComponentRuntime: ObservableObject {
         objectWillChange.send()
     }
 
-    public func makeView(_ name: String, arguments: [String: Any] = [:]) -> some View {
+    public func view(for name: String, arguments: [String: Any] = [:]) -> some View {
         willRender()
         if
             let json = runtime
                 .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
                 .toString(),
             let data = json.data(using: .utf8),
-            let directive = try? JSONDecoder().decode(Directive.self, from: data),
+            case let decoder = {
+                let decoder = JSONDecoder()
+                decoder.allowsJSON5 = true
+                return decoder
+            }(),
+            let directive = try? decoder.decode(Directive.self, from: data),
             let component = makeComponent(directive)
         {
             return ComponentView(component)

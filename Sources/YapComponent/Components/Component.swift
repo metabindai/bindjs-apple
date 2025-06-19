@@ -1,6 +1,6 @@
 import SwiftUI
 
-protocol Component {
+public protocol Component {
     static var directiveName: String { get }
     init?(from directive: Directive)
 }

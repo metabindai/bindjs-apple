@@ -727,8 +727,6 @@ function makeComponent (component) {
     // As the name isnt passed in, generate one from the call order
     const componentIndex = this.hookState.makeComponentIndex++;
 
-    console.log('registerCallback - makeComponent ', component, componentIndex);
-
     // Create body function
     let f = (props, children) =>
         this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
@@ -1012,7 +1010,7 @@ class YapJSRuntime {
                }
 
                // Wrap the component in a directive so the renderer knows what component generated that part of the AST
-               let componentAst = AST.Directive('ComponentCall', { name: name }, [ ast ]);
+               let componentAst = AST.Directive('ComponentCall', { name: name, props: props }, [ ast ]);
 
                // Return
                return componentAst
@@ -1408,19 +1406,29 @@ class YapJSRuntime {
 
 // MARK: - After the runtime...
 
+// Custom JSON stringify that preserves Infinity, -Infinity, and NaN
+function customJSONStringify(value, replacer, space) {
+    return JSON.stringify(value, (key, val) => {
+        if (val === Infinity) return "Infinity";
+        if (val === -Infinity) return "-Infinity";
+        if (Number.isNaN(val)) return "NaN";
+        return replacer ? replacer(key, val) : val;
+    }, space);
+}
+
 const runtime = new YapJSRuntime();
 
 Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
-    call: (args) => JSON.stringify(runtime.call(...args)(), null, 2),
-    callComponent: (args) => JSON.stringify(runtime.callComponent(...args), null, 2),
+    call: (args) => customJSONStringify(runtime.call(...args)(), null, 2),
+    callComponent: (args) => customJSONStringify(runtime.callComponent(...args), null, 2),
     setEnvironment: (environment) => runtime.registerEnvironment(environment),
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
     restoreFunction: (functionId) => runtime.restoreFunction(functionId),
     setForEachElementId: (id) => runtime.setForEachElementId(id),
-    callForEachFunction: (functionId, element, index) => JSON.stringify(runtime.callForEachFunction(functionId, element, index), null, 2),
+    callForEachFunction: (functionId, element, index) => customJSONStringify(runtime.callForEachFunction(functionId, element, index), null, 2),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
@@ -1431,7 +1439,7 @@ Object.assign(this, {
         return null
     },
     willRender: () => runtime.willRender(),
-    debug: () => console.log(JSON.stringify(runtime.components)),
+    debug: () => console.log(customJSONStringify(runtime.components)),
     reset: () => runtime.reset(),
 });
 

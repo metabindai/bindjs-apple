@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct UnknownComponent: Component {
-    static var directiveName: String = "Unknown"
+struct UnresolvedComponent: Component {
+    static var directiveName: String = "Unresolved"
     
     let directive: Directive
     let children: [Component]
@@ -12,7 +12,7 @@ struct UnknownComponent: Component {
     }
 }
 
-extension UnknownComponent: View {
+extension UnresolvedComponent: View {
     
     var body: some View {
         ForEach(children.indices, id: \.self) { index in

@@ -1,11 +1,11 @@
 import Foundation
 
-package struct Directive {
+public struct Directive {
     let type: String
     let props: [String: Any]
     let children: [Directive]
     
-    init(type: String, props: [String : Any] = [:], children: [Directive] = []) {
+    public init(type: String, props: [String : Any] = [:], children: [Directive] = []) {
         self.type = type
         self.props = props
         self.children = children
@@ -58,7 +58,7 @@ extension Directive: Decodable {
         case type, props
     }
 
-    package init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         // 1️⃣ Decode the “type” field
         type = try container.decode(String.self, forKey: .type)
@@ -137,7 +137,7 @@ struct AnyDecodable: Decodable {
 }
 
 extension Directive: CustomStringConvertible {
-    package var description: String {
+    public var description: String {
         var lines = ["↳ Directive(type: “\(type)”)"]
         if !props.isEmpty {
             lines.append("  Props:")
