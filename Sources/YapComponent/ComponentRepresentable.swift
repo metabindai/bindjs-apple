@@ -4,6 +4,7 @@ public protocol ComponentRepresentable {
     associatedtype Body: View
     
     var name: String { get }
+    @ViewBuilder
     func makeView(context: Self.Context) -> Self.Body
     
     typealias Context = ComponentRepresentableContext
