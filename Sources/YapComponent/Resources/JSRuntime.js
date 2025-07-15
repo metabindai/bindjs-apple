@@ -54,9 +54,14 @@ const componentNames = [
     "Canvas",
     "Circle",
     "ColorPicker",
+    "Content",
     "ContentUnavailableView",
     "ControlGroup",
     "ComposerGroup",
+    "ComposerAdd",
+    "ComposerChildren",
+    "FilterChildren",
+    "DrawingCanvas",
     "DatePicker",
     "DisclosureGroup",
     "Divider",
@@ -70,6 +75,7 @@ const componentNames = [
     "EnvironmentValue",
     "ForEach",
     "Form",
+    "FontCustom",
     "Gauge",
     "GeometryReader",
     "GeometryReader3D",
@@ -90,6 +96,7 @@ const componentNames = [
     "LinearGradient",
     "Link",
     "List",
+    "Material",
     "Menu",
     "MenuButton",
     "MultiDatePicker",
@@ -135,6 +142,7 @@ const componentNames = [
     "ViewThatFits",
     "VSplitView",
     "VStack",
+    "Video",
     "WindowVisibilityToggle",
     "ZStack"
 ];
@@ -644,6 +652,74 @@ function AnimationModifier({ args,  name, content }) {
     return { ast: content }
 }
 
+const propertyNameMap = {
+    'PropertyString'  : 'string',
+    'PropertyNumber'  : 'number',
+    'PropertyBoolean' : 'boolean',
+    'PropertyEnum'    : 'enum',
+    'PropertyDate'    : 'date',
+    'PropertyArray'   : 'array',
+    'PropertyAsset'   : 'asset',
+    'PropertyGroup'   : 'group',
+    'PropertyContent' : 'content',
+    'PropertyComponent': 'component',
+    'PropertyComponentList': 'componentList',
+};
+
+function PropertyComponent({ args, name }) {
+    const props = args?.[0] || {};
+
+    const result = {
+        type: propertyNameMap[name] || 'unknown',
+        ...props,
+    };
+    
+    return result;
+}
+
+// Helper: Recursively checks if a node or its children matches the given type
+function extractPropsByType(node, typeName) {
+    var ast = node;
+    if (typeof node === 'function') {
+        ast = node();
+    }
+    if (typeof ast === 'object' && ast !== null) {
+        if (ast?.type === typeName && typeof ast.props === 'object') {
+            const { children, ...restProps } = ast.props;
+            return { ...restProps };
+        }
+        // Recurse into children if they exist
+        const astChildren = ast?.props?.children;
+        if (astChildren) {
+            const children = Array.isArray(astChildren) ? astChildren : [astChildren];
+            for (const child of children) {
+                const result = extractPropsByType(child, typeName);
+                if (result)
+                    return result;
+            }
+        }
+    }
+    return null;
+}
+
+function FontModifier({ args, content }) {
+    const [arg] = args;
+
+    const customProps = extractPropsByType(arg, 'FontCustom');
+    
+    let options = {};
+    if (customProps) {
+        options = { custom: customProps };
+    } else {
+        options = { rawValue: arg };
+    }
+
+    return {
+        props: options,
+        children: content,
+    };
+}
+
 function EnvironmentValue({ args }) {
     const props = { environmentKey: args[0], value: args[1] };
     return { props }
@@ -652,6 +728,52 @@ function EnvironmentValue({ args }) {
 EnvironmentValue.environmentValue = (name, args) => {
     return { key: args[0], value: args[1] }
 };
+
+// Normalise .fill modifier and pass into to the component it's applied to as a prop
+// fill: { style: ShapeStyle }
+function Fill({ args, content }) {
+
+    const style = args[0];
+
+    // If the content is a Color component, we need to modify its opacity
+    const shapeProps = content.props;
+
+    // If passing { style: Color('red') } etc , then pass dictionary directly
+    if (typeof style === 'object' && style.style != null) {
+        shapeProps.fill = this.processProps({ ...style });
+
+    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+    } else if (typeof style === 'function') {
+        shapeProps.fill = this.processProps({ style: style });
+    }
+
+    // Return the Color directly
+    return { ast: content }
+}
+
+// Normalise .stroke modifier and pass into to the component it's applied to as a prop
+// stroke: { style: ShapeStyle, lineWidth: number }
+function Stroke({ args, content }) {
+
+    const style = args[0];
+
+    // If the content is a Color component, we need to modify its opacity
+    const shapeProps = content.props;
+
+    // If passing { style: Color('red') } etc , then pass dictionary directly
+    if (typeof style === 'object' && style.style != null) {
+        shapeProps.stroke = this.processProps({ ...style });
+
+    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+    } else if (typeof style === 'function') {
+        shapeProps.stroke = this.processProps({ style: style });
+    } else if (typeof style === 'number') {
+        shapeProps.stroke = { lineWidth: style };
+    }
+    
+    // Return the Color directly
+    return { ast: content }
+}
 
 function ForEach({ args }) {
 
@@ -682,6 +804,20 @@ function ForEach({ args }) {
     }
 
     return { ast }
+}
+
+function Content({ args }) {
+
+    const id = this.currentPathId('Content');
+    const environmentId = this.storeEnvironment(id);
+
+    const contentId = typeof args[0] === 'object' ? args[0]?.content : args[0];
+
+    const props = {
+        environmentId,
+        id: contentId
+    };
+    return { props }
 }
 
 function useState(initialValue) {
@@ -719,6 +855,10 @@ function useState(initialValue) {
     return [hooks[this.hookState.currentComponent.hookIndex++], callback]
 }
 
+function useNavigate() {
+    return this.navigateCallback
+}
+
 function makeComponent (component) {
 
     // Pass body directly or in dictionary
@@ -727,6 +867,8 @@ function makeComponent (component) {
     // As the name isnt passed in, generate one from the call order
     const componentIndex = this.hookState.makeComponentIndex++;
 
+    //console.log('registerCallback - makeComponent ', component, componentIndex)
+
     // Create body function
     let f = (props, children) =>
         this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
@@ -734,6 +876,80 @@ function makeComponent (component) {
     f._component = true;
 
     return f
+}
+
+/**
+ * convertComponentProps
+ * ---------------------
+ * Recursively traverses a props object and replaces any "component-like" objects
+ * (objects with a `componentId` and `name` field) with the result of calling that component.
+ *
+ * A "component-like" object is expected to look like:
+ * {
+ *   componentId: string,
+ *   name: string,
+ *   props: object
+ * }
+ *
+ * The function assumes `this.call(name, 'body', props)` is available for resolving components.
+ *
+ * Efficiency:
+ * - Arrays and objects are only cloned if any of their children change.
+ * - Component calls are only made when matching shape is detected.
+ * - Fast return for primitive types and unchanged structures.
+ *
+ * @param props - The input props object to convert.
+ * @returns A new props object with all components resolved, or the original if unchanged.
+ */
+function convertComponentProps(props) {
+    if (props == null || typeof props !== 'object') return props;
+
+    const callFn = this.call?.bind(this);
+
+    function process(item) {
+        // Fast-path array
+        if (Array.isArray(item)) {
+            let changed = false;
+            const len = item.length;
+            const result = new Array(len);
+            for (let i = 0; i < len; i++) {
+                const [val, didChange] = process(item[i]);
+                if (didChange) changed = true;
+                result[i] = val;
+            }
+            return [changed ? result : item, changed];
+        }
+
+        // Fast-path component call
+        if (item && typeof item === 'object') {
+            if (item.componentId != null && item.name && callFn) {
+                const result = callFn(item.name, 'body', item.props);
+                return [result, true];
+            }
+
+            // Traverse object
+            let changed = false;
+            let result = null;
+            for (const key in item) {
+                if (!Object.hasOwn(item, key)) continue;
+                const val = item[key];
+                const [processed, didChange] = process(val);
+                if (didChange) {
+                    if (!changed) {
+                        changed = true;
+                        result = { ...item };  // Lazy copy only when the first change occurs
+                    }
+                    result[key] = processed;  // Apply the changed value
+                }
+            }
+            return [changed ? result : item, changed];
+        }
+
+        // Primitive
+        return [item, false];
+    }
+
+    return process(props)[0];
 }
 
 function withAnimation(arg1, arg2) {
@@ -827,6 +1043,10 @@ class YapJSRuntime {
             console.log('Needs rerender not implemented');
         };
         
+        this.navigateCallback = (path, options) => {
+            console.log('Navigate not implemented', path, options);
+        };
+
         this.withAnimation = (handlerId) => {
             console.log('With animation not implemented', handlerId);
             // Provide default implementation.
@@ -908,11 +1128,16 @@ class YapJSRuntime {
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
         this.#registerBuiltInComponent('ForEach', ForEach);
+        this.#registerBuiltInComponent('Content', Content);
 
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
         this.#registerBuiltInModifier('opacity', Opacity);
+        this.#registerBuiltInModifier('font', FontModifier);
+        this.#registerBuiltInModifier('fill', Fill);
+        this.#registerBuiltInModifier('stroke', Stroke);
         
+
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 
@@ -921,6 +1146,10 @@ class YapJSRuntime {
 
         // Register animation modifiers
         ['delay', 'speed', 'repeatCount', 'repeatForever'].map(name => this.#registerBuiltInModifier(name, AnimationModifier));
+        
+        ['PropertyString', 'PropertyNumber', 'PropertyEnum', 'PropertyBoolean', 'PropertyArray', 'PropertyAsset', 'PropertyContent', 'PropertyComponent', 'PropertyDate', 'PropertyGroup', 'PropertyComponentList'].map(name => {
+            this.#registerHelperComponent(name, PropertyComponent);
+        });
 
         // Regster environment value modiifer
         this.#registerBuiltInModifier('environment', EnvironmentValue);
@@ -945,6 +1174,9 @@ class YapJSRuntime {
         // useState
         this.registerCallback('useState', useState.bind(this));
 
+        // useState
+        this.registerCallback('useNavigate', useNavigate.bind(this));
+
         // makeComponent
         this.registerCallback('makeComponent', makeComponent.bind(this));
 
@@ -954,8 +1186,7 @@ class YapJSRuntime {
         // With animation callback
         this.registerCallback('withAnimation', withAnimation.bind(this));
     }
-
-
+    
     /**
      * Creates a built in component.
      * A callback can be passed to generate the component, or left empty to use the generic handler.
@@ -975,6 +1206,10 @@ class YapJSRuntime {
      */
     #registerBuiltInModifier(name, callback) {
         this.modifierRegistry[name] = callback;
+    }
+
+    #registerHelperComponent(name, callback) {
+        this.context[name] = (...args) => callback({ name, args: args });
     }
 
     /**
@@ -999,7 +1234,7 @@ class YapJSRuntime {
             return this.#makeComponent((props, children) => {
 
                // Call the body of our registered component
-               let componentFunction = this.call(name, entryPoint, props, children, ...otherArgs);
+               let componentFunction = this.call(name, entryPoint, this.convertComponentProps(props), children, ...otherArgs);
 
                // It's assumed a component returns an inbuilt component.
                // Run the returned function to generate the ast
@@ -1054,6 +1289,10 @@ class YapJSRuntime {
         }
     }
 
+    getEnvironment(environmentId) {
+        return this.storedEnvironments[environmentId]
+    }
+
     debugEnvironment() {
         console.log('Envionment:');
         console.log(' - Current:', this.environment);
@@ -1087,6 +1326,10 @@ class YapJSRuntime {
             }
         }
         return null
+    }
+
+    convertComponentProps(props) {
+        return convertComponentProps.bind(this)(props)
     }
 
     /**
@@ -1132,8 +1375,12 @@ class YapJSRuntime {
                     (typeof v === 'function' && v._component) ? v() : v
                 );
 
+            // If the value is an object, process its properties recursively
+            } else if (typeof value === 'object' && value !== null) {
+                newProps[key] = this.processProps(value);
+
             // Expand functions if value of key
-            } if (typeof newProps[key] === 'function' && newProps[key]._component) {
+            } else if (typeof value === 'function' && value._component) {
                 newProps[key] = newProps[key]();
             }
         });
@@ -1231,7 +1478,7 @@ class YapJSRuntime {
 
                 // Execute modifier function
                 const { props: modifierProps, ast: modifierAst } = modifierFunction.bind(this)({ args: processedArgs, content: content, name: name });
-                
+
                 /**
                  * Modifier function can return either an AST or a new set of props.
                  */
@@ -1402,6 +1649,7 @@ class YapJSRuntime {
     }
 
 }
+
 
 
 // MARK: - After the runtime...
