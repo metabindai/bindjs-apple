@@ -27,6 +27,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case SectionComponent.directiveName: SectionComponent(from: directive)
     case SpacerComponent.directiveName: SpacerComponent(from: directive)
     case TextComponent.directiveName: TextComponent(from: directive)
+    case VideoComponent.directiveName: VideoComponent(from: directive)
     case VStackComponent.directiveName: VStackComponent(from: directive)
     case ZStackComponent.directiveName: ZStackComponent(from: directive)
     
@@ -136,6 +137,7 @@ public struct ComponentView: View {
         case let spacer as SpacerComponent: spacer
         case let text as TextComponent: text
         case let unresolved as UnresolvedComponent: unresolved
+        case let video as VideoComponent: video
         case let vStack as VStackComponent: vStack
         case let zStack as ZStackComponent: zStack
         default: Text("Unsupported: \(type(of: component).directiveName)")

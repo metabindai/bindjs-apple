@@ -39,6 +39,13 @@ extension Directive {
         return []
     }
     
+    subscript(name: String) -> [String: Any]? {
+        if let value = props[name] as? [String: Any] {
+            return value
+        }
+        return nil
+    }
+    
     func rawValue<T: ParsableArgument>() -> T? {
         self["rawValue"]
     }
