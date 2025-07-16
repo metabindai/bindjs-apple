@@ -25,9 +25,9 @@ extension FontCustomComponent {
 extension FontCustomComponent: ViewModifier {
     public func body(content: Content) -> some View {
         content
-        // 1)  Use the custom font if loaded, else fallback:
+            // 1)  Use the custom font if loaded, else fallback:
             .font(makeFont())
-        // 2)  Kick off download when this view appears / url changes:
+            // 2)  Kick off download when this view appears / url changes:
             .task(id: url) {
                 await loadFontIfNeeded()
             }
@@ -35,16 +35,37 @@ extension FontCustomComponent: ViewModifier {
     
     // MARK: — Helper: choose the Font to apply
     private func makeFont() -> Font {
+        let textStyle = nearestTextStyle(for: size)
         if let psName = postScriptName {
-            // We have a downloaded font → use it
-            return .custom(psName, size: size)
+            // We have a downloaded font → use it, scaling relative to the nearest text style
+            return .custom(psName, size: size, relativeTo: textStyle)
         } else if url != nil {
-            // We're still loading → use system for now
-            return .system(size: size)
+            // We're still loading → use system, scaling relative to the nearest text style
+            return .system(size: size, weight: .regular, design: .default)
         } else {
-            // No URL was provided → try using the family name locally
-            return .custom(family, size: size)
+            // No URL was provided → try using the family name locally, scaling relative to the nearest text style
+            return .custom(family, size: size, relativeTo: textStyle)
         }
+    }
+    
+    /// Find the closest dynamic TextStyle for a given base size
+    private func nearestTextStyle(for size: CGFloat) -> Font.TextStyle {
+        // Mapping of base point sizes to SwiftUI TextStyles (iOS default Dynamic Type sizes)
+        let styleMap: [(Font.TextStyle, CGFloat)] = [
+            (.largeTitle, 34),
+            (.title,      28),
+            (.title2,     22),
+            (.title3,     20),
+            (.headline,   17),
+            (.body,       17),
+            (.callout,    16),
+            (.subheadline,15),
+            (.footnote,   13),
+            (.caption,    12),
+            (.caption2,   11)
+        ]
+        // Pick the style whose base size is closest to our requested size
+        return styleMap.min(by: { abs($0.1 - size) < abs($1.1 - size) })!.0
     }
     
     // MARK: — Async loader
