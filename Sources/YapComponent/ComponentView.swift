@@ -92,6 +92,11 @@ func makeComponent(_ directive: Directive) -> Component? {
     case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
     case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
     case ZIndexComponent.directiveName: ZIndexComponent(from: directive)
+        
+    // Values
+        
+    case FontCustomComponent.directiveName: FontCustomComponent(from: directive)
+        
     default: UnresolvedComponent(from: directive)
     }
 }

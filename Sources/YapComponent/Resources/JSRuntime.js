@@ -705,18 +705,28 @@ function extractPropsByType(node, typeName) {
 function FontModifier({ args, content }) {
     const [arg] = args;
 
+    // Try to pull out the FontCustom props
     const customProps = extractPropsByType(arg, 'FontCustom');
-    
-    let options = {};
+
     if (customProps) {
-        options = { custom: customProps };
-    } else {
-        options = { rawValue: arg };
+        // Reconstruct the original FontCustom AST node
+        const fontCustomNode = AST.Directive(
+            'FontCustom',
+            customProps,
+            []            // or pass along children if you had any
+        );
+    
+        // Return that node as the rawValue of your .font modifier
+        return {
+            props: { rawValue: fontCustomNode },
+            children: content
+        };
     }
 
+    // No FontCustom found?  Fall back to whatever your default is:
     return {
-        props: options,
-        children: content,
+        props: { rawValue: arg },
+        children: content
     };
 }
 

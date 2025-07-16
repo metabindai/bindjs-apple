@@ -6,6 +6,7 @@ struct FontComponent: Component {
     enum Storage {
         case textStyle(Font.TextStyle)
         case size(CGFloat)
+        case custom(FontCustomComponent)
     }
     
     let storage: Storage
@@ -19,6 +20,9 @@ extension FontComponent {
             storage = .size(size)
         } else if let textStyle: Font.TextStyle = directive.rawValue() {
             storage = .textStyle(textStyle)
+        } else if let directive: Directive = directive.rawValue(),
+                  let fontCustom: FontCustomComponent = makeComponent(directive) as? FontCustomComponent {
+            storage = .custom(fontCustom)
         } else {
             return nil
         }
@@ -53,6 +57,9 @@ extension FontComponent: ViewModifier {
         case .size(let size):
             content
                 .font(.system(size: size))
+        case .custom(let custom):
+            content
+                .modifier(custom)
         }
     }
 }
