@@ -10,6 +10,7 @@ struct VideoComponent: Component, View {
     private let muted: Bool
     private let controls: Bool
     private let loop: Bool
+    private let contentMode: ContentMode
 
     init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
@@ -28,6 +29,7 @@ struct VideoComponent: Component, View {
         muted    = directive["muted"]    ?? false
         controls = directive["controls"] ?? true
         loop     = directive["loop"]     ?? false
+        contentMode = directive["contentMode"] ?? .fit
     }
 
     var body: some View {
@@ -36,7 +38,8 @@ struct VideoComponent: Component, View {
             autoplay: autoplay,
             muted: muted,
             controls: controls,
-            loop: loop
+            loop: loop,
+            contentMode: contentMode
         )
         .aspectRatio(contentMode: .fit)
     }
@@ -48,6 +51,7 @@ private struct VideoPlayerContainer: View {
     let muted: Bool
     let controls: Bool
     let loop: Bool
+    let contentMode: ContentMode
 
     var body: some View {
     #if os(macOS)
@@ -56,7 +60,8 @@ private struct VideoPlayerContainer: View {
             autoplay: autoplay,
             muted: muted,
             controls: controls,
-            loop: loop
+            loop: loop,
+            contentMode: contentMode
         )
     #else
         iOSVideoPlayer(
@@ -64,7 +69,8 @@ private struct VideoPlayerContainer: View {
             autoplay: autoplay,
             muted: muted,
             controls: controls,
-            loop: loop
+            loop: loop,
+            contentMode: contentMode
         )
     #endif
     }
@@ -77,6 +83,7 @@ private struct iOSVideoPlayer: UIViewControllerRepresentable {
     let muted: Bool
     let controls: Bool
     let loop: Bool
+    let contentMode: ContentMode
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
@@ -84,6 +91,7 @@ private struct iOSVideoPlayer: UIViewControllerRepresentable {
         player.isMuted = muted
         controller.player = player
         controller.showsPlaybackControls = controls
+        controller.videoGravity = contentMode == .fit ? .resizeAspect : .resizeAspectFill
 
         context.coordinator.player = player
 
@@ -130,6 +138,7 @@ private struct MacVideoPlayer: NSViewRepresentable {
     let muted: Bool
     let controls: Bool
     let loop: Bool
+    let contentMode: ContentMode
 
     func makeNSView(context: Context) -> AVPlayerView {
         let view = AVPlayerView()
@@ -137,7 +146,7 @@ private struct MacVideoPlayer: NSViewRepresentable {
         player.isMuted = muted
         view.player = player
         view.controlsStyle = controls ? .floating : .none
-        view.videoGravity = .resizeAspect
+        view.videoGravity = contentMode == .fit ? .resizeAspect: .resizeAspectFill
 
         context.coordinator.player = player
 
