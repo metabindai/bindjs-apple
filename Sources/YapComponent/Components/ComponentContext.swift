@@ -5,6 +5,7 @@ public class ComponentContext: ObservableObject {
     private let context: JSContext
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
+    private var navigateCallback: ((ContentLink) -> Void)?
 
     public init() {
         context = JSContext()!
@@ -17,6 +18,7 @@ public class ComponentContext: ObservableObject {
         setupConsoleLog()
         setupNeedsRerender()
         setupWithAnimation()
+        setupNavigate()
         setupPerformAction()
     }
 
@@ -89,6 +91,29 @@ public class ComponentContext: ObservableObject {
         _ = context.evaluateScript("runtime.withAnimation = withAnimation")
     }
     
+    private func setupNavigate() {
+        let navigateFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
+            guard let self = self else { return }
+            
+            
+            guard let jsonString = jsonStringify(options),
+                  let data = jsonString.data(using: .utf8) else {
+                print("Invalid options for navigate")
+                return
+            }
+            
+            // Decode ContentLink
+            do {
+                let contentLink = try JSONDecoder().decode(ContentLinkDTO.self, from: data)
+                self.navigateCallback?(contentLink.to)
+            } catch {
+                print("Error decoding ContentLink: \(error)")
+            }
+        }
+        context.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
+        _ = context.evaluateScript("runtime.navigateCallback = navigateCallback")
+    }
+    
     private func setupPerformAction() {
         let performActionFunction: @convention(block) (String, JSValue?) -> JSValue? = { [weak self] actionName, args in
             guard let self = self else { return nil }
@@ -132,8 +157,9 @@ public class ComponentContext: ObservableObject {
         objectWillChange.send()
     }
 
-    public func view(for name: String, arguments: [String: Any] = [:]) -> some View {
-        willRender()
+    @ViewBuilder
+    public func view(for name: String, arguments: [String: Any] = [:]) -> (some View)? {
+        let _ = willRender()
         if
             let json = runtime
                 .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
@@ -147,13 +173,10 @@ public class ComponentContext: ObservableObject {
             let directive = try? decoder.decode(Directive.self, from: data),
             let component = makeComponent(directive)
         {
-            return ComponentView(component)
+            ComponentView(component)
                 .environmentObject(self)
                 .id(name)
         }
-        return ComponentView(EmptyComponent())
-            .environmentObject(self)
-            .id(name)
     }
 
     public func debug() {
@@ -252,5 +275,11 @@ public class ComponentContext: ObservableObject {
             action(argumentDict)
             return nil
         }
+    }
+    
+    // MARK: - Navigation Callback
+    
+    public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
+        self.navigateCallback = callback
     }
 }
