@@ -149,9 +149,11 @@ public class ComponentContext: ObservableObject {
         {
             return ComponentView(component)
                 .environmentObject(self)
+                .id(name)
         }
         return ComponentView(EmptyComponent())
             .environmentObject(self)
+            .id(name)
     }
 
     public func debug() {
