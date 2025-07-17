@@ -1,5 +1,22 @@
 import SwiftUI
 
+func makeShape(_ component: Component) -> Shape? {
+    switch component {
+    case let circle as CircleComponent:
+        return circle.swiftUI
+    case let ellipse as EllipseComponent:
+        return ellipse.swiftUI
+    case let rectangle as RectangleComponent:
+        return rectangle.swiftUI
+    case let roundedRectangle as RoundedRectangleComponent:
+        return roundedRectangle.swiftUI
+    case let capsule as CapsuleComponent:
+        return capsule.swiftUI
+    default:
+        return nil
+    }
+}
+
 enum ShapeStyle {
     case fill(Component)
     case stroke(Component, lineWidth: CGFloat)
@@ -38,6 +55,10 @@ extension CircleComponent: View {
             Circle().stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    var swiftUI: Circle {
+        Circle()
+    }
 }
 
 struct EllipseComponent: ShapeComponent {
@@ -69,6 +90,10 @@ extension EllipseComponent: View {
             Ellipse().stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    var swiftUI: Ellipse {
+        Ellipse()
+    }
 }
 
 struct RectangleComponent: ShapeComponent {
@@ -99,6 +124,10 @@ extension RectangleComponent: View {
         case .stroke(let stroke, let lineWidth):
             Rectangle().stroke(stroke, lineWidth: lineWidth)
         }
+    }
+    
+    var swiftUI: Rectangle {
+        Rectangle()
     }
 }
 
@@ -134,6 +163,10 @@ extension RoundedRectangleComponent: View {
             RoundedRectangle(cornerRadius: cornerRadius).stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    var swiftUI: RoundedRectangle {
+        RoundedRectangle(cornerRadius: cornerRadius)
+    }
 }
 
 struct CapsuleComponent: ShapeComponent {
@@ -165,6 +198,11 @@ extension CapsuleComponent: View {
             Capsule().stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    var swiftUI: Capsule {
+        Capsule()
+    }
+    
 }
 
 extension Shape {
