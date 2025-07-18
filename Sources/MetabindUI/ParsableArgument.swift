@@ -290,6 +290,21 @@ extension Axis.Set: ParsableArgument {
     }
 }
 
+extension Edge.Set: ParsableArgument {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "top": self = .top
+        case "leading": self = .leading
+        case "bottom": self = .bottom
+        case "trailing": self = .trailing
+        case "horizontal": self = .horizontal
+        case "vertical": self = .vertical
+        case "all": self = .all
+        default: return nil
+        }
+    }
+}
+
 extension ButtonRole: ParsableArgument {
     init?(rawValue: String) {
         switch rawValue {
@@ -305,6 +320,17 @@ extension ContentMode: ParsableArgument {
         switch rawValue {
         case "fit": self = .fit
         case "fill": self = .fill
+        default: return nil
+        }
+    }
+}
+
+extension SafeAreaRegions: ParsableArgument {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "container": self = .container
+        case "keyboard": self = .keyboard
+        case "all": self = .all
         default: return nil
         }
     }
