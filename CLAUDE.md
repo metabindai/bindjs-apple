@@ -1,9 +1,9 @@
-# YapComponent Development Guide
+# MetabindUI Development Guide
 
 ## Build Commands
 - Build package: `swift build`
 - Run tests: `swift test`
-- Run single test: `swift test --filter YapComponentTests/specificTestName`
+- Run single test: `swift test --filter MetabindUITests/specificTestName`
 - Generate Xcode project: `swift package generate-xcodeproj`
 
 ## Code Style Guidelines
@@ -17,4 +17,4 @@
 - **Testing**: Create unit tests for new component types and modifiers
 
 ## Components Organization
-Components should be organized in Sources/YapComponent/Convertibles with Views/ for basic views and Modifiers/ for modifiers.
+Components should be organized in Sources/MetabindUI/Convertibles with Views/ for basic views and Modifiers/ for modifiers.
