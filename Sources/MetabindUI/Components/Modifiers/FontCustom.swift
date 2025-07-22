@@ -12,23 +12,27 @@ extension Logger {
 
 // MARK: - FontCustomComponent
 
-struct FontCustomComponent: Component {
-    static var directiveName: String = "FontCustom"
+public struct FontCustomComponent: Component {
+    public static var directiveName: String = "FontCustom"
     
     // MARK: — Modifier State
     @State private var postScriptName: String?
     @State private var isLoading = false
     
-    let family: String
-    let size: CGFloat
-    let url: URL?
+    public let family: String
+    public let size: CGFloat
+    public let url: URL?
 }
 
 extension FontCustomComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         self.family = directive["family"] ?? "Not Specified"
         self.size = directive["size"] ?? 17.0
         self.url = directive["url"]
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitFontCustom(self)
     }
 }
 

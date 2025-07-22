@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct HiddenComponent: Component {
-    static var directiveName: String = "hidden"
+public struct HiddenComponent: Component {
+    public static var directiveName: String = "hidden"
 }
 
 extension HiddenComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitHidden(self)
     }
 }
 
 extension HiddenComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .hidden()
     }

@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct IDComponent: Component {
-    static var directiveName: String = "id"
+public struct IDComponent: Component {
+    public static var directiveName: String = "id"
     
-    let id: String
+    public let id: String
 }
 
 extension IDComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         id = directive.rawValue() ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitID(self)
+    }
 }
 
 extension IDComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .id(id)
     }

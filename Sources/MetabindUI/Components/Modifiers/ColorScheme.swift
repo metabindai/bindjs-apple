@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct ColorSchemeComponent: Component {
-    static var directiveName: String = "colorScheme"
+public struct ColorSchemeComponent: Component {
+    public static var directiveName: String = "colorScheme"
     
-    let colorScheme: ColorScheme
+    public let colorScheme: ColorScheme
 }
 
 extension ColorSchemeComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         colorScheme = directive.rawValue() ?? .light
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitColorScheme(self)
+    }
 }
 
 extension ColorSchemeComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .colorScheme(colorScheme)
     }

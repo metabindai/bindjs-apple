@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct MultilineTextAlignmentComponent: Component {
-    static var directiveName: String = "multilineTextAlignment"
+public struct MultilineTextAlignmentComponent: Component {
+    public static var directiveName: String = "multilineTextAlignment"
     
-    let alignment: TextAlignment
+    public let alignment: TextAlignment
 }
 
 extension MultilineTextAlignmentComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         alignment = directive.rawValue() ?? .center
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitMultilineTextAlignment(self)
+    }
 }
 
 extension MultilineTextAlignmentComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .multilineTextAlignment(alignment)
     }

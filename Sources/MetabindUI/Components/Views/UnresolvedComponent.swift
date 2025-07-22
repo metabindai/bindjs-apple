@@ -1,20 +1,24 @@
 import SwiftUI
 
-struct UnresolvedComponent: Component {
-    static var directiveName: String = "Unresolved"
+public struct UnresolvedComponent: Component {
+    public static var directiveName: String = "Unresolved"
     
-    let directive: Directive
-    let children: [Component]
+    public let directive: Directive
+    public let children: [Component]
     
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         self.directive = directive
         self.children = directive.children.compactMap(makeComponent(_:))
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitUnresolved(self)
     }
 }
 
 extension UnresolvedComponent: View {
     
-    var body: some View {
+    public var body: some View {
         ForEach(children.indices, id: \.self) { index in
             ComponentView(children[index])
         }

@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct FontDesignComponent: Component {
-    static var directiveName: String = "fontDesign"
+public struct FontDesignComponent: Component {
+    public static var directiveName: String = "fontDesign"
     
-    let fontDesign: Font.Design
+    public let fontDesign: Font.Design
 }
 
 extension FontDesignComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         fontDesign = directive.rawValue() ?? .default
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitFontDesign(self)
+    }
 }
 
 extension FontDesignComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if #available(iOS 16.1, *) {
             content
                 .fontDesign(fontDesign)

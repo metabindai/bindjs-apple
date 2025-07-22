@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct TrackingComponent: Component {
-    static var directiveName: String = "tracking"
+public struct TrackingComponent: Component {
+    public static var directiveName: String = "tracking"
     
-    let tracking: CGFloat
+    public let tracking: CGFloat
 }
 
 extension TrackingComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         tracking = directive.rawValue() ?? 0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitTracking(self)
+    }
 }
 
 extension TrackingComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .tracking(tracking)
     }

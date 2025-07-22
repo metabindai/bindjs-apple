@@ -1,19 +1,19 @@
 import SwiftUI
 import JavaScriptCore
 
-struct ForEachComponent: Component {
-    static var directiveName: String = "ForEach"
+public struct ForEachComponent: Component {
+    public static var directiveName: String = "ForEach"
     
     @EnvironmentObject private var context: ComponentContext
     
-    let dataId: String
-    let count: Int
-    let functionId: String
-    let environmentId: String
+    public let dataId: String
+    public let count: Int
+    public let functionId: String
+    public let environmentId: String
 }
 
 extension ForEachComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         dataId = directive["dataId"] ?? ""
@@ -21,11 +21,15 @@ extension ForEachComponent {
         functionId = directive["functionId"] ?? ""
         environmentId = directive["environmentId"] ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitForEach(self)
+    }
 }
 
 extension ForEachComponent: View {
     
-    var body: some View {
+    public var body: some View {
         if let data = context.restoreForEachData(id: dataId),
            case _ = context.restoreEnvironment(id: environmentId) {
             ForEach(0..<count, id: \.self) { index in

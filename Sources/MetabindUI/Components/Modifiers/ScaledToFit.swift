@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct ScaledToFitComponent: Component {
-    static var directiveName: String = "scaledToFit"
+public struct ScaledToFitComponent: Component {
+    public static var directiveName: String = "scaledToFit"
 }
 
 extension ScaledToFitComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitScaledToFit(self)
     }
 }
 
 extension ScaledToFitComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .scaledToFit()
     }

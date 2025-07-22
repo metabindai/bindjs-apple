@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct ScaledToFillComponent: Component {
-    static var directiveName: String = "scaledToFill"
+public struct ScaledToFillComponent: Component {
+    public static var directiveName: String = "scaledToFill"
 }
 
 extension ScaledToFillComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitScaledToFill(self)
     }
 }
 
 extension ScaledToFillComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .scaledToFill()
     }

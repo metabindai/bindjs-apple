@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct AccessibilityRepresentationComponent: Component {
-    static var directiveName: String = "accessibilityRepresentation"
+public struct AccessibilityRepresentationComponent: Component {
+    public static var directiveName: String = "accessibilityRepresentation"
     
-    let representation: Component
+    public let representation: Component
 }
 
 extension AccessibilityRepresentationComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         representation = directive.rawValue().flatMap { makeComponent($0) } ?? EmptyComponent()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitAccessibilityRepresentation(self)
+    }
 }
 
 extension AccessibilityRepresentationComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .accessibilityRepresentation {
                 ComponentView(representation)

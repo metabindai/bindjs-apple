@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct MonospacedComponent: Component {
-    static var directiveName: String = "monospaced"
+public struct MonospacedComponent: Component {
+    public static var directiveName: String = "monospaced"
     
-    let isActive: Bool
+    public let isActive: Bool
 }
 
 extension MonospacedComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         isActive = directive.rawValue() ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitMonospaced(self)
+    }
 }
 
 extension MonospacedComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .monospaced(isActive)
     }

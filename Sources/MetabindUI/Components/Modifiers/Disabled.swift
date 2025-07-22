@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct DisabledComponent: Component {
-    static var directiveName: String = "disabled"
+public struct DisabledComponent: Component {
+    public static var directiveName: String = "disabled"
     
-    let isActive: Bool
+    public let isActive: Bool
 }
 
 extension DisabledComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         isActive = directive.rawValue() ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitDisabled(self)
+    }
 }
 
 extension DisabledComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .disabled(isActive)
     }

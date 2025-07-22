@@ -1,11 +1,11 @@
 import SwiftUI
 
-struct CallComponent: Component {
-    static var directiveName: String = "ComponentCall"
+public struct CallComponent: Component {
+    public static var directiveName: String = "ComponentCall"
     @Environment(\.componentRegistry) private var componentRegistry
     
-    let directive: Directive
-    let children: [Component]
+    public let directive: Directive
+    public let children: [Component]
     
     var name: String {
         directive["name"] ?? ""
@@ -15,16 +15,20 @@ struct CallComponent: Component {
         directive.props["props"] as? [String: Any] ?? [:]
     }
     
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         self.directive = directive
         self.children = directive.children.compactMap(makeComponent(_:))
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitCall(self)
     }
 }
 
 extension CallComponent: View {
     
-    var body: some View {
+    public var body: some View {
         if let resolved = componentRegistry.makeComponent(name, props: props, children: children) {
             resolved
         } else {

@@ -17,23 +17,23 @@ func makeShape(_ component: Component) -> Shape? {
     }
 }
 
-enum ShapeStyle {
+public enum ShapeStyle {
     case fill(Component)
     case stroke(Component, lineWidth: CGFloat)
 }
 
-protocol ShapeComponent: Component {
+public protocol ShapeComponent: Component {
     var style: ShapeStyle? { get set }
 }
 
-struct CircleComponent: ShapeComponent {
-    static var directiveName: String = "Circle"
+public struct CircleComponent: ShapeComponent {
+    public static var directiveName: String = "Circle"
     
-    var style: ShapeStyle?
+    public var style: ShapeStyle?
 }
 
 extension CircleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let fill = directive["fill"].flatMap(makeComponent) {
@@ -43,10 +43,14 @@ extension CircleComponent {
             style = .stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitCircle(self)
+    }
 }
 
 extension CircleComponent: View {
-    var body: some View {
+    public var body: some View {
         switch style {
         case .none: Circle()
         case .fill(let fill):
@@ -56,19 +60,19 @@ extension CircleComponent: View {
         }
     }
     
-    var swiftUI: Circle {
+    public var swiftUI: Circle {
         Circle()
     }
 }
 
-struct EllipseComponent: ShapeComponent {
-    static var directiveName: String = "Ellipse"
+public struct EllipseComponent: ShapeComponent {
+    public static var directiveName: String = "Ellipse"
     
-    var style: ShapeStyle?
+    public var style: ShapeStyle?
 }
 
 extension EllipseComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let fill = directive["fill"].flatMap(makeComponent) {
@@ -78,10 +82,14 @@ extension EllipseComponent {
             style = .stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitEllipse(self)
+    }
 }
 
 extension EllipseComponent: View {
-    var body: some View {
+    public var body: some View {
         switch style {
         case .none: Ellipse()
         case .fill(let fill):
@@ -91,19 +99,19 @@ extension EllipseComponent: View {
         }
     }
     
-    var swiftUI: Ellipse {
+    public var swiftUI: Ellipse {
         Ellipse()
     }
 }
 
-struct RectangleComponent: ShapeComponent {
-    static var directiveName: String = "Rectangle"
+public struct RectangleComponent: ShapeComponent {
+    public static var directiveName: String = "Rectangle"
     
-    var style: ShapeStyle?
+    public var style: ShapeStyle?
 }
 
 extension RectangleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let fill = directive["fill"].flatMap(makeComponent) {
@@ -113,10 +121,14 @@ extension RectangleComponent {
             style = .stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitRectangle(self)
+    }
 }
 
 extension RectangleComponent: View {
-    var body: some View {
+    public var body: some View {
         switch style {
         case .none: Rectangle()
         case .fill(let fill):
@@ -126,20 +138,20 @@ extension RectangleComponent: View {
         }
     }
     
-    var swiftUI: Rectangle {
+    public var swiftUI: Rectangle {
         Rectangle()
     }
 }
 
-struct RoundedRectangleComponent: ShapeComponent {
-    static var directiveName: String = "RoundedRectangle"
+public struct RoundedRectangleComponent: ShapeComponent {
+    public static var directiveName: String = "RoundedRectangle"
     
-    let cornerRadius: CGFloat
-    var style: ShapeStyle?
+    public let cornerRadius: CGFloat
+    public var style: ShapeStyle?
 }
 
 extension RoundedRectangleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         cornerRadius = directive["cornerRadius"] ?? 10
@@ -151,10 +163,14 @@ extension RoundedRectangleComponent {
             style = .stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitRoundedRectangle(self)
+    }
 }
 
 extension RoundedRectangleComponent: View {
-    var body: some View {
+    public var body: some View {
         switch style {
         case .none: RoundedRectangle(cornerRadius: cornerRadius)
         case .fill(let fill):
@@ -164,19 +180,19 @@ extension RoundedRectangleComponent: View {
         }
     }
     
-    var swiftUI: RoundedRectangle {
+    public var swiftUI: RoundedRectangle {
         RoundedRectangle(cornerRadius: cornerRadius)
     }
 }
 
-struct CapsuleComponent: ShapeComponent {
-    static var directiveName: String = "Capsule"
+public struct CapsuleComponent: ShapeComponent {
+    public static var directiveName: String = "Capsule"
     
-    var style: ShapeStyle?
+    public var style: ShapeStyle?
 }
 
 extension CapsuleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let fill = directive["fill"].flatMap(makeComponent) {
@@ -186,10 +202,14 @@ extension CapsuleComponent {
             style = .stroke(stroke, lineWidth: lineWidth)
         }
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitCapsule(self)
+    }
 }
 
 extension CapsuleComponent: View {
-    var body: some View {
+    public var body: some View {
         switch style {
         case .none: Capsule()
         case .fill(let fill):
@@ -199,7 +219,7 @@ extension CapsuleComponent: View {
         }
     }
     
-    var swiftUI: Capsule {
+    public var swiftUI: Capsule {
         Capsule()
     }
     

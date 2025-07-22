@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct CornerRadiusComponent: Component {
-    static var directiveName: String = "cornerRadius"
+public struct CornerRadiusComponent: Component {
+    public static var directiveName: String = "cornerRadius"
     
-    let radius: CGFloat
+    public let radius: CGFloat
 }
 
 extension CornerRadiusComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         radius = directive.rawValue() ?? 0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitCornerRadius(self)
+    }
 }
 
 extension CornerRadiusComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .cornerRadius(radius)
     }

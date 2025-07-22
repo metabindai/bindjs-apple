@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct ForegroundStyleComponent: Component {
-    static var directiveName: String = "foregroundStyle"
+public struct ForegroundStyleComponent: Component {
+    public static var directiveName: String = "foregroundStyle"
     
-    let style: Component
+    public let style: Component
 }
 
 extension ForegroundStyleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         style = directive.rawValue().flatMap { makeComponent($0) } ?? EmptyComponent()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitForegroundStyle(self)
+    }
 }
 
 extension ForegroundStyleComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         switch style {
         case let color as ColorComponent:
             content.foregroundStyle(color.swiftUI)

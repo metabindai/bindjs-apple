@@ -155,7 +155,7 @@ struct ComponentViewModifier: ViewModifier {
         self.component = component
     }
 
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         switch component {
         case let m as AccessibilityHiddenComponent: content.modifier(m)
         case let m as AccessibilityHintComponent: content.modifier(m)

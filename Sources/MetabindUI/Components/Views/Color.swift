@@ -1,19 +1,19 @@
 import SwiftUI
 
-struct ColorComponent: Component {
-    static var directiveName: String = "Color"
+public struct ColorComponent: Component {
+    public static var directiveName: String = "Color"
     
-    enum Storage {
+    public enum Storage {
         case name(String)
         case rgba(Double, Double, Double, Double)
     }
     
-    let storage: Storage
-    let opacity: Double
+    public let storage: Storage
+    public let opacity: Double
 }
 
 extension ColorComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let name: String = directive.rawValue() {
@@ -26,6 +26,10 @@ extension ColorComponent {
             storage = .rgba(red, green, blue, alpha)
         }
         opacity = directive["opacity"] ?? 1
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitColor(self)
     }
 }
 
@@ -40,7 +44,7 @@ extension ColorComponent: View {
         }
     }
     
-    var body: some View {
+    public var body: some View {
         swiftUI
     }
 }

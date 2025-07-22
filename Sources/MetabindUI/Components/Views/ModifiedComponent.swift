@@ -1,23 +1,27 @@
 import SwiftUI
 
-struct ModifiedComponent: Component {
-    static var directiveName: String = "ModifiedComponent"
+public struct ModifiedComponent: Component {
+    public static var directiveName: String = "ModifiedComponent"
     
-    let content: [Component]
-    let modifier: Component
+    public let content: [Component]
+    public let modifier: Component
 }
 
 extension ModifiedComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         content = directive["content"].compactMap { makeComponent($0) }
         modifier = directive["modifier"].flatMap { makeComponent($0) } ?? EmptyComponent()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitModified(self)
+    }
 }
 
 extension ModifiedComponent: View {
-    var body: some View {
+    public var body: some View {
         ForEach(content.indices, id: \.self) { index in
             ComponentView(content[index])
         }
@@ -38,20 +42,24 @@ extension Directive {
     }
 }
 
-struct EmptyComponent: Component {
-    static var directiveName: String = "EmptyComponent"
+public struct EmptyComponent: Component {
+    public static var directiveName: String = "EmptyComponent"
     
-    init() {}
+    public init() {}
 }
 
 extension EmptyComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitEmpty(self)
     }
 }
 
 extension EmptyComponent: View {
-    var body: some View {
+    public var body: some View {
         EmptyView()
     }
 }

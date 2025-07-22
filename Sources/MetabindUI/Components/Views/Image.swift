@@ -15,17 +15,17 @@ import CoreImage
 import CoreImage.CIFilterBuiltins
 import OSLog
 
-struct ImageComponent: Component {
-    static var directiveName: String = "Image"
+public struct ImageComponent: Component {
+    public static var directiveName: String = "Image"
     
-    let name: String?
-    let url: URL?
-    let systemName: String?
-    let resizable: Bool
+    public let name: String?
+    public let url: URL?
+    public let systemName: String?
+    public let resizable: Bool
 }
 
 extension ImageComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         name = directive["name"]
@@ -33,10 +33,14 @@ extension ImageComponent {
         systemName = directive["systemName"]
         resizable = directive["resizable"] ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitImage(self)
+    }
 }
 
 extension ImageComponent: View {
-    var body: some View {
+    public var body: some View {
         if let name = name {
             if resizable {
                 Image(name)

@@ -1,22 +1,26 @@
 import SwiftUI
 
-struct PaddingComponent: Component {
-    static var directiveName: String = "padding"
+public struct PaddingComponent: Component {
+    public static var directiveName: String = "padding"
     
-    let top: CGFloat?
-    let leading: CGFloat?
-    let bottom: CGFloat?
-    let trailing: CGFloat?
+    public let top: CGFloat?
+    public let leading: CGFloat?
+    public let bottom: CGFloat?
+    public let trailing: CGFloat?
 }
 
 extension PaddingComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         top = directive["top"]
         leading = directive["leading"]
         bottom = directive["bottom"]
         trailing = directive["trailing"]
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitPadding(self)
     }
 }
 
@@ -48,7 +52,7 @@ extension PaddingComponent: ViewModifier {
         return .init(top: top ?? 0, leading: leading ?? 0, bottom: bottom ?? 0, trailing: trailing ?? 0)
     }
     
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content.modifier(_PaddingLayout(edges: edgeSet, insets: edgeInsets))
     }
 }

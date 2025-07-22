@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct AllowsHitTestingComponent: Component {
-    static var directiveName: String = "allowsHitTestingComponent"
+public struct AllowsHitTestingComponent: Component {
+    public static var directiveName: String = "allowsHitTestingComponent"
     
-    let isActive: Bool
+    public let isActive: Bool
 }
 
 extension AllowsHitTestingComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         isActive = directive.rawValue() ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitAllowsHitTesting(self)
+    }
 }
 
 extension AllowsHitTestingComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .allowsHitTesting(isActive)
     }

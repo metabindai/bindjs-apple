@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct LineSpacingComponent: Component {
-    static var directiveName: String = "lineSpacing"
+public struct LineSpacingComponent: Component {
+    public static var directiveName: String = "lineSpacing"
     
-    let lineSpacing: CGFloat
+    public let lineSpacing: CGFloat
 }
 
 extension LineSpacingComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         lineSpacing = directive.rawValue() ?? 0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitLineSpacing(self)
+    }
 }
 
 extension LineSpacingComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .lineSpacing(lineSpacing)
     }

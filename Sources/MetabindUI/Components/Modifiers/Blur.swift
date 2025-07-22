@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct BlurComponent: Component {
-    static var directiveName: String = "blur"
+public struct BlurComponent: Component {
+    public static var directiveName: String = "blur"
     
-    let radius: CGFloat
+    public let radius: CGFloat
 }
 
 extension BlurComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         radius = directive.rawValue() ?? 0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitBlur(self)
+    }
 }
 
 extension BlurComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .blur(radius: radius)
     }

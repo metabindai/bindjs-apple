@@ -1,15 +1,15 @@
 import SwiftUI
 
-struct LinearGradientComponent: Component {
-    static var directiveName: String = "LinearGradient"
+public struct LinearGradientComponent: Component {
+    public static var directiveName: String = "LinearGradient"
     
-    let colors: [Color]
-    let startPoint: UnitPoint
-    let endPoint: UnitPoint
+    public let colors: [Color]
+    public let startPoint: UnitPoint
+    public let endPoint: UnitPoint
 }
 
 extension LinearGradientComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         let colors = directive["colors"].compactMap(makeComponent).compactMap { $0 as? ColorComponent }.map(\.swiftUI)
@@ -21,10 +21,14 @@ extension LinearGradientComponent {
         startPoint = directive["startPoint"] ?? .top
         endPoint = directive["endPoint"] ?? .bottom
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitLinearGradient(self)
+    }
 }
 
 extension LinearGradientComponent: View {
-    var swiftUI: LinearGradient {
+    public var swiftUI: LinearGradient {
         LinearGradient(
             colors: colors,
             startPoint: startPoint,
@@ -32,22 +36,22 @@ extension LinearGradientComponent: View {
         )
     }
     
-    var body: some View {
+    public var body: some View {
         swiftUI
     }
 }
 
-struct AngularGradientComponent: Component {
-    static var directiveName: String = "AngularGradient"
+public struct AngularGradientComponent: Component {
+    public static var directiveName: String = "AngularGradient"
     
-    let colors: [Color]
-    let center: UnitPoint
-    let startAngle: Angle
-    let endAngle: Angle
+    public let colors: [Color]
+    public let center: UnitPoint
+    public let startAngle: Angle
+    public let endAngle: Angle
 }
 
 extension AngularGradientComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         let colors = directive["colors"].compactMap(makeComponent).compactMap { $0 as? ColorComponent }.map(\.swiftUI)
@@ -60,10 +64,14 @@ extension AngularGradientComponent {
         startAngle = Angle(degrees: directive["startAngle"] ?? 0)
         endAngle = Angle(degrees: directive["endAngle"] ?? 360)
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitAngularGradient(self)
+    }
 }
 
 extension AngularGradientComponent: View {
-    var swiftUI: AngularGradient {
+    public var swiftUI: AngularGradient {
         AngularGradient(
             colors: colors,
             center: center,
@@ -72,22 +80,22 @@ extension AngularGradientComponent: View {
         )
     }
     
-    var body: some View {
+    public var body: some View {
         swiftUI
     }
 }
 
-struct RadialGradientComponent: Component {
-    static var directiveName: String = "RadialGradient"
+public struct RadialGradientComponent: Component {
+    public static var directiveName: String = "RadialGradient"
     
-    let colors: [Color]
-    let center: UnitPoint
-    let startRadius: CGFloat
-    let endRadius: CGFloat
+    public let colors: [Color]
+    public let center: UnitPoint
+    public let startRadius: CGFloat
+    public let endRadius: CGFloat
 }
 
 extension RadialGradientComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         let colors = directive["colors"].compactMap(makeComponent).compactMap { $0 as? ColorComponent }.map(\.swiftUI)
@@ -100,10 +108,14 @@ extension RadialGradientComponent {
         startRadius = directive["startRadius"] ?? 0.0
         endRadius = directive["endRadius"] ?? 128.0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitRadialGradient(self)
+    }
 }
 
 extension RadialGradientComponent: View {
-    var swiftUI: RadialGradient {
+    public var swiftUI: RadialGradient {
         RadialGradient(
             colors: colors,
             center: center,
@@ -112,22 +124,22 @@ extension RadialGradientComponent: View {
         )
     }
     
-    var body: some View {
+    public var body: some View {
         swiftUI
     }
 }
 
-struct EllipticalGradientComponent: Component {
-    static var directiveName: String = "EllipticalGradient"
+public struct EllipticalGradientComponent: Component {
+    public static var directiveName: String = "EllipticalGradient"
     
-    let colors: [Color]
-    let center: UnitPoint
-    let startRadiusFraction: CGFloat
-    let endRadiusFraction: CGFloat
+    public let colors: [Color]
+    public let center: UnitPoint
+    public let startRadiusFraction: CGFloat
+    public let endRadiusFraction: CGFloat
 }
 
 extension EllipticalGradientComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         let colors = directive["colors"].compactMap(makeComponent).compactMap { $0 as? ColorComponent }.map(\.swiftUI)
@@ -140,10 +152,14 @@ extension EllipticalGradientComponent {
         startRadiusFraction = directive["startRadiusFraction"] ?? 0.0
         endRadiusFraction = directive["endRadiusFraction"] ?? 0.5
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitEllipticalGradient(self)
+    }
 }
 
 extension EllipticalGradientComponent: View {
-    var swiftUI: EllipticalGradient {
+    public var swiftUI: EllipticalGradient {
         EllipticalGradient(
             colors: colors,
             center: center,
@@ -152,7 +168,7 @@ extension EllipticalGradientComponent: View {
         )
     }
     
-    var body: some View {
+    public var body: some View {
         swiftUI
     }
 }

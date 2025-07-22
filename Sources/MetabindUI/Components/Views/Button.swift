@@ -1,25 +1,29 @@
 import SwiftUI
 
-struct ButtonComponent: Component {
-    static var directiveName: String = "Button"
+public struct ButtonComponent: Component {
+    public static var directiveName: String = "Button"
     
     @EnvironmentObject private var context: ComponentContext
     
-    let label: Component
-    let handlerId: String
+    public let label: Component
+    public let handlerId: String
 }
 
 extension ButtonComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         label = directive["label"].flatMap(makeComponent) ?? TextComponent("Button")
         handlerId = directive["handlerId"] ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitButton(self)
+    }
 }
 
 extension ButtonComponent: View {
-    var body: some View {
+    public var body: some View {
         Button(action: {
             _ = context.callEventHandler(id: handlerId, arguments: [])
         }) {

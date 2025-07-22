@@ -2,17 +2,17 @@ import SwiftUI
 import AVKit
 import AVFoundation
 
-struct VideoComponent: Component, View {
-    static let directiveName = "Video"
+public struct VideoComponent: Component, View {
+    public static let directiveName = "Video"
 
-    private let url: URL
-    private let autoplay: Bool
-    private let muted: Bool
-    private let controls: Bool
-    private let loop: Bool
-    private let contentMode: ContentMode
+    public let url: URL
+    public let autoplay: Bool
+    public let muted: Bool
+    public let controls: Bool
+    public let loop: Bool
+    public let contentMode: ContentMode
 
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
 
         if let directURL: URL = directive["url"] {
@@ -31,8 +31,12 @@ struct VideoComponent: Component, View {
         loop     = directive["loop"]     ?? false
         contentMode = directive["contentMode"] ?? .fit
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitVideo(self)
+    }
 
-    var body: some View {
+    public var body: some View {
         VideoPlayerContainer(
             url: url,
             autoplay: autoplay,

@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct GrayscaleComponent: Component {
-    static var directiveName: String = "grayscale"
+public struct GrayscaleComponent: Component {
+    public static var directiveName: String = "grayscale"
     
-    let grayscale: Double
+    public let grayscale: Double
 }
 
 extension GrayscaleComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         grayscale = directive.rawValue() ?? 1
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitGrayscale(self)
+    }
 }
 
 extension GrayscaleComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .grayscale(grayscale)
     }

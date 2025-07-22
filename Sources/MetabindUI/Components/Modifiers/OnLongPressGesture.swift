@@ -1,25 +1,29 @@
 import SwiftUI
 
-struct OnLongPressGestureComponent: Component {
-    static var directiveName: String = "onLongPressGesture"
+public struct OnLongPressGestureComponent: Component {
+    public static var directiveName: String = "onLongPressGesture"
     
-    let minimumDuration: Double
-    let maximumDistance: Double
-    let handlerId: String
+    public let minimumDuration: Double
+    public let maximumDistance: Double
+    public let handlerId: String
 }
 
 extension OnLongPressGestureComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         minimumDuration = directive["minimumDuration"] ?? 0.5
         maximumDistance = directive["maximumDistance"] ?? 10.0
         handlerId = directive["handlerId"] ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitOnLongPressGesture(self)
+    }
 }
 
 extension OnLongPressGestureComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         OnLongPressGestureWrapper(configuration: self, content: content)
     }
 }

@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct BackgroundComponent: Component {
-    static var directiveName: String = "background"
+public struct BackgroundComponent: Component {
+    public static var directiveName: String = "background"
     
-    let style: Component
+    public let style: Component
 }
 
 extension BackgroundComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         style = directive.rawValue().flatMap { makeComponent($0) } ?? EmptyComponent()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitBackground(self)
+    }
 }
 
 extension BackgroundComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         switch style {
         case let color as ColorComponent:
             content.background(color.swiftUI)

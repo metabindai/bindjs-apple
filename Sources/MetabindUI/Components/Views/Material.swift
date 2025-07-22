@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct MaterialComponent: Component {
-    static var directiveName: String = "Material"
+public struct MaterialComponent: Component {
+    public static var directiveName: String = "Material"
     
-    let material: Material
+    public let material: Material
 }
 
 extension MaterialComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         guard let material: Material = directive.rawValue() else { return nil }
         
         self.material = material
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitMaterial(self)
     }
 }
 
@@ -20,7 +24,7 @@ extension MaterialComponent: View {
         material
     }
     
-    var body: some View {
+    public var body: some View {
         Rectangle().fill(swiftUI)
     }
 }

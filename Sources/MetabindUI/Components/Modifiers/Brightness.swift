@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct BrightnessComponent: Component {
-    static var directiveName: String = "brightness"
+public struct BrightnessComponent: Component {
+    public static var directiveName: String = "brightness"
     
-    let brightness: Double
+    public let brightness: Double
 }
 
 extension BrightnessComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         brightness = directive.rawValue() ?? 0
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitBrightness(self)
+    }
 }
 
 extension BrightnessComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .brightness(brightness)
     }

@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct TextCaseComponent: Component {
-    static var directiveName: String = "textCase"
+public struct TextCaseComponent: Component {
+    public static var directiveName: String = "textCase"
     
-    let textCase: Text.Case?
+    public let textCase: Text.Case?
 }
 
 extension TextCaseComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         textCase = directive.rawValue()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitTextCase(self)
+    }
 }
 
 extension TextCaseComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if let textCase {
             content
                 .textCase(textCase)

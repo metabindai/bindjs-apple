@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct SpacerComponent: Component {
-    static var directiveName: String = "Spacer"
+public struct SpacerComponent: Component {
+    public static var directiveName: String = "Spacer"
     
-    let minLength: CGFloat?
+    public let minLength: CGFloat?
 }
 
 extension SpacerComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         minLength = directive["minLength"]
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitSpacer(self)
+    }
 }
 
 extension SpacerComponent: View {
-    var body: some View {
+    public var body: some View {
         Spacer(minLength: minLength)
     }
 }

@@ -1,23 +1,27 @@
 import SwiftUI
 
-struct ProgressViewComponent: Component {
-    static var directiveName: String = "ProgressView"
+public struct ProgressViewComponent: Component {
+    public static var directiveName: String = "ProgressView"
     
-    let value: Double?
-    let total: Double?
+    public let value: Double?
+    public let total: Double?
 }
 
 extension ProgressViewComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         value = directive["value"]
         total = directive["total"]
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitProgressView(self)
+    }
 }
 
 extension ProgressViewComponent: View {
-    var body: some View {
+    public var body: some View {
         if let value {
             if let total {
                 ProgressView(value: value, total: total)

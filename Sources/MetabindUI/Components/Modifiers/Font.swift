@@ -1,19 +1,19 @@
 import SwiftUI
 
-struct FontComponent: Component {
-    static var directiveName: String = "font"
+public struct FontComponent: Component {
+    public static var directiveName: String = "font"
     
-    enum Storage {
+    public enum Storage {
         case textStyle(Font.TextStyle)
         case size(CGFloat)
         case custom(FontCustomComponent)
     }
     
-    let storage: Storage
+    public let storage: Storage
 }
 
 extension FontComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         if let size: CGFloat = directive.rawValue() {
@@ -26,6 +26,10 @@ extension FontComponent {
         } else {
             return nil
         }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitFont(self)
     }
 }
 
@@ -49,7 +53,7 @@ extension Font.TextStyle {
 }
 
 extension FontComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         switch storage {
         case .textStyle(let textStyle):
             content

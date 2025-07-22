@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct FontWeightComponent: Component {
-    static var directiveName: String = "fontWeight"
+public struct FontWeightComponent: Component {
+    public static var directiveName: String = "fontWeight"
     
-    let fontWeight: Font.Weight
+    public let fontWeight: Font.Weight
 }
 
 extension FontWeightComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         fontWeight = directive.rawValue() ?? .regular
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitFontWeight(self)
+    }
 }
 
 extension FontWeightComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .fontWeight(fontWeight)
     }

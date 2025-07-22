@@ -1,23 +1,27 @@
 import SwiftUI
 
-struct IgnoresSafeAreaComponent: Component {
-    static var directiveName: String = "ignoresSafeArea"
+public struct IgnoresSafeAreaComponent: Component {
+    public static var directiveName: String = "ignoresSafeArea"
     
-    let regions: SafeAreaRegions?
-    let edges: Edge.Set?
+    public let regions: SafeAreaRegions?
+    public let edges: Edge.Set?
 }
 
 extension IgnoresSafeAreaComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         regions = directive["regions"]
         edges = directive["edges"]
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitIgnoresSafeArea(self)
+    }
 }
 
 extension IgnoresSafeAreaComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         if let regions = regions, let edges = edges {
             content.ignoresSafeArea(regions, edges: edges)
         } else if let regions = regions {

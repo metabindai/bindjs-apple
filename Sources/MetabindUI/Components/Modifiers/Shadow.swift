@@ -1,16 +1,16 @@
 import SwiftUI
 
-struct ShadowComponent: Component {
-    static var directiveName: String = "shadow"
+public struct ShadowComponent: Component {
+    public static var directiveName: String = "shadow"
     
-    let color: Color
-    let radius: CGFloat
-    let x: CGFloat
-    let y: CGFloat
+    public let color: Color
+    public let radius: CGFloat
+    public let x: CGFloat
+    public let y: CGFloat
 }
 
 extension ShadowComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         color = (directive["color"].flatMap(makeComponent(_:)) as? ColorComponent)?.swiftUI ?? .black.opacity(0.3)
@@ -18,10 +18,14 @@ extension ShadowComponent {
         x = directive["x"] ?? 0
         y = directive["y"] ?? 10
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitShadow(self)
+    }
 }
 
 extension ShadowComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .shadow(color: color, radius: radius, x: x, y: y)
     }

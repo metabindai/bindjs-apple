@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct BlendModeComponent: Component {
-    static var directiveName: String = "blendMode"
+public struct BlendModeComponent: Component {
+    public static var directiveName: String = "blendMode"
     
-    let blendMode: BlendMode
+    public let blendMode: BlendMode
 }
 
 extension BlendModeComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         blendMode = directive.rawValue() ?? .normal
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitBlendMode(self)
+    }
 }
 
 extension BlendModeComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .blendMode(blendMode)
     }

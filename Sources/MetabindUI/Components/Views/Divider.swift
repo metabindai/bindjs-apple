@@ -1,17 +1,21 @@
 import SwiftUI
 
-struct DividerComponent: Component {
-    static var directiveName: String = "Divider"
+public struct DividerComponent: Component {
+    public static var directiveName: String = "Divider"
 }
 
 extension DividerComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitDivider(self)
     }
 }
 
 extension DividerComponent: View {
-    var body: some View {
+    public var body: some View {
         Divider()
     }
 }

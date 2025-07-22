@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct ContrastComponent: Component {
-    static var directiveName: String = "contrast"
+public struct ContrastComponent: Component {
+    public static var directiveName: String = "contrast"
     
-    let contrast: Double
+    public let contrast: Double
 }
 
 extension ContrastComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         contrast = directive.rawValue() ?? 1
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitContrast(self)
+    }
 }
 
 extension ContrastComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .contrast(contrast)
     }

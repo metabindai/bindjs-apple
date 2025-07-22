@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct TextComponent: Component {
-    static var directiveName: String = "Text"
+public struct TextComponent: Component {
+    public static var directiveName: String = "Text"
     
-    let text: String
+    public let text: String
     
     init(_ string: String) {
         self.text = string
@@ -11,15 +11,19 @@ struct TextComponent: Component {
 }
 
 extension TextComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         text = directive.rawValue() ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitText(self)
+    }
 }
 
 extension TextComponent: View {
-    var body: some View {
+    public var body: some View {
         Text(text)
     }
 }

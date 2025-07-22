@@ -336,7 +336,7 @@ extension SafeAreaRegions: ParsableArgument {
     }
 }
 
-enum TextSelectabilityArgument: ParsableArgument {
+public enum TextSelectabilityArgument: ParsableArgument {
     case enabled
     case disabled
     

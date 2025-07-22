@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct FontWidthComponent: Component {
-    static var directiveName: String = "fontWidth"
+public struct FontWidthComponent: Component {
+    public static var directiveName: String = "fontWidth"
     
-    let fontWidth: Font.Width
+    public let fontWidth: Font.Width
 }
 
 extension FontWidthComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         fontWidth = directive.rawValue() ?? .standard
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitFontWidth(self)
+    }
 }
 
 extension FontWidthComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .fontWidth(fontWidth)
     }

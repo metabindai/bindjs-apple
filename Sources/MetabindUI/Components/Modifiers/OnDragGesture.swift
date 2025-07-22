@@ -2,23 +2,27 @@ import SwiftUI
 
 // MARK: – Component
 
-struct OnDragGestureComponent: Component {
-    static var directiveName: String = "onDragGesture"
+public struct OnDragGestureComponent: Component {
+    public static var directiveName: String = "onDragGesture"
     
-    let minimumDistance: Double
-    let handlerId: String
+    public let minimumDistance: Double
+    public let handlerId: String
 }
 
 extension OnDragGestureComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         minimumDistance = directive["minimumDistance"] ?? 0.0
         handlerId = directive["handlerId"] ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitOnDragGesture(self)
+    }
 }
 
 extension OnDragGestureComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         OnDragGestureWrapper(configuration: self, content: content)
     }
 }

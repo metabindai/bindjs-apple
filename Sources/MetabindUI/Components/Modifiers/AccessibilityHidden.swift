@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct AccessibilityHiddenComponent: Component {
-    static var directiveName: String = "accessibilityHidden"
+public struct AccessibilityHiddenComponent: Component {
+    public static var directiveName: String = "accessibilityHidden"
     
-    let isActive: Bool
+    public let isActive: Bool
 }
 
 extension AccessibilityHiddenComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         isActive = directive.rawValue() ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitAccessibilityHidden(self)
+    }
 }
 
 extension AccessibilityHiddenComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .accessibilityHidden(isActive)
     }

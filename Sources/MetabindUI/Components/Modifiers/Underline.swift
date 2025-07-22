@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct UnderlineComponent: Component {
-    static var directiveName: String = "underline"
+public struct UnderlineComponent: Component {
+    public static var directiveName: String = "underline"
     
-    var isActive: Bool
+    public var isActive: Bool
 }
 
 extension UnderlineComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         isActive = directive.rawValue() ?? true
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitUnderline(self)
+    }
 }
 
 extension UnderlineComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .underline(isActive)
     }

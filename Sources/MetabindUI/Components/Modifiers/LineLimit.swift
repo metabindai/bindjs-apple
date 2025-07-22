@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct LineLimitComponent: Component {
-    static var directiveName: String = "lineLimit"
+public struct LineLimitComponent: Component {
+    public static var directiveName: String = "lineLimit"
     
-    let lineLimit: Int?
+    public let lineLimit: Int?
 }
 
 extension LineLimitComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         lineLimit = directive.rawValue()
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitLineLimit(self)
+    }
 }
 
 extension LineLimitComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .lineLimit(lineLimit)
     }

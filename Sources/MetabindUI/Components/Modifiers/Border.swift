@@ -1,23 +1,27 @@
 import SwiftUI
 
-struct BorderComponent: Component {
-    static var directiveName: String = "border"
+public struct BorderComponent: Component {
+    public static var directiveName: String = "border"
     
-    let style: Component
-    let width: CGFloat
+    public let style: Component
+    public let width: CGFloat
 }
 
 extension BorderComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         style = directive["style"].flatMap { makeComponent($0) } ?? EmptyComponent()
         width = directive["width"] ?? 1
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitBorder(self)
+    }
 }
 
 extension BorderComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         switch style {
         case let color as ColorComponent:
             content.border(color.swiftUI, width: width)

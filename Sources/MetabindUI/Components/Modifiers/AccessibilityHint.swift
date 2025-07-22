@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct AccessibilityHintComponent: Component {
-    static var directiveName: String = "accessibilityHint"
+public struct AccessibilityHintComponent: Component {
+    public static var directiveName: String = "accessibilityHint"
     
-    let hint: String
+    public let hint: String
 }
 
 extension AccessibilityHintComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         hint = directive.rawValue() ?? ""
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitAccessibilityHint(self)
+    }
 }
 
 extension AccessibilityHintComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .accessibilityHint(hint)
     }

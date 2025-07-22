@@ -1,21 +1,25 @@
 import SwiftUI
 
-struct SaturationComponent: Component {
-    static var directiveName: String = "saturation"
+public struct SaturationComponent: Component {
+    public static var directiveName: String = "saturation"
     
-    let saturation: Double
+    public let saturation: Double
 }
 
 extension SaturationComponent {
-    init?(from directive: Directive) {
+    public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
         saturation = directive.rawValue() ?? 1
     }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitSaturation(self)
+    }
 }
 
 extension SaturationComponent: ViewModifier {
-    func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         content
             .saturation(saturation)
     }
