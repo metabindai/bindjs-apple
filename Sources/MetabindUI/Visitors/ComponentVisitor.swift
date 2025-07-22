@@ -103,7 +103,7 @@ public protocol ComponentVisitor {
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
 
-extension ComponentVisitor {
+public extension ComponentVisitor {
     // Default visit is left out of the extension so that the compiler forces implementation of it in concrete conformances
     
     mutating func visit(_ component: any Component) -> Result {
