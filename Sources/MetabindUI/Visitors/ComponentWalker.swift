@@ -1,9 +1,9 @@
-protocol ComponentWalker: ComponentVisitor where Result == Void {
+public protocol ComponentWalker: ComponentVisitor where Result == Void {
     
 }
 
-extension ComponentWalker {
-    public mutating func descendInto(_ component: Component) {
+public extension ComponentWalker {
+    mutating func descendInto(_ component: Component) {
         let mirror = Mirror(reflecting: component)
         for child in mirror.children {
             if let component = child.value as? Component {
