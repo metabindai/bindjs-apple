@@ -159,23 +159,28 @@ public class ComponentContext: ObservableObject {
     @ViewBuilder
     public func view(for name: String, arguments: [String: Any] = [:]) -> (some View)? {
         let _ = willRender()
-        if
-            let json = runtime
-                .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
-                .toString(),
-            let data = json.data(using: .utf8),
-            case let decoder = {
-                let decoder = JSONDecoder()
-                decoder.allowsJSON5 = true
-                return decoder
-            }(),
-            let directive = try? decoder.decode(Directive.self, from: data),
-            let component = makeComponent(directive)
-        {
+        if let component = componentWithName(name, arguments: arguments) {
             ComponentView(component)
                 .environmentObject(self)
                 .id(name)
         }
+    }
+    
+    public func componentWithName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
+        if let json = runtime
+            .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
+            .toString(),
+           let data = json.data(using: .utf8),
+           case let decoder = {
+               let decoder = JSONDecoder()
+               decoder.allowsJSON5 = true
+               return decoder
+           }(),
+           let directive = try? decoder.decode(Directive.self, from: data),
+           let component = makeComponent(directive) {
+            return component
+        }
+        return nil
     }
 
     public func debug() {
