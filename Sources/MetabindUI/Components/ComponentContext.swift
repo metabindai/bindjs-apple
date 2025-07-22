@@ -65,7 +65,6 @@ public class ComponentContext: ObservableObject {
             let callbackId = callback.toString() ?? ""
 
             // 1. JSON-stringify the JSValue options dictionary:
-            let ctx = JSContext.current() ?? self.context
             guard let jsonString = jsonStringify(options),
                   let data = jsonString.data(using: .utf8) else {
                 // Fallback: No or invalid options; just animate with default

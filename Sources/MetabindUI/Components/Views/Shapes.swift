@@ -1,6 +1,6 @@
 import SwiftUI
 
-func makeShape(_ component: Component) -> Shape? {
+func makeShape(_ component: Component) -> (any Shape)? {
     switch component {
     case let circle as CircleComponent:
         return circle.swiftUI

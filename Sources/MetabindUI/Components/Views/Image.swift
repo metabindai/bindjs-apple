@@ -186,7 +186,7 @@ private actor InFlightCoordinator {
     func task(for url: URL, fetch: @escaping () async throws -> PlatformImage) -> Task<PlatformImage, Error> {
         if let existing = tasks[url] { return existing }
         let newTask = Task<PlatformImage, Error> {
-            defer { Task { await remove(url) } }
+            defer { Task { remove(url) } }
             return try await fetch()
         }
         tasks[url] = newTask
