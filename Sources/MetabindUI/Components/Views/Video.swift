@@ -5,12 +5,12 @@ import AVFoundation
 public struct VideoComponent: Component, View {
     public static let directiveName = "Video"
 
-    public let url: URL
-    public let autoplay: Bool
-    public let muted: Bool
-    public let controls: Bool
-    public let loop: Bool
-    public let contentMode: ContentMode
+    public var url: URL
+    public var autoplay: Bool
+    public var muted: Bool
+    public var controls: Bool
+    public var loop: Bool
+    public var contentMode: ContentMode
 
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }

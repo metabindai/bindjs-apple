@@ -3,7 +3,7 @@ import SwiftUI
 public struct TextCaseComponent: Component {
     public static var directiveName: String = "textCase"
     
-    public let textCase: Text.Case?
+    public var textCase: Text.Case?
 }
 
 extension TextCaseComponent {

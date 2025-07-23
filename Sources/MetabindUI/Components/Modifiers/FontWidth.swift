@@ -3,7 +3,7 @@ import SwiftUI
 public struct FontWidthComponent: Component {
     public static var directiveName: String = "fontWidth"
     
-    public let fontWidth: Font.Width
+    public var fontWidth: Font.Width
 }
 
 extension FontWidthComponent {

@@ -3,7 +3,7 @@ import SwiftUI
 public struct CornerRadiusComponent: Component {
     public static var directiveName: String = "cornerRadius"
     
-    public let radius: CGFloat
+    public var radius: CGFloat
 }
 
 extension CornerRadiusComponent {

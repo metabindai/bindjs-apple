@@ -3,7 +3,7 @@ import SwiftUI
 public struct SpacerComponent: Component {
     public static var directiveName: String = "Spacer"
     
-    public let minLength: CGFloat?
+    public var minLength: CGFloat?
 }
 
 extension SpacerComponent {

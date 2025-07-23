@@ -3,7 +3,7 @@ import SwiftUI
 public struct LineLimitComponent: Component {
     public static var directiveName: String = "lineLimit"
     
-    public let lineLimit: Int?
+    public var lineLimit: Int?
 }
 
 extension LineLimitComponent {

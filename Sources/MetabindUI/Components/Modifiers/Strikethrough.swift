@@ -3,7 +3,7 @@ import SwiftUI
 public struct StrikethroughComponent: Component {
     public static var directiveName: String = "strikethrough"
     
-    public let isActive: Bool
+    public var isActive: Bool
 }
 
 extension StrikethroughComponent {

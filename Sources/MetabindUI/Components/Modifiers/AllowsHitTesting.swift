@@ -3,7 +3,7 @@ import SwiftUI
 public struct AllowsHitTestingComponent: Component {
     public static var directiveName: String = "allowsHitTestingComponent"
     
-    public let isActive: Bool
+    public var isActive: Bool
 }
 
 extension AllowsHitTestingComponent {

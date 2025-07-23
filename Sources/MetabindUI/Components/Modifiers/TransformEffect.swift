@@ -3,12 +3,12 @@ import SwiftUI
 public struct TransformEffectComponent: Component {
     public static var directiveName: String = "transformEffect"
     
-    public let a: CGFloat
-    public let b: CGFloat
-    public let c: CGFloat
-    public let d: CGFloat
-    public let tx: CGFloat
-    public let ty: CGFloat
+    public var a: CGFloat
+    public var b: CGFloat
+    public var c: CGFloat
+    public var d: CGFloat
+    public var tx: CGFloat
+    public var ty: CGFloat
 }
 
 extension TransformEffectComponent {

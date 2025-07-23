@@ -3,8 +3,8 @@ import SwiftUI
 public struct ZStackComponent: Component {
     public static var directiveName: String = "ZStack"
     
-    public let alignment: Alignment
-    public let children: [Component]
+    public var alignment: Alignment
+    public var children: [Component]
 }
 
 extension ZStackComponent {

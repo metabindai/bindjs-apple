@@ -3,7 +3,7 @@ import SwiftUI
 public struct TextComponent: Component {
     public static var directiveName: String = "Text"
     
-    public let text: String
+    public var text: String
     
     init(_ string: String) {
         self.text = string

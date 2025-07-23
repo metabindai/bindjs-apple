@@ -3,8 +3,8 @@ import SwiftUI
 public struct OverlayComponent: Component {
     public static var directiveName: String = "overlay"
     
-    public let content: [Component]
-    public let alignment: Alignment
+    public var content: [Component]
+    public var alignment: Alignment
 }
 
 extension OverlayComponent {

@@ -4,7 +4,7 @@ public struct UnresolvedComponent: Component {
     public static var directiveName: String = "Unresolved"
     
     public let directive: Directive
-    public let children: [Component]
+    public var children: [Component]
     
     public init?(from directive: Directive) {
         self.directive = directive

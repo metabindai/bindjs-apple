@@ -3,7 +3,7 @@ import SwiftUI
 public struct TextSelectionComponent: Component {
     public static var directiveName: String = "textSelection"
     
-    public let textSelectability: TextSelectabilityArgument
+    public var textSelectability: TextSelectabilityArgument
 }
 
 extension TextSelectionComponent {

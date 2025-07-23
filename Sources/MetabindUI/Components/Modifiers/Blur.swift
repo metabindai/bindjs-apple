@@ -3,7 +3,7 @@ import SwiftUI
 public struct BlurComponent: Component {
     public static var directiveName: String = "blur"
     
-    public let radius: CGFloat
+    public var radius: CGFloat
 }
 
 extension BlurComponent {

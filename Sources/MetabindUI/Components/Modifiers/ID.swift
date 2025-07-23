@@ -3,7 +3,7 @@ import SwiftUI
 public struct IDComponent: Component {
     public static var directiveName: String = "id"
     
-    public let id: String
+    public var id: String
 }
 
 extension IDComponent {

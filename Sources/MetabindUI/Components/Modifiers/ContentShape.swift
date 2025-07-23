@@ -3,7 +3,7 @@ import SwiftUI
 public struct ContentShapeComponent: Component {
     public static var directiveName: String = "contentShape"
     
-    public let shape: (any Shape)?
+    public var shape: (any Shape)?
 }
 
 extension ContentShapeComponent {

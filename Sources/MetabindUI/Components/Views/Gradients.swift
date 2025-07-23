@@ -3,9 +3,9 @@ import SwiftUI
 public struct LinearGradientComponent: Component {
     public static var directiveName: String = "LinearGradient"
     
-    public let colors: [Color]
-    public let startPoint: UnitPoint
-    public let endPoint: UnitPoint
+    public var colors: [Color]
+    public var startPoint: UnitPoint
+    public var endPoint: UnitPoint
 }
 
 extension LinearGradientComponent {

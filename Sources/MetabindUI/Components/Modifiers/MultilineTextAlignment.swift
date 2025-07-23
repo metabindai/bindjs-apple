@@ -3,7 +3,7 @@ import SwiftUI
 public struct MultilineTextAlignmentComponent: Component {
     public static var directiveName: String = "multilineTextAlignment"
     
-    public let alignment: TextAlignment
+    public var alignment: TextAlignment
 }
 
 extension MultilineTextAlignmentComponent {

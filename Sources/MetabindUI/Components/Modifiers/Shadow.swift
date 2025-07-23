@@ -3,10 +3,10 @@ import SwiftUI
 public struct ShadowComponent: Component {
     public static var directiveName: String = "shadow"
     
-    public let color: Color
-    public let radius: CGFloat
-    public let x: CGFloat
-    public let y: CGFloat
+    public var color: Color
+    public var radius: CGFloat
+    public var x: CGFloat
+    public var y: CGFloat
 }
 
 extension ShadowComponent {

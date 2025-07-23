@@ -3,7 +3,7 @@ import SwiftUI
 public struct FontWeightComponent: Component {
     public static var directiveName: String = "fontWeight"
     
-    public let fontWeight: Font.Weight
+    public var fontWeight: Font.Weight
 }
 
 extension FontWeightComponent {

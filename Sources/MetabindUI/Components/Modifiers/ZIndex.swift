@@ -3,7 +3,7 @@ import SwiftUI
 public struct ZIndexComponent: Component {
     public static var directiveName: String = "zIndex"
     
-    public let zIndex: Double
+    public var zIndex: Double
 }
 
 extension ZIndexComponent {

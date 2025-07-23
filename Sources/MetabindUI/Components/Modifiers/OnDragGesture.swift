@@ -5,7 +5,7 @@ import SwiftUI
 public struct OnDragGestureComponent: Component {
     public static var directiveName: String = "onDragGesture"
     
-    public let minimumDistance: Double
+    public var minimumDistance: Double
     public let handlerId: String
 }
 

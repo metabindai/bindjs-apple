@@ -3,8 +3,8 @@ import SwiftUI
 public struct RotationEffectComponent: Component {
     public static var directiveName: String = "rotationEffect"
     
-    public let angle: Angle
-    public let anchor: UnitPoint
+    public var angle: Angle
+    public var anchor: UnitPoint
 }
 
 extension RotationEffectComponent {

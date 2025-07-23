@@ -3,11 +3,11 @@ import SwiftUI
 public struct FlexibleFrameComponent: Component {
     public static var directiveName: String = "frame"
     
-    public let minWidth: CGFloat?
-    public let maxWidth: CGFloat?
-    public let minHeight: CGFloat?
-    public let maxHeight: CGFloat?
-    public let alignment: Alignment
+    public var minWidth: CGFloat?
+    public var maxWidth: CGFloat?
+    public var minHeight: CGFloat?
+    public var maxHeight: CGFloat?
+    public var alignment: Alignment
 }
 
 extension FlexibleFrameComponent {

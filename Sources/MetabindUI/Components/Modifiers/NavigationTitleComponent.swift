@@ -4,7 +4,7 @@ import SwiftUI
 public struct NavigationTitleComponent: Component {
     public static var directiveName: String = "navigationTitle"
     
-    public let title: String
+    public var title: String
 }
 
 extension NavigationTitleComponent {

@@ -3,7 +3,7 @@ import SwiftUI
 public struct SaturationComponent: Component {
     public static var directiveName: String = "saturation"
     
-    public let saturation: Double
+    public var saturation: Double
 }
 
 extension SaturationComponent {

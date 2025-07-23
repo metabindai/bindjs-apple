@@ -3,7 +3,7 @@ import SwiftUI
 public struct FontDesignComponent: Component {
     public static var directiveName: String = "fontDesign"
     
-    public let fontDesign: Font.Design
+    public var fontDesign: Font.Design
 }
 
 extension FontDesignComponent {

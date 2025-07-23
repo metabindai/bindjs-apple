@@ -3,7 +3,7 @@ import SwiftUI
 public struct AccessibilityLabelComponent: Component {
     public static var directiveName: String = "accessibilityLabel"
     
-    public let label: String
+    public var label: String
 }
 
 extension AccessibilityLabelComponent {

@@ -3,7 +3,7 @@ import SwiftUI
 public struct ControlSizeComponent: Component {
     public static var directiveName: String = "controlSize"
     
-    public let controlSize: ControlSize
+    public var controlSize: ControlSize
 }
 
 extension ControlSizeComponent {

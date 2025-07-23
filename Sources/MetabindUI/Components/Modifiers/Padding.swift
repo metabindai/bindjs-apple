@@ -3,10 +3,10 @@ import SwiftUI
 public struct PaddingComponent: Component {
     public static var directiveName: String = "padding"
     
-    public let top: CGFloat?
-    public let leading: CGFloat?
-    public let bottom: CGFloat?
-    public let trailing: CGFloat?
+    public var top: CGFloat?
+    public var leading: CGFloat?
+    public var bottom: CGFloat?
+    public var trailing: CGFloat?
 }
 
 extension PaddingComponent {

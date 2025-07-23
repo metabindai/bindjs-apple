@@ -3,7 +3,7 @@ import SwiftUI
 public struct ForegroundStyleComponent: Component {
     public static var directiveName: String = "foregroundStyle"
     
-    public let style: Component
+    public var style: Component
 }
 
 extension ForegroundStyleComponent {

@@ -3,7 +3,7 @@ import SwiftUI
 public struct AccessibilityHiddenComponent: Component {
     public static var directiveName: String = "accessibilityHidden"
     
-    public let isActive: Bool
+    public var isActive: Bool
 }
 
 extension AccessibilityHiddenComponent {

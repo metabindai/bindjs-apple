@@ -3,7 +3,7 @@ import SwiftUI
 public struct BrightnessComponent: Component {
     public static var directiveName: String = "brightness"
     
-    public let brightness: Double
+    public var brightness: Double
 }
 
 extension BrightnessComponent {

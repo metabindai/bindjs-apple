@@ -3,9 +3,9 @@ import SwiftUI
 public struct HStackComponent: Component {
     public static var directiveName: String = "HStack"
     
-    public let alignment: VerticalAlignment
-    public let spacing: CGFloat?
-    public let children: [Component]
+    public var alignment: VerticalAlignment
+    public var spacing: CGFloat?
+    public var children: [Component]
 }
 
 extension HStackComponent {

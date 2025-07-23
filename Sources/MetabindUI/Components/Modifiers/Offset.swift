@@ -3,8 +3,8 @@ import SwiftUI
 public struct OffsetComponent: Component {
     public static var directiveName: String = "offset"
     
-    public let x: CGFloat
-    public let y: CGFloat
+    public var x: CGFloat
+    public var y: CGFloat
 }
 
 extension OffsetComponent {

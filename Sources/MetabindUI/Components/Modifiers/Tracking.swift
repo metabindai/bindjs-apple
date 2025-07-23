@@ -3,7 +3,7 @@ import SwiftUI
 public struct TrackingComponent: Component {
     public static var directiveName: String = "tracking"
     
-    public let tracking: CGFloat
+    public var tracking: CGFloat
 }
 
 extension TrackingComponent {

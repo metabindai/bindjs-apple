@@ -3,7 +3,7 @@ import SwiftUI
 public struct DisabledComponent: Component {
     public static var directiveName: String = "disabled"
     
-    public let isActive: Bool
+    public var isActive: Bool
 }
 
 extension DisabledComponent {

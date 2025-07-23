@@ -3,7 +3,7 @@ import SwiftUI
 public struct GroupComponent: Component {
     public static var directiveName: String = "Group"
     
-    public let content: [Component]
+    public var content: [Component]
 }
 
 extension GroupComponent {

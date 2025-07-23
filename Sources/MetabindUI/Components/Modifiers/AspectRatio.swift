@@ -3,8 +3,8 @@ import SwiftUI
 public struct AspectRatioComponent: Component {
     public static var directiveName: String = "aspectRatio"
     
-    public let aspectRatio: CGFloat?
-    public let contentMode: ContentMode
+    public var aspectRatio: CGFloat?
+    public var contentMode: ContentMode
 }
 
 extension AspectRatioComponent {

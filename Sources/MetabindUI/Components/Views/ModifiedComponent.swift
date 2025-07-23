@@ -3,8 +3,8 @@ import SwiftUI
 public struct ModifiedComponent: Component {
     public static var directiveName: String = "ModifiedComponent"
     
-    public let content: [Component]
-    public let modifier: Component
+    public var content: [Component]
+    public var modifier: Component
 }
 
 extension ModifiedComponent {

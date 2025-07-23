@@ -3,9 +3,9 @@ import SwiftUI
 public struct SectionComponent: Component {
     public static var directiveName: String = "Section"
     
-    public let header: Component?
-    public let footer: Component?
-    public let content: [Component]
+    public var header: Component?
+    public var footer: Component?
+    public var content: [Component]
 }
 
 extension SectionComponent {

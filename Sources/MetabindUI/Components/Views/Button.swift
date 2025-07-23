@@ -5,7 +5,7 @@ public struct ButtonComponent: Component {
     
     @EnvironmentObject private var context: ComponentContext
     
-    public let label: Component
+    public var label: Component
     public let handlerId: String
 }
 

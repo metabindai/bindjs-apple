@@ -3,8 +3,8 @@ import SwiftUI
 public struct ProgressViewComponent: Component {
     public static var directiveName: String = "ProgressView"
     
-    public let value: Double?
-    public let total: Double?
+    public var value: Double?
+    public var total: Double?
 }
 
 extension ProgressViewComponent {

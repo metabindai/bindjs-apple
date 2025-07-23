@@ -3,7 +3,7 @@ import SwiftUI
 public struct OpacityComponent: Component {
     public static var directiveName: String = "opacity"
     
-    public let opacity: Double
+    public var opacity: Double
 }
 
 extension OpacityComponent {

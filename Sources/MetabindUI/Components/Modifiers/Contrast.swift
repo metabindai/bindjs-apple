@@ -3,7 +3,7 @@ import SwiftUI
 public struct ContrastComponent: Component {
     public static var directiveName: String = "contrast"
     
-    public let contrast: Double
+    public var contrast: Double
 }
 
 extension ContrastComponent {

@@ -8,8 +8,8 @@ public struct ColorComponent: Component {
         case rgba(Double, Double, Double, Double)
     }
     
-    public let storage: Storage
-    public let opacity: Double
+    public var storage: Storage
+    public var opacity: Double
 }
 
 extension ColorComponent {

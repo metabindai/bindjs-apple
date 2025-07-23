@@ -3,7 +3,7 @@ import SwiftUI
 public struct LineSpacingComponent: Component {
     public static var directiveName: String = "lineSpacing"
     
-    public let lineSpacing: CGFloat
+    public var lineSpacing: CGFloat
 }
 
 extension LineSpacingComponent {

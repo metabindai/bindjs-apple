@@ -3,7 +3,7 @@ import SwiftUI
 public struct DynamicTypeSizeComponent: Component {
     public static var directiveName: String = "dynamicTypeSize"
     
-    public let dynamicTypeSize: DynamicTypeSize
+    public var dynamicTypeSize: DynamicTypeSize
 }
 
 extension DynamicTypeSizeComponent {

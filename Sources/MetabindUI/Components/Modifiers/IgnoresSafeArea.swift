@@ -3,8 +3,8 @@ import SwiftUI
 public struct IgnoresSafeAreaComponent: Component {
     public static var directiveName: String = "ignoresSafeArea"
     
-    public let regions: SafeAreaRegions?
-    public let edges: Edge.Set?
+    public var regions: SafeAreaRegions?
+    public var edges: Edge.Set?
 }
 
 extension IgnoresSafeAreaComponent {

@@ -18,10 +18,10 @@ import OSLog
 public struct ImageComponent: Component {
     public static var directiveName: String = "Image"
     
-    public let name: String?
-    public let url: URL?
-    public let systemName: String?
-    public let resizable: Bool
+    public var name: String?
+    public var url: URL?
+    public var systemName: String?
+    public var resizable: Bool
 }
 
 extension ImageComponent {

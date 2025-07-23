@@ -3,7 +3,7 @@ import SwiftUI
 public struct BlendModeComponent: Component {
     public static var directiveName: String = "blendMode"
     
-    public let blendMode: BlendMode
+    public var blendMode: BlendMode
 }
 
 extension BlendModeComponent {

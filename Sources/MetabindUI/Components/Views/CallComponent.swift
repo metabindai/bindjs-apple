@@ -5,7 +5,7 @@ public struct CallComponent: Component {
     @Environment(\.componentRegistry) private var componentRegistry
     
     public let directive: Directive
-    public let children: [Component]
+    public var children: [Component]
     
     public var name: String {
         directive["name"] ?? ""

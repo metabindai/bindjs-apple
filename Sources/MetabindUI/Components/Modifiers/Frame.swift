@@ -3,9 +3,9 @@ import SwiftUI
 public struct FrameComponent: Component {
     public static var directiveName: String = "frame"
     
-    public let width: CGFloat?
-    public let height: CGFloat?
-    public let alignment: Alignment
+    public var width: CGFloat?
+    public var height: CGFloat?
+    public var alignment: Alignment
 }
 
 extension FrameComponent {

@@ -3,7 +3,7 @@ import SwiftUI
 public struct ColorSchemeComponent: Component {
     public static var directiveName: String = "colorScheme"
     
-    public let colorScheme: ColorScheme
+    public var colorScheme: ColorScheme
 }
 
 extension ColorSchemeComponent {

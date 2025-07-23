@@ -3,8 +3,8 @@ import SwiftUI
 public struct BorderComponent: Component {
     public static var directiveName: String = "border"
     
-    public let style: Component
-    public let width: CGFloat
+    public var style: Component
+    public var width: CGFloat
 }
 
 extension BorderComponent {

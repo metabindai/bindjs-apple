@@ -3,7 +3,7 @@ import SwiftUI
 public struct GrayscaleComponent: Component {
     public static var directiveName: String = "grayscale"
     
-    public let grayscale: Double
+    public var grayscale: Double
 }
 
 extension GrayscaleComponent {

@@ -19,9 +19,9 @@ public struct FontCustomComponent: Component {
     @State private var postScriptName: String?
     @State private var isLoading = false
     
-    public let family: String
-    public let size: CGFloat
-    public let url: URL?
+    public var family: String
+    public var size: CGFloat
+    public var url: URL?
 }
 
 extension FontCustomComponent {

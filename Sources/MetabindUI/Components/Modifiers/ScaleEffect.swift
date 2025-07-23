@@ -3,9 +3,9 @@ import SwiftUI
 public struct ScaleEffectComponent: Component {
     public static var directiveName: String = "scaleEffect"
     
-    public let x: CGFloat
-    public let y: CGFloat
-    public let anchor: UnitPoint
+    public var x: CGFloat
+    public var y: CGFloat
+    public var anchor: UnitPoint
 }
 
 extension ScaleEffectComponent {

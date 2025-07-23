@@ -3,8 +3,8 @@ import SwiftUI
 public struct OnLongPressGestureComponent: Component {
     public static var directiveName: String = "onLongPressGesture"
     
-    public let minimumDuration: Double
-    public let maximumDistance: Double
+    public var minimumDuration: Double
+    public var maximumDistance: Double
     public let handlerId: String
 }
 

@@ -3,7 +3,7 @@ import SwiftUI
 public struct MaterialComponent: Component {
     public static var directiveName: String = "Material"
     
-    public let material: Material
+    public var material: Material
 }
 
 extension MaterialComponent {

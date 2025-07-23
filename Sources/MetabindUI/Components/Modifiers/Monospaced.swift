@@ -3,7 +3,7 @@ import SwiftUI
 public struct MonospacedComponent: Component {
     public static var directiveName: String = "monospaced"
     
-    public let isActive: Bool
+    public var isActive: Bool
 }
 
 extension MonospacedComponent {

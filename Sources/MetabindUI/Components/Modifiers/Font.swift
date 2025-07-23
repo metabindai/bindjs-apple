@@ -9,7 +9,7 @@ public struct FontComponent: Component {
         case custom(FontCustomComponent)
     }
     
-    public let storage: Storage
+    public var storage: Storage
 }
 
 extension FontComponent {

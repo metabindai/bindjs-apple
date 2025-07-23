@@ -3,9 +3,9 @@ import SwiftUI
 public struct ScrollViewComponent: Component {
     public static var directiveName: String = "ScrollView"
     
-    public let axis: Axis.Set
-    public let showsIndicators: Bool
-    public let content: [Component]
+    public var axis: Axis.Set
+    public var showsIndicators: Bool
+    public var content: [Component]
 }
 
 extension ScrollViewComponent {

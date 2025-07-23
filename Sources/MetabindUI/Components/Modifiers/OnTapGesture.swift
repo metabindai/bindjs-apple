@@ -5,7 +5,7 @@ public struct OnTapGestureComponent: Component {
     
     @EnvironmentObject private var context: ComponentContext
     
-    public let count: Int
+    public var count: Int
     public let handlerId: String
 }
 
