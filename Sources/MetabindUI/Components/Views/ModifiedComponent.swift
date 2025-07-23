@@ -5,11 +5,6 @@ public struct ModifiedComponent: Component {
     
     public var content: [Component]
     public var modifier: Component
-    
-    public init(content: Component, modifier: Component) {
-        self.content = [content]
-        self.modifier = modifier
-    }
 }
 
 extension ModifiedComponent {

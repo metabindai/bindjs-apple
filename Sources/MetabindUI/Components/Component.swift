@@ -8,7 +8,7 @@ public protocol Component {
 }
 
 extension Component {
-    func modifier(_ m: Component) -> Component {
+    public func modifier(_ m: Component) -> Component {
         ModifiedComponent(content: [self], modifier: m)
     }
 }
