@@ -4,7 +4,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     switch directive.type {
     case AngularGradientComponent.directiveName: AngularGradientComponent(from: directive)
     case ButtonComponent.directiveName: ButtonComponent(from: directive)
-    case CallComponent.directiveName: CallComponent(from: directive)
+    case ComponentCall.directiveName: ComponentCall(from: directive)
     case CapsuleComponent.directiveName: CapsuleComponent(from: directive)
     case CircleComponent.directiveName: CircleComponent(from: directive)
     case ColorComponent.directiveName: ColorComponent(from: directive)
@@ -116,7 +116,7 @@ public struct ComponentView: View {
         switch component {
         case let angularGradient as AngularGradientComponent: angularGradient
         case let button as ButtonComponent: button
-        case let callComponent as CallComponent: callComponent
+        case let callComponent as ComponentCall: callComponent
         case let capsule as CapsuleComponent: capsule
         case let circle as CircleComponent: circle
         case let color as ColorComponent: color

@@ -14,7 +14,7 @@ public extension ComponentRewriter {
         return copy
     }
     
-    mutating func visitCall(_ call: CallComponent) -> Result {
+    mutating func visitCall(_ call: ComponentCall) -> Result {
         var copy = call
         copy.children = call.children.map { $0.accept(visitor: &self) }
         return copy

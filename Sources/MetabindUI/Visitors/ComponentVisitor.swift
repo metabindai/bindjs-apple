@@ -6,7 +6,7 @@ public protocol ComponentVisitor {
     
     // Views Components
     mutating func visitButton(_ button: ButtonComponent) -> Result
-    mutating func visitCall(_ call: CallComponent) -> Result
+    mutating func visitCall(_ call: ComponentCall) -> Result
     mutating func visitColor(_ color: ColorComponent) -> Result
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
@@ -115,7 +115,7 @@ public extension ComponentVisitor {
         return defaultVisit(button)
     }
     
-    mutating func visitCall(_ call: CallComponent) -> Result {
+    mutating func visitCall(_ call: ComponentCall) -> Result {
         return defaultVisit(call)
     }
     

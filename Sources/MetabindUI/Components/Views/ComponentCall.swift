@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct CallComponent: Component {
+public struct ComponentCall: Component {
     public static var directiveName: String = "ComponentCall"
     @Environment(\.componentRegistry) private var componentRegistry
     
@@ -26,7 +26,7 @@ public struct CallComponent: Component {
     }
 }
 
-extension CallComponent: View {
+extension ComponentCall: View {
     
     public var body: some View {
         if let resolved = componentRegistry.makeComponent(name, props: props, children: children) {

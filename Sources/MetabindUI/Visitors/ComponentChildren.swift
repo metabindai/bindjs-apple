@@ -15,7 +15,7 @@ private struct ComponentChildren: ComponentVisitor {
         [button.label]
     }
     
-    mutating func visitCall(_ call: CallComponent) -> [any Component] {
+    mutating func visitCall(_ call: ComponentCall) -> [any Component] {
         call.children
     }
     
