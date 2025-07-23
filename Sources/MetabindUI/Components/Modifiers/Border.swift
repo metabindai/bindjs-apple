@@ -11,7 +11,7 @@ extension BorderComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        style = directive["style"].flatMap { makeComponent($0) } ?? EmptyComponent()
+        style = (directive["style"] ?? directive.rawValue()).flatMap { makeComponent($0) } ?? EmptyComponent()
         width = directive["width"] ?? 1
     }
     
