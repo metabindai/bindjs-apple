@@ -7,11 +7,11 @@ public struct CallComponent: Component {
     public let directive: Directive
     public let children: [Component]
     
-    var name: String {
+    public var name: String {
         directive["name"] ?? ""
     }
     
-    var props: [String: Any] {
+    public var props: [String: Any] {
         directive.props["props"] as? [String: Any] ?? [:]
     }
     
