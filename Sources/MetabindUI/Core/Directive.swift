@@ -1,9 +1,9 @@
 import Foundation
 
 public struct Directive {
-    let type: String
-    let props: [String: Any]
-    let children: [Directive]
+    public let type: String
+    public let props: [String: Any]
+    public let children: [Directive]
     
     public init(type: String, props: [String : Any] = [:], children: [Directive] = []) {
         self.type = type
