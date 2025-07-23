@@ -38,3 +38,9 @@ extension ComponentCall: View {
         }
     }
 }
+
+extension ComponentCall: CustomStringConvertible {
+    public var description: String {
+        "\(name)(props: \(props))"
+    }
+}
