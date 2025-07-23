@@ -7,7 +7,7 @@ let package = Package(
     name: "MetabindUI",
     platforms: [
         .macOS(.v14),
-        .iOS(.v16),
+        .iOS(.v14),
         .watchOS(.v6),
         .tvOS(.v13),
         .visionOS(.v1)
