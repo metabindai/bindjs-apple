@@ -188,7 +188,7 @@ public class ComponentContext: ObservableObject {
         print(debugInfo ?? "No debug info")
     }
 
-    public func environment(_ environment: [String: Any]) -> Self {
+    public func setEnvironment(_ environment: [String: Any]) -> Self {
         runtime.invokeMethod("setEnvironment", withArguments: [environment])
         return self
     }
