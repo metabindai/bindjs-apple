@@ -79,9 +79,11 @@ extension EllipseComponent {
         
         if let fill = directive["fill"].flatMap(makeComponent) {
             style = .fill(fill)
-        } else if let stroke = directive["stroke"].flatMap(makeComponent) {
-            let lineWidth: CGFloat = directive["lineWidth"] ?? 1
-            style = .stroke(stroke, lineWidth: lineWidth)
+        } else if let stroke: [String: Any] = directive["stroke"],
+                  let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
+        {
+            let lineWidth: CGFloat = (stroke["lineWidth"] as? Double) ?? 1
+            style = .stroke(strokeStyle, lineWidth: lineWidth)
         }
     }
     
@@ -118,9 +120,11 @@ extension RectangleComponent {
         
         if let fill = directive["fill"].flatMap(makeComponent) {
             style = .fill(fill)
-        } else if let stroke = directive["stroke"].flatMap(makeComponent) {
-            let lineWidth: CGFloat = directive["lineWidth"] ?? 1
-            style = .stroke(stroke, lineWidth: lineWidth)
+        } else if let stroke: [String: Any] = directive["stroke"],
+                  let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
+        {
+            let lineWidth: CGFloat = (stroke["lineWidth"] as? Double) ?? 1
+            style = .stroke(strokeStyle, lineWidth: lineWidth)
         }
     }
     
@@ -160,9 +164,11 @@ extension RoundedRectangleComponent {
         
         if let fill = directive["fill"].flatMap(makeComponent) {
             style = .fill(fill)
-        } else if let stroke = directive["stroke"].flatMap(makeComponent) {
-            let lineWidth: CGFloat = directive["lineWidth"] ?? 1
-            style = .stroke(stroke, lineWidth: lineWidth)
+        } else if let stroke: [String: Any] = directive["stroke"],
+                  let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
+        {
+            let lineWidth: CGFloat = (stroke["lineWidth"] as? Double) ?? 1
+            style = .stroke(strokeStyle, lineWidth: lineWidth)
         }
     }
     
@@ -199,9 +205,11 @@ extension CapsuleComponent {
         
         if let fill = directive["fill"].flatMap(makeComponent) {
             style = .fill(fill)
-        } else if let stroke = directive["stroke"].flatMap(makeComponent) {
-            let lineWidth: CGFloat = directive["lineWidth"] ?? 1
-            style = .stroke(stroke, lineWidth: lineWidth)
+        } else if let stroke: [String: Any] = directive["stroke"],
+                  let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
+        {
+            let lineWidth: CGFloat = (stroke["lineWidth"] as? Double) ?? 1
+            style = .stroke(strokeStyle, lineWidth: lineWidth)
         }
     }
     
