@@ -8,4 +8,8 @@ public extension ComponentWalker {
             visit(child)
         }
     }
+    
+    mutating func defaultVisit(_ component: any Component) -> Result {
+        descendInto(component)
+    }
 }
