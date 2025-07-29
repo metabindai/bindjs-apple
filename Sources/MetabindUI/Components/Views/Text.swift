@@ -34,6 +34,10 @@ extension TextComponent {
         
         if let markdown: String = directive.rawValue() {
             self.storage = .markdown(markdown)
+        } else if let markdown: String = directive["markdown"] {
+            self.storage = .markdown(markdown)
+        } else if let markdown: String = directive["text"] {
+            self.storage = .markdown(markdown)
         } else if let verbatim: String = directive["verbatim"] {
             self.storage = .verbatim(verbatim)
         } else {
