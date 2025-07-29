@@ -33,6 +33,8 @@ extension ForegroundStyleComponent: ViewModifier {
             content.foregroundStyle(ellipticalGradient.swiftUI)
         case let material as MaterialComponent:
             content.foregroundStyle(material.swiftUI)
+        case let call as ComponentCall:
+            content.modifier(ForegroundStyleComponent(style: call.wrapped))
         default:
             content
         }

@@ -7,6 +7,10 @@ public struct ComponentCall: Component {
     public let directive: Directive
     public var children: [Component]
     
+    public var wrapped: Component {
+        children.first ?? EmptyComponent()
+    }
+    
     public var name: String {
         directive["name"] ?? ""
     }

@@ -255,6 +255,28 @@ extension Shape {
             self.stroke(ellipticalGradient.swiftUI, lineWidth: lineWidth)
         case let material as MaterialComponent:
             self.stroke(material.swiftUI, lineWidth: lineWidth)
+        case let call as ComponentCall:
+            self.stroke(call, lineWidth: lineWidth)
+        default:
+            self.stroke(Color.primary, lineWidth: lineWidth)
+        }
+    }
+    
+    @ViewBuilder
+    private func stroke(_ call: ComponentCall, lineWidth: CGFloat) -> some View {
+        switch call.wrapped {
+        case let color as ColorComponent:
+            self.stroke(color.swiftUI, lineWidth: lineWidth)
+        case let linearGradient as LinearGradientComponent:
+            self.stroke(linearGradient.swiftUI, lineWidth: lineWidth)
+        case let angularGradient as AngularGradientComponent:
+            self.stroke(angularGradient.swiftUI, lineWidth: lineWidth)
+        case let radialGradient as RadialGradientComponent:
+            self.stroke(radialGradient.swiftUI, lineWidth: lineWidth)
+        case let ellipticalGradient as EllipticalGradientComponent:
+            self.stroke(ellipticalGradient.swiftUI, lineWidth: lineWidth)
+        case let material as MaterialComponent:
+            self.stroke(material.swiftUI, lineWidth: lineWidth)
         default:
             self.stroke(Color.primary, lineWidth: lineWidth)
         }

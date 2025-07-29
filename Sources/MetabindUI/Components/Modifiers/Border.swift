@@ -35,6 +35,8 @@ extension BorderComponent: ViewModifier {
             content.border(ellipticalGradient.swiftUI, width: width)
         case let material as MaterialComponent:
             content.border(material.swiftUI, width: width)
+        case let call as ComponentCall:
+            content.modifier(BorderComponent(style: call.wrapped, width: width))
         default:
             content.border(.primary, width: width)
         }
