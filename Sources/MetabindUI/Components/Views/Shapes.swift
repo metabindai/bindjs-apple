@@ -36,8 +36,9 @@ extension CircleComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        if let fill = directive["fill"].flatMap(makeComponent) {
-            style = .fill(fill)
+        if let fill: [String: Any] = directive["fill"],
+           let fillStyle = (fill["fill"] as? Directive).flatMap(makeComponent) {
+            style = .fill(fillStyle)
         } else if let stroke: [String: Any] = directive["stroke"],
                   let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
         {
@@ -77,8 +78,9 @@ extension EllipseComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        if let fill = directive["fill"].flatMap(makeComponent) {
-            style = .fill(fill)
+        if let fill: [String: Any] = directive["fill"],
+           let fillStyle = (fill["fill"] as? Directive).flatMap(makeComponent) {
+            style = .fill(fillStyle)
         } else if let stroke: [String: Any] = directive["stroke"],
                   let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
         {
@@ -118,8 +120,9 @@ extension RectangleComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        if let fill = directive["fill"].flatMap(makeComponent) {
-            style = .fill(fill)
+        if let fill: [String: Any] = directive["fill"],
+           let fillStyle = (fill["fill"] as? Directive).flatMap(makeComponent) {
+            style = .fill(fillStyle)
         } else if let stroke: [String: Any] = directive["stroke"],
                   let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
         {
@@ -162,8 +165,9 @@ extension RoundedRectangleComponent {
         
         cornerRadius = directive["cornerRadius"] ?? 10
         
-        if let fill = directive["fill"].flatMap(makeComponent) {
-            style = .fill(fill)
+        if let fill: [String: Any] = directive["fill"],
+           let fillStyle = (fill["fill"] as? Directive).flatMap(makeComponent) {
+            style = .fill(fillStyle)
         } else if let stroke: [String: Any] = directive["stroke"],
                   let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
         {
@@ -203,8 +207,9 @@ extension CapsuleComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        if let fill = directive["fill"].flatMap(makeComponent) {
-            style = .fill(fill)
+        if let fill: [String: Any] = directive["fill"],
+           let fillStyle = (fill["fill"] as? Directive).flatMap(makeComponent) {
+            style = .fill(fillStyle)
         } else if let stroke: [String: Any] = directive["stroke"],
                   let strokeStyle = (stroke["style"] as? Directive).flatMap(makeComponent)
         {
