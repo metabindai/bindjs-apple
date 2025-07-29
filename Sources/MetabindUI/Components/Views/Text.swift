@@ -3,10 +3,28 @@ import SwiftUI
 public struct TextComponent: Component {
     public static var directiveName: String = "Text"
     
-    public var text: String
+    enum Storage {
+        case markdown(String)
+        case verbatim(String)
+    }
     
-    init(_ string: String) {
-        self.text = string
+    private var storage: Storage
+    
+    public var text: String {
+        switch storage {
+        case .markdown(let string):
+            string
+        case .verbatim(let string):
+            string
+        }
+    }
+    
+    init(_ markdown: String) {
+        self.storage = .markdown(markdown)
+    }
+    
+    init(verbatim: String) {
+        self.storage = .verbatim(verbatim)
     }
 }
 
@@ -14,7 +32,13 @@ extension TextComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        text = directive.rawValue() ?? ""
+        if let markdown: String = directive.rawValue() {
+            self.storage = .markdown(markdown)
+        } else if let verbatim: String = directive["verbatim"] {
+            self.storage = .verbatim(verbatim)
+        } else {
+            return nil
+        }
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -24,6 +48,11 @@ extension TextComponent {
 
 extension TextComponent: View {
     public var body: some View {
-        Text(text)
+        switch storage {
+        case .markdown(let string):
+            Text(LocalizedStringKey(string))
+        case .verbatim(let string):
+            Text(verbatim: string)
+        }
     }
 }

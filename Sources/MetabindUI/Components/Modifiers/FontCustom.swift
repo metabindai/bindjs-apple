@@ -7,7 +7,7 @@ import os.log
 
 extension Logger {
     /// Logger for font loading operations
-    static let fontLoading = Logger(subsystem: "com.example.app", category: "FontLoading")
+    static let fontLoading = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FontCustom", category: "FontLoading")
 }
 
 // MARK: - FontCustomComponent
