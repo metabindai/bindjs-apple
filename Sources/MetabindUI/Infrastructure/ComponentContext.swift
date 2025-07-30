@@ -2,19 +2,19 @@ import SwiftUI
 import JavaScriptCore
 
 public class ComponentContext: ObservableObject {
-    private let context: JSContext
+    private let jsContext: JSContext
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
 
     public init() {
-        context = JSContext()!
-        context.exceptionHandler = { _, exception in
+        jsContext = JSContext()!
+        jsContext.exceptionHandler = { _, exception in
             if let exception = exception {
                 print("JS Error: \(exception)")
             }
         }
-        runtime = context.evaluateScript(Self.loadRuntime())
+        runtime = jsContext.evaluateScript(Self.loadRuntime())
         setupConsoleLog()
         setupNeedsRerender()
         setupWithAnimation()
@@ -46,17 +46,17 @@ public class ComponentContext: ObservableObject {
             print(output)
         }
 
-        let console = JSValue(newObjectIn: context)!
+        let console = JSValue(newObjectIn: jsContext)!
         console.setObject(logBlock, forKeyedSubscript: "log" as NSString)
-        context.globalObject.setValue(console, forProperty: "console")
+        jsContext.globalObject.setValue(console, forProperty: "console")
     }
 
     private func setupNeedsRerender() {
         let rerender: @convention(block) () -> Void = { [weak self] in
             self?.objectWillChange.send()
         }
-        context.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
-        _ = context.evaluateScript("runtime.needsRerender = needsRerender")
+        jsContext.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
+        _ = jsContext.evaluateScript("runtime.needsRerender = needsRerender")
     }
 
     private func setupWithAnimation() {
@@ -86,8 +86,8 @@ public class ComponentContext: ObservableObject {
                 }
             }
         }
-        context.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
-        _ = context.evaluateScript("runtime.withAnimation = withAnimation")
+        jsContext.setObject(withAnimationFunction, forKeyedSubscript: "withAnimation" as NSString)
+        _ = jsContext.evaluateScript("runtime.withAnimation = withAnimation")
     }
     
     private func setupNavigate() {
@@ -109,8 +109,8 @@ public class ComponentContext: ObservableObject {
                 print("Error decoding ContentLink: \(error)")
             }
         }
-        context.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
-        _ = context.evaluateScript("runtime.navigateCallback = navigateCallback")
+        jsContext.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
+        _ = jsContext.evaluateScript("runtime.navigateCallback = navigateCallback")
     }
     
     private func setupPerformAction() {
@@ -138,7 +138,7 @@ public class ComponentContext: ObservableObject {
                 do {
                     let data = try JSONSerialization.data(withJSONObject: result)
                     let jsonString = String(data: data, encoding: .utf8) ?? "null"
-                    return self.context.evaluateScript("(\(jsonString))")
+                    return self.jsContext.evaluateScript("(\(jsonString))")
                 } catch {
                     print("Error serializing action result: \(error)")
                     return nil
@@ -148,7 +148,7 @@ public class ComponentContext: ObservableObject {
             return nil
         }
         
-        context.setObject(performActionFunction, forKeyedSubscript: "performAction" as NSString)
+        jsContext.setObject(performActionFunction, forKeyedSubscript: "performAction" as NSString)
     }
 
     public func register(name: String, source: String) {
@@ -168,7 +168,7 @@ public class ComponentContext: ObservableObject {
     
     public func componentWithName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
         if let json = runtime
-            .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: context)!]])
+            .invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: jsContext)!]])
             .toString(),
            let data = json.data(using: .utf8),
            case let decoder = {
@@ -256,7 +256,7 @@ public class ComponentContext: ObservableObject {
     ///   - context: Context to use (defaults to self.context).
     /// - Returns: JSON string if successful, otherwise nil.
     private func jsonStringify(_ value: JSValue?, in context: JSContext? = nil) -> String? {
-        let ctx = context ?? self.context
+        let ctx = context ?? self.jsContext
         guard let value = value else { return nil }
         guard let json = ctx.objectForKeyedSubscript("JSON") else { return nil }
         return json.invokeMethod("stringify", withArguments: [value])?.toString()
