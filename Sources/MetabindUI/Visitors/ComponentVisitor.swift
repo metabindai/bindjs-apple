@@ -61,6 +61,7 @@ public protocol ComponentVisitor {
     mutating func visitControlSize(_ controlSize: ControlSizeComponent) -> Result
     mutating func visitCornerRadius(_ cornerRadius: CornerRadiusComponent) -> Result
     mutating func visitDisabled(_ disabled: DisabledComponent) -> Result
+    mutating func visitAutocorrectionDisabled(_ autocorrectionDisabled: AutocorrectionDisabledComponent) -> Result
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result
     mutating func visitFont(_ font: FontComponent) -> Result
@@ -313,6 +314,10 @@ public extension ComponentVisitor {
     
     mutating func visitDisabled(_ disabled: DisabledComponent) -> Result {
         return defaultVisit(disabled)
+    }
+    
+    mutating func visitAutocorrectionDisabled(_ autocorrectionDisabled: AutocorrectionDisabledComponent) -> Result {
+        return defaultVisit(autocorrectionDisabled)
     }
     
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result {
