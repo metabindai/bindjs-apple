@@ -11,7 +11,7 @@ extension NavigationTitleComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        title = directive["title"] ?? ""
+        title = directive.rawValue() ?? ""
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
