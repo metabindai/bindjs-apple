@@ -26,6 +26,5 @@ extension TextEditorComponent {
 extension TextEditorComponent: View {
     public var body: some View {
         TextEditor(text: $text)
-            .textinpu
     }
 }

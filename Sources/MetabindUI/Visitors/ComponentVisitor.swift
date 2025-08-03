@@ -45,6 +45,9 @@ public protocol ComponentVisitor {
     mutating func visitAccessibilityHint(_ accessibilityHint: AccessibilityHintComponent) -> Result
     mutating func visitAccessibilityLabel(_ accessibilityLabel: AccessibilityLabelComponent) -> Result
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> Result
+    mutating func visitAccessibilityValue(_ accessibilityValue: AccessibilityValueComponent) -> Result
+    mutating func visitAccessibilityAddTraits(_ accessibilityAddTraits: AccessibilityAddTraitsComponent) -> Result
+    mutating func visitAccessibilityRemoveTraits(_ accessibilityRemoveTraits: AccessibilityRemoveTraitsComponent) -> Result
     mutating func visitAllowsHitTesting(_ allowsHitTesting: AllowsHitTestingComponent) -> Result
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result
     mutating func visitBackground(_ background: BackgroundComponent) -> Result
@@ -250,6 +253,18 @@ public extension ComponentVisitor {
     
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> Result {
         return defaultVisit(accessibilityRepresentation)
+    }
+    
+    mutating func visitAccessibilityValue(_ accessibilityValue: AccessibilityValueComponent) -> Result {
+        return defaultVisit(accessibilityValue)
+    }
+    
+    mutating func visitAccessibilityAddTraits(_ accessibilityAddTraits: AccessibilityAddTraitsComponent) -> Result {
+        return defaultVisit(accessibilityAddTraits)
+    }
+    
+    mutating func visitAccessibilityRemoveTraits(_ accessibilityRemoveTraits: AccessibilityRemoveTraitsComponent) -> Result {
+        return defaultVisit(accessibilityRemoveTraits)
     }
     
     mutating func visitAllowsHitTesting(_ allowsHitTesting: AllowsHitTestingComponent) -> Result {
