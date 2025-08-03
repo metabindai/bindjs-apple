@@ -49,6 +49,7 @@ public protocol ComponentVisitor {
     mutating func visitAccessibilityAddTraits(_ accessibilityAddTraits: AccessibilityAddTraitsComponent) -> Result
     mutating func visitAccessibilityRemoveTraits(_ accessibilityRemoveTraits: AccessibilityRemoveTraitsComponent) -> Result
     mutating func visitAllowsHitTesting(_ allowsHitTesting: AllowsHitTestingComponent) -> Result
+    mutating func visitAllowsTightening(_ allowsTightening: AllowsTighteningComponent) -> Result
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result
     mutating func visitBackground(_ background: BackgroundComponent) -> Result
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result
@@ -57,6 +58,7 @@ public protocol ComponentVisitor {
     mutating func visitBorder(_ border: BorderComponent) -> Result
     mutating func visitBrightness(_ brightness: BrightnessComponent) -> Result
     mutating func visitClipped(_ clipped: ClippedComponent) -> Result
+    mutating func visitClipShape(_ clipShape: ClipShapeComponent) -> Result
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result
     mutating func visitColorScheme(_ colorScheme: ColorSchemeComponent) -> Result
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result
@@ -66,6 +68,7 @@ public protocol ComponentVisitor {
     mutating func visitDisabled(_ disabled: DisabledComponent) -> Result
     mutating func visitAutocorrectionDisabled(_ autocorrectionDisabled: AutocorrectionDisabledComponent) -> Result
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result
+    mutating func visitFixedSize(_ fixedSize: FixedSizeComponent) -> Result
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result
     mutating func visitFont(_ font: FontComponent) -> Result
     mutating func visitFontCustom(_ fontCustom: FontCustomComponent) -> Result
@@ -79,8 +82,10 @@ public protocol ComponentVisitor {
     mutating func visitID(_ id: IDComponent) -> Result
     mutating func visitIgnoresSafeArea(_ ignoresSafeArea: IgnoresSafeAreaComponent) -> Result
     mutating func visitItalic(_ italic: ItalicComponent) -> Result
+    mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result
+    mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
@@ -271,6 +276,10 @@ public extension ComponentVisitor {
         return defaultVisit(allowsHitTesting)
     }
     
+    mutating func visitAllowsTightening(_ allowsTightening: AllowsTighteningComponent) -> Result {
+        return defaultVisit(allowsTightening)
+    }
+    
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result {
         return defaultVisit(aspectRatio)
     }
@@ -301,6 +310,10 @@ public extension ComponentVisitor {
     
     mutating func visitClipped(_ clipped: ClippedComponent) -> Result {
         return defaultVisit(clipped)
+    }
+    
+    mutating func visitClipShape(_ clipShape: ClipShapeComponent) -> Result {
+        return defaultVisit(clipShape)
     }
     
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result {
@@ -337,6 +350,10 @@ public extension ComponentVisitor {
     
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result {
         return defaultVisit(dynamicTypeSize)
+    }
+    
+    mutating func visitFixedSize(_ fixedSize: FixedSizeComponent) -> Result {
+        return defaultVisit(fixedSize)
     }
     
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result {
@@ -391,12 +408,20 @@ public extension ComponentVisitor {
         return defaultVisit(italic)
     }
     
+    mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result {
+        return defaultVisit(layoutPriority)
+    }
+    
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result {
         return defaultVisit(lineLimit)
     }
     
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result {
         return defaultVisit(lineSpacing)
+    }
+    
+    mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result {
+        return defaultVisit(minimumScaleFactor)
     }
     
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result {
