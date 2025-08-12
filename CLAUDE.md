@@ -40,6 +40,28 @@ To add a new component to MetabindUI, follow these steps:
    - Add case to the body switch: `case let yourComponent as YourComponent: yourComponent`
    - For modifiers, add to ComponentViewModifier instead
 
-5. **Build and Test**
+5. **Register in JS Runtime** in `Sources/MetabindUI/Resources/JSRuntime.js`
+   - Add the component name to the `componentNames` array (around line 49)
+   - This is REQUIRED for the component to be recognized by the JavaScript runtime
+   - Keep the list alphabetically sorted for consistency
+
+6. **Build and Test**
    - Run `swift build` to ensure everything compiles
    - Components should support initialization from directives with various property names
+
+## Component Implementation Notes
+
+### Color Handling
+- Colors in MetabindUI use the `ColorComponent` type with named colors (e.g., "gray", "primary") or RGBA values
+- For simple color fills in shapes, use SwiftUI's `Color` directly with `.fill()` modifier
+- Default opacity values can be applied using `.opacity()` modifier
+
+### Shape Components Pattern
+- Shape components typically don't need to handle fill/stroke in the component itself
+- The shape's appearance can be modified using SwiftUI's built-in modifiers
+- RoundedRectangle is commonly used for placeholder-style components with customizable corner radius
+
+### Component Initialization
+- Use default values in `init?(from:)` for optional parameters (e.g., `directive["cornerRadius"] ?? 10`)
+- Keep components simple - avoid complex state management unless necessary
+- Components without parameters still need the full protocol implementation

@@ -109,6 +109,7 @@ const componentNames = [
     "Path",
     "PhaseAnimator",
     "Picker",
+    "Placeholder",
     "ProgressView",
     "ReactRepresentable",
     "DOMIdentifable",

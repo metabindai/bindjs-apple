@@ -16,6 +16,7 @@ public protocol ComponentVisitor {
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
+    mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result
     mutating func visitProgressView(_ progressView: ProgressViewComponent) -> Result
     mutating func visitScrollView(_ scrollView: ScrollViewComponent) -> Result
     mutating func visitSection(_ section: SectionComponent) -> Result
@@ -163,6 +164,10 @@ public extension ComponentVisitor {
     
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result {
         return defaultVisit(empty)
+    }
+    
+    mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result {
+        return defaultVisit(placeholder)
     }
     
     mutating func visitProgressView(_ progressView: ProgressViewComponent) -> Result {
