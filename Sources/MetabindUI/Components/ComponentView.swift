@@ -18,6 +18,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case ImageComponent.directiveName: ImageComponent(from: directive)
     case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
     case MaterialComponent.directiveName: MaterialComponent(from: directive)
+    case Model3DComponent.directiveName: Model3DComponent(from: directive)
     case ModifiedComponent.directiveName: ModifiedComponent(from: directive)
     case PlaceholderComponent.directiveName: PlaceholderComponent(from: directive)
     case ProgressViewComponent.directiveName: ProgressViewComponent(from: directive)
@@ -141,6 +142,7 @@ public struct ComponentView: View {
         case let image as ImageComponent: image
         case let linearGradient as LinearGradientComponent: linearGradient
         case let material as MaterialComponent: material
+        case let model3D as Model3DComponent: model3D
         case let modified as ModifiedComponent: modified
         case let placeholder as PlaceholderComponent: placeholder
         case let progressView as ProgressViewComponent: progressView
