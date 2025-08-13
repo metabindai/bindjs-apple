@@ -18,11 +18,17 @@ let package = Package(
             name: "MetabindUI",
             targets: ["MetabindUI"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/exyte/SVGView", from: "1.0.6")
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "MetabindUI",
+            dependencies: [
+                .product(name: "SVGView", package: "SVGView")
+            ],
             resources: [
                 .copy("Resources/JSRuntime.js")
             ]

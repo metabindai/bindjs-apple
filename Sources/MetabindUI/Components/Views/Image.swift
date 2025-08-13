@@ -14,6 +14,7 @@ import ImageIO
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import OSLog
+import SVGView
 
 public struct ImageComponent: Component {
     public static var directiveName: String = "Image"
@@ -21,6 +22,7 @@ public struct ImageComponent: Component {
     public var name: String?
     public var url: URL?
     public var systemName: String?
+    public var svg: String?
     public var resizable: Bool
 }
 
@@ -31,6 +33,7 @@ extension ImageComponent {
         name = directive["name"]
         url = directive["url"]
         systemName = directive["systemName"]
+        svg = directive["svg"]
         resizable = directive["resizable"] ?? true
     }
     
@@ -48,19 +51,76 @@ extension ImageComponent: View {
             } else {
                 Image(name)
             }
+        } else if let svg = svg {
+            SVGImageView(svgData: svg, resizable: resizable)
         } else if let url = url {
-            AsyncImageView(url: url) { image in
-                if resizable {
-                    image.resizable()
-                } else {
-                    image
+            if url.pathExtension.lowercased() == "svg" {
+                SVGURLView(url: url, resizable: resizable)
+            } else {
+                AsyncImageView(url: url) { image in
+                    if resizable {
+                        image.resizable()
+                    } else {
+                        image
+                    }
+                } placeholder: { _ in
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(.quaternary)
                 }
-            } placeholder: { _ in
-                RoundedRectangle(cornerRadius: 0)
-                    .fill(.quaternary)
             }
         } else if let systemName = systemName {
             Image(systemName: systemName)
+        }
+    }
+}
+
+// MARK: - SVG Support Views
+private struct SVGImageView: View {
+    let svgData: String
+    let resizable: Bool
+    
+    var body: some View {
+        SVGView(string: svgData)
+    }
+}
+
+private struct SVGURLView: View {
+    let url: URL
+    let resizable: Bool
+    @State private var svgString: String?
+    @State private var isLoading = true
+    
+    var body: some View {
+        Group {
+            if let svgString = svgString {
+                SVGView(string: svgString)
+            } else {
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(.quaternary)
+                    .task {
+                        await loadSVG()
+                    }
+            }
+        }
+    }
+    
+    private func loadSVG() async {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let string = String(data: data, encoding: .utf8) {
+                await MainActor.run {
+                    self.svgString = string
+                    self.isLoading = false
+                }
+            } else {
+                await MainActor.run {
+                    self.isLoading = false
+                }
+            }
+        } catch {
+            await MainActor.run {
+                self.isLoading = false
+            }
         }
     }
 }
