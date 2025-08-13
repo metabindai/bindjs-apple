@@ -204,8 +204,8 @@ private struct Model3DView: View {
             // Setup lighting
             setupLighting(for: scnScene)
             
-            // Setup camera
-            setupCamera(for: scnScene)
+            // Setup camera with auto-framing
+            setupCameraWithAutoFraming(for: scnScene)
             
             await MainActor.run {
                 self.scene = scnScene
@@ -251,13 +251,50 @@ private struct Model3DView: View {
         scene.rootNode.addChildNode(directionalLight)
     }
     
-    private func setupCamera(for scene: SCNScene) {
+    private func setupCameraWithAutoFraming(for scene: SCNScene) {
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 3)
-        cameraNode.camera?.fieldOfView = 60
-        cameraNode.camera?.zNear = 0.1
-        cameraNode.camera?.zFar = 100
+        
+        // Calculate bounding box of the entire scene
+        let (min, max) = scene.rootNode.boundingBox
+        let boundingBox = SCNVector3(
+            x: max.x - min.x,
+            y: max.y - min.y,
+            z: max.z - min.z
+        )
+        
+        // Calculate the center of the bounding box
+        let center = SCNVector3(
+            x: (min.x + max.x) / 2,
+            y: (min.y + max.y) / 2,
+            z: (min.z + max.z) / 2
+        )
+        
+        // Calculate the maximum dimension of the bounding box
+        let maxDimension = Swift.max(boundingBox.x, Swift.max(boundingBox.y, boundingBox.z))
+        
+        // Position camera at a distance proportional to the model size
+        // Using a factor of 2.5 to ensure the entire model is visible
+        let cameraDistance = maxDimension * 2.5
+        
+        // Position camera looking at the center of the model
+        cameraNode.position = SCNVector3(
+            x: center.x,
+            y: center.y,
+            z: center.z + cameraDistance
+        )
+        
+        // Look at the center of the model
+        cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
+        
+        // Set camera properties
+        cameraNode.camera?.fieldOfView = 45
+        cameraNode.camera?.zNear = 0.01
+        cameraNode.camera?.zFar = cameraDistance * 10
+        
+        // Enable automatic adaptation to lighting
+        cameraNode.camera?.automaticallyAdjustsZRange = true
+        
         scene.rootNode.addChildNode(cameraNode)
     }
 }
