@@ -290,7 +290,7 @@ private struct Model3DView: View {
         // Set camera properties
         cameraNode.camera?.fieldOfView = 45
         cameraNode.camera?.zNear = 0.01
-        cameraNode.camera?.zFar = cameraDistance * 10
+        cameraNode.camera?.zFar = Double(cameraDistance * 10)
         
         // Enable automatic adaptation to lighting
         cameraNode.camera?.automaticallyAdjustsZRange = true
