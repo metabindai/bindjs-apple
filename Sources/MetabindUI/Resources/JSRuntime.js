@@ -71,6 +71,7 @@ const componentNames = [
     "Capsule",
     "EmptyModifier",
     "EmptyView",
+    "Empty",
     "EquatableView",
     "EnvironmentValue",
     "ForEach",
@@ -100,6 +101,7 @@ const componentNames = [
     "Menu",
     "MenuButton",
     "MultiDatePicker",
+    "Model3D",
     "NavigationLink",
     "NavigationSplitView",
     "NavigationStack",
@@ -583,6 +585,19 @@ function GenericComponent({ args }) {
     /**
      * Execute children
      */
+    const childrenAST = processChildren.bind(this)(children);
+
+    return { props, children: childrenAST }
+}
+
+function processChildren(children) {
+    if (!children) {
+        return [];
+    }
+
+    /**
+     * Execute children
+     */
     const childrenAST = (children ?? []).flatMap((child, index) => {
         this.hookState.childIndex = index;
 
@@ -596,7 +611,7 @@ function GenericComponent({ args }) {
     // Reset
     this.hookState.childIndex = 0;
 
-    return { props, children: childrenAST }
+    return childrenAST
 }
 
 function processComponentArgs(arg1, arg2) {
@@ -665,6 +680,7 @@ const propertyNameMap = {
     'PropertyContent' : 'content',
     'PropertyComponent': 'component',
     'PropertyComponentList': 'componentList',
+    'PropertyChildren' : 'children',
 };
 
 function PropertyComponent({ args, name }) {
@@ -673,6 +689,74 @@ function PropertyComponent({ args, name }) {
     const result = {
         type: propertyNameMap[name] || 'unknown',
         ...props,
+    };
+    
+    return result;
+}
+
+function LayoutGroup({ args, name }) {
+    const props = args?.[0] || {};
+
+    const result = {
+        ...props,
+    };
+    
+    return result;
+}
+
+function ComposerGroup({ args, name }) {
+    const props = { };
+
+    const env = this.environment;
+    var children = null;
+
+    if (args) {
+        if (args[0] && args[1] || (typeof args[0] === 'object' && !Array.isArray(args[0])) || typeof args[0] === 'string') {
+            // If the first argument is an object, treat it as props
+            if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
+                Object.assign(props, args[0]);
+
+            } else if (typeof args[0] === 'string') {
+                // Otherwise, treat the first argument as a raw value
+                props.rawValue = args[0];
+            }
+
+            if (args[1]) {
+                children = args[1];
+            }
+
+        } else if (args[0]) {
+            // If the first argument is an array, treat it as children
+            children = args[0] ?? [];
+        }
+    }
+
+    if (!children) {
+        let propName = props.property || props.rawValue || props.group;
+        if (propName == 'children') {
+            children = env?.content?.children || [];
+        } else {
+            children = env?.content?.layoutProps?.[props.rawValue ?? props.property] || [];
+        }
+    }
+
+    const childrenAST = processChildren.bind(this)(children).filter(child => {
+        return true
+        // const groupName = props.group || props.rawValue;
+
+        // const childGroupName = child?.props?.group;
+
+        // if (!groupName && !childGroupName) {
+        //     return true
+        // }
+
+        // return (childGroupName === groupName)
+    });
+
+    
+    const result = {
+        props: this.processProps(props),
+        children: childrenAST
     };
     
     return result;
@@ -706,28 +790,18 @@ function extractPropsByType(node, typeName) {
 function FontModifier({ args, content }) {
     const [arg] = args;
 
-    // Try to pull out the FontCustom props
     const customProps = extractPropsByType(arg, 'FontCustom');
-
-    if (customProps) {
-        // Reconstruct the original FontCustom AST node
-        const fontCustomNode = AST.Directive(
-            'FontCustom',
-            customProps,
-            []            // or pass along children if you had any
-        );
     
-        // Return that node as the rawValue of your .font modifier
-        return {
-            props: { rawValue: fontCustomNode },
-            children: content
-        };
+    let options = {};
+    if (customProps) {
+        options = { custom: customProps };
+    } else {
+        options = { rawValue: arg };
     }
 
-    // No FontCustom found?  Fall back to whatever your default is:
     return {
-        props: { rawValue: arg },
-        children: content
+        props: options,
+        children: content,
     };
 }
 
@@ -822,7 +896,7 @@ function Content({ args }) {
     const id = this.currentPathId('Content');
     const environmentId = this.storeEnvironment(id);
 
-    const contentId = typeof args[0] === 'object' ? args[0]?.content : args[0];
+    const contentId = typeof args[0] === 'object' ? args[0]?._content : args[0];
 
     const props = {
         environmentId,
@@ -916,6 +990,7 @@ function convertComponentProps(props) {
     if (props == null || typeof props !== 'object') return props;
 
     const callFn = this.call?.bind(this);
+    const makeComponent = this.makeComponent?.bind(this);
 
     function process(item) {
         // Fast-path array
@@ -933,8 +1008,21 @@ function convertComponentProps(props) {
 
         // Fast-path component call
         if (item && typeof item === 'object') {
+            // Check for component-like structure with componentId and name
             if (item.componentId != null && item.name && callFn) {
-                const result = callFn(item.name, 'body', item.props);
+
+                // Wrap in makeComponent, so the function is called at runtime (rather than parsing of props time)
+                // So environment works correctly.
+                const result = makeComponent(() => {
+                    return callFn(item.name, 'body', item.props);
+                });
+                //callFn(item.name, 'body', item.props);
+                return [result, true];
+            }
+
+            // Check for component-like structure
+            if (item.id != null && item.type && item.props && callFn) {
+                const result = callFn(item.type, 'body', item.props);
                 return [result, true];
             }
 
@@ -1158,9 +1246,15 @@ class YapJSRuntime {
         // Register animation modifiers
         ['delay', 'speed', 'repeatCount', 'repeatForever'].map(name => this.#registerBuiltInModifier(name, AnimationModifier));
         
-        ['PropertyString', 'PropertyNumber', 'PropertyEnum', 'PropertyBoolean', 'PropertyArray', 'PropertyAsset', 'PropertyContent', 'PropertyComponent', 'PropertyDate', 'PropertyGroup', 'PropertyComponentList'].map(name => {
+        ['PropertyString', 'PropertyNumber', 'PropertyEnum', 'PropertyBoolean', 'PropertyArray', 'PropertyAsset', 'PropertyContent', 'PropertyComponent', 'PropertyDate', 'PropertyGroup', 'PropertyChildren', 'PropertyComponentList'].map(name => {
             this.#registerHelperComponent(name, PropertyComponent);
         });
+
+        this.#registerBuiltInComponent('ComposerGroup', ComposerGroup);
+        this.#registerBuiltInComponent('ComposerChildren', ComposerGroup);
+
+        // Register layout group
+        this.#registerHelperComponent('LayoutGroup', LayoutGroup);
 
         // Regster environment value modiifer
         this.#registerBuiltInModifier('environment', EnvironmentValue);
@@ -1280,7 +1374,7 @@ class YapJSRuntime {
      * @param {*} environment
      */
     registerEnvironment(environment = {}) {
-        this.storedEnvironments = {};
+        //this.storedEnvironments = {}
         this.environment = environment;
     }
 
