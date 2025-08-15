@@ -9,9 +9,12 @@ struct ComponentRegistry {
         }
     }
     
-    func makeComponent(_ name: String, props: [String: Any], children: [Component]) -> AnyView? {
+    func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: ComponentContext) -> AnyView? {
         guard let builder = components[name] else { return nil }
-        return builder(props, children)
+        return AnyView(
+            builder(props, children)
+                .environmentObject(componentContext)
+        )
     }
 }
 

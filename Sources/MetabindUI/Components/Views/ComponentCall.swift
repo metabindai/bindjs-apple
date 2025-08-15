@@ -34,9 +34,8 @@ public struct ComponentCall: Component {
 extension ComponentCall: View {
     
     public var body: some View {
-        if let resolved = componentRegistry.makeComponent(name, props: props, children: children) {
+        if let resolved = componentRegistry.makeComponent(name, props: props, children: children, componentContext: componentContext) {
             resolved
-                .environmentObject(componentContext)
         } else {
             ForEach(children.indices, id: \.self) { index in
                 ComponentView(children[index])
