@@ -1419,7 +1419,22 @@ class YapJSRuntime {
      * AppState
      */
     registerAppState(state) {
+        const oldState = this.appState || {};
         this.appState = state;
+        
+        // Notify listeners of all changes
+        for (const key in state) {
+            if (oldState[key] !== state[key]) {
+                this.onUpdateAppState(key, state[key], this.appState);
+            }
+        }
+        
+        // Notify about removed keys
+        for (const key in oldState) {
+            if (!(key in state)) {
+                this.onUpdateAppState(key, undefined, this.appState);
+            }
+        }
     }
 
     updatedAppState(key, value, newState, completionCallback) {
