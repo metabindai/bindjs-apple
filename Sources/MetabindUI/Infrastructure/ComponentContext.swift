@@ -6,6 +6,7 @@ public class ComponentContext: ObservableObject {
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
+    private var appState: [String: Any] = [:]
 
     public init() {
         jsContext = JSContext()!
@@ -20,6 +21,7 @@ public class ComponentContext: ObservableObject {
         setupWithAnimation()
         setupNavigate()
         setupPerformAction()
+        setupAppStateListener()
     }
 
     private func setupConsoleLog() {
@@ -285,5 +287,33 @@ public class ComponentContext: ObservableObject {
     
     public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
         self.navigateCallback = callback
+    }
+    
+    // MARK: - App State Management
+    
+    private func setupAppStateListener() {
+        let onUpdateAppStateFunction: @convention(block) (String, JSValue, JSValue) -> Void = { [weak self] key, value, state in
+            guard let self = self else { return }
+            
+            // Convert JSValue to Swift objects
+            let swiftValue = value.toObject()
+            let swiftState = state.toObject() as? [String: Any] ?? [:]
+            
+            // Update internal app state
+            self.appState = swiftState
+            
+            // Trigger UI update
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
+        }
+        
+        jsContext.setObject(onUpdateAppStateFunction, forKeyedSubscript: "onUpdateAppState" as NSString)
+        _ = jsContext.evaluateScript("runtime.onUpdateAppState = onUpdateAppState")
+    }
+    
+    public func setAppState(_ state: [String: Any]) -> Self {
+        runtime.invokeMethod("setAppState", withArguments: [state])
+        return self
     }
 }

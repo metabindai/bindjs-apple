@@ -940,6 +940,28 @@ function useState(initialValue) {
     return [hooks[this.hookState.currentComponent.hookIndex++], callback]
 }
 
+function useAppState(key, defaultValue) {
+    const rerenderCallback = this.needsRerender;
+    const rendererId = this.rendererId;
+
+    const set = (newValue) => {
+
+        // Update the app state with the new value
+        this.updatedAppState(key, newValue, (prevState) => {
+            // Check if the value has changed
+            if (prevState[key] !== newValue) {
+                return { ...prevState, [key]: newValue };
+            }
+            return prevState;  // No change, return previous state
+        }, () => {
+            // Trigger a re-render if the state has changed
+            rerenderCallback(rendererId);
+        });
+    };
+
+    return [this.appState[key] ?? defaultValue, set];
+}
+
 function useNavigate() {
     return this.navigateCallback
 }
@@ -1135,13 +1157,25 @@ class YapJSRuntime {
         this.hookState = {};
         this.modifierRegistry = { GenericModifier };
         this.componentRegistry = { GenericComponent };
+
+        // Default app state that can be managed by the renderer. Can be overridden by the renderer.
+        this.appState = { };
+
         this.resetState();
         this.registerBuiltInCallbacks();
         this.registerASTComponents(componentNames);
         this.needsRerender = () => {
             console.log('Needs rerender not implemented');
         };
-        
+
+        // Callback to update the app state.
+        // Renderers will want to override this to know when the app state has changed
+        // and to update the appropriate storage.
+        this.onUpdateAppState = (key, value, state) => {
+            // Default implementation.
+            this.appState[key] = value;
+        };
+
         this.navigateCallback = (path, options) => {
             console.log('Navigate not implemented', path, options);
         };
@@ -1280,6 +1314,9 @@ class YapJSRuntime {
         this.registerCallback('useState', useState.bind(this));
 
         // useState
+        this.registerCallback('useAppState', useAppState.bind(this));
+
+        // useNavigate
         this.registerCallback('useNavigate', useNavigate.bind(this));
 
         // makeComponent
@@ -1376,6 +1413,23 @@ class YapJSRuntime {
     registerEnvironment(environment = {}) {
         //this.storedEnvironments = {}
         this.environment = environment;
+    }
+
+    /**
+     * AppState
+     */
+    registerAppState(state) {
+        this.appState = state;
+    }
+
+    updatedAppState(key, value, newState, completionCallback) {
+        // Execute the callback to let the renderer know the app state has changed
+        this.onUpdateAppState(key, value, newState(this.appState));
+
+        // If the app state has changed, trigger a re-render
+        if (completionCallback) {
+            completionCallback();
+        }
     }
 
     /**
@@ -1794,5 +1848,6 @@ Object.assign(this, {
     willRender: () => runtime.willRender(),
     debug: () => console.log(customJSONStringify(runtime.components)),
     reset: () => runtime.reset(),
+    setAppState: (state) => runtime.registerAppState(state),
 });
 
