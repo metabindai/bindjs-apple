@@ -13,9 +13,9 @@ public protocol ComponentRepresentable {
 public struct ComponentRepresentableContext {
     public let children: [Component]
     public let props: [String: Any]
-    public let componentContext: ComponentContext?
+    public let componentContext: ComponentContext
     
-    public init(children: [Component], props: [String: Any], componentContext: ComponentContext? = nil) {
+    public init(children: [Component], props: [String: Any], componentContext: ComponentContext) {
         self.children = children
         self.props = props
         self.componentContext = componentContext

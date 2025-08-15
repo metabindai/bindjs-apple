@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct ComponentRegistry {
-    var components: [String: ([String: Any], [Component], ComponentContext?) -> AnyView] = [:]
+    var components: [String: ([String: Any], [Component], ComponentContext) -> AnyView] = [:]
     
-    mutating func register<C: View>(_ name: String, @ViewBuilder build: @escaping (_ props: [String: Any], _ children: [Component], _ componentContext: ComponentContext?) -> C) {
+    mutating func register<C: View>(_ name: String, @ViewBuilder build: @escaping (_ props: [String: Any], _ children: [Component], _ componentContext: ComponentContext) -> C) {
         components[name] = { props, children, context in
             AnyView(build(props, children, context))
         }
