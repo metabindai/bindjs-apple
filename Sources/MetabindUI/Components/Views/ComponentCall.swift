@@ -3,6 +3,7 @@ import SwiftUI
 public struct ComponentCall: Component {
     public static var directiveName: String = "ComponentCall"
     @Environment(\.componentRegistry) private var componentRegistry
+    @EnvironmentObject private var componentContext: ComponentContext
     
     public let directive: Directive
     public var children: [Component]
@@ -35,6 +36,7 @@ extension ComponentCall: View {
     public var body: some View {
         if let resolved = componentRegistry.makeComponent(name, props: props, children: children) {
             resolved
+                .environmentObject(componentContext)
         } else {
             ForEach(children.indices, id: \.self) { index in
                 ComponentView(children[index])
