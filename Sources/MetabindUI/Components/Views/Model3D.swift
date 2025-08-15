@@ -5,7 +5,8 @@ import OSLog
 
 // MARK: - Model3DComponent
 /// A SwiftUI component that displays a GLTF/GLB model using SceneKit with production-ready
-/// threading, caching, lifecycle, and error handling.
+/// threading, caching, lifecycle, and error handling. This version fixes transparency by using
+/// a custom SCNView wrapper that disables opacity on the backing view/layer.
 public struct Model3DComponent: Component {
     public static var directiveName: String = "Model3D"
 
@@ -29,7 +30,7 @@ public struct Model3DComponent: Component {
     public var preferredFPS: Int
     /// Scene antialiasing. Default 4x.
     public var antialiasing: SCNAntialiasingMode
-    /// Background color for the SceneView.
+    /// Background color for the SceneView. (Kept for API stability; the SCNView itself is forced clear.)
     public var backgroundColor: Color
 
     /// Enable HDR rendering and tone mapping.
@@ -88,7 +89,7 @@ extension Model3DComponent {
         fixZUp = directive["fixZUp"] ?? false
         resourceBundle = .main
     }
-    
+
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
         visitor.visitModel3D(self)
     }
@@ -126,6 +127,73 @@ private final class SceneCache {
     func set(_ scene: SCNScene, for key: String) { cache.setObject(scene, forKey: key as NSString) }
 }
 
+// MARK: - Transparent SCNView wrapper
+#if os(iOS) || os(tvOS)
+typealias ViewRepresentable = UIViewRepresentable
+#elseif os(macOS)
+typealias ViewRepresentable = NSViewRepresentable
+#endif
+
+/// A representable that makes the backing SCNView truly transparent.
+/// - Forces clear background and sets both view and layer as non-opaque.
+/// - Leaves actual scene background clear as well.
+private struct TransparentSceneView: ViewRepresentable {
+    var scene: SCNScene
+    var pointOfView: SCNNode?
+    var allowsCameraControl: Bool
+    var preferredFPS: Int
+    var antialiasing: SCNAntialiasingMode
+
+    #if os(iOS) || os(tvOS)
+    func makeUIView(context: Context) -> SCNView { make() }
+    func updateUIView(_ v: SCNView, context: Context) { update(v) }
+    #elseif os(macOS)
+    func makeNSView(context: Context) -> SCNView { make() }
+    func updateNSView(_ v: SCNView, context: Context) { update(v) }
+    #endif
+
+    private func make() -> SCNView {
+        let v = SCNView(frame: .zero)
+        v.scene = scene
+        v.pointOfView = pointOfView
+        v.allowsCameraControl = allowsCameraControl
+        v.preferredFramesPerSecond = preferredFPS
+        v.antialiasingMode = antialiasing
+
+        // 🔑 True transparency across Metal/GL & platforms
+        v.backgroundColor = .clear
+        #if os(macOS)
+        v.wantsLayer = true
+        v.layer?.isOpaque = false
+        #else
+        v.isOpaque = false
+        v.layer.isOpaque = false
+        #endif
+
+        v.scene?.background.contents = PlatformColor.clear
+        return v
+    }
+
+    private func update(_ v: SCNView) {
+        v.scene = scene
+        v.pointOfView = pointOfView
+        v.allowsCameraControl = allowsCameraControl
+        v.preferredFramesPerSecond = preferredFPS
+        v.antialiasingMode = antialiasing
+
+        v.backgroundColor = .clear
+        #if os(macOS)
+        v.wantsLayer = true
+        v.layer?.isOpaque = false
+        #else
+        v.isOpaque = false
+        v.layer.isOpaque = false
+        #endif
+
+        v.scene?.background.contents = PlatformColor.clear
+    }
+}
+
 // MARK: - Internal View
 private struct Model3DView: View {
     let name: String?
@@ -155,18 +223,17 @@ private struct Model3DView: View {
         GeometryReader { geometry in
             ZStack {
                 if let scene, let pov = cameraNode {
-                    SceneView(
+                    // Replaces SwiftUI.SceneView to guarantee transparent background
+                    TransparentSceneView(
                         scene: scene,
                         pointOfView: pov,
-                        options: cameraControl ? [.allowsCameraControl] : [],
-                        preferredFramesPerSecond: preferredFPS,
-                        antialiasingMode: antialiasing,
-                        delegate: nil,
-                        technique: nil
+                        allowsCameraControl: cameraControl,
+                        preferredFPS: preferredFPS,
+                        antialiasing: antialiasing
                     )
-                    .background(backgroundColor)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .accessibilityLabel("3D model viewer")
+                    // NOTE: Do NOT add a non-clear SwiftUI background here.
                 } else if let error = loadError {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(.quaternary)
@@ -182,8 +249,9 @@ private struct Model3DView: View {
                         .fill(.quaternary)
                         .overlay(ProgressView().progressViewStyle(CircularProgressViewStyle()))
                 } else {
+                    // Keep placeholder UI but ensure it's visually neutral
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(.quaternary)
+                        .fill(.clear)
                         .overlay(
                             Text("No model specified").foregroundColor(.secondary)
                         )
@@ -502,3 +570,4 @@ public typealias PlatformColor = UIColor
 import AppKit
 public typealias PlatformColor = NSColor
 #endif
+
