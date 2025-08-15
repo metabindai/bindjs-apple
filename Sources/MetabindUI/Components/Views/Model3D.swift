@@ -6,7 +6,8 @@ import OSLog
 // MARK: - Model3DComponent
 /// A SwiftUI component that displays a GLTF/GLB model using SceneKit with production-ready
 /// threading, caching, lifecycle, and error handling. This version fixes transparency by using
-/// a custom SCNView wrapper that disables opacity on the backing view/layer.
+/// a custom SCNView wrapper that disables opacity on the backing view/layer, and frames the
+/// model to fit the current viewport using the camera FOV and aspect ratio.
 public struct Model3DComponent: Component {
     public static var directiveName: String = "Model3D"
 
@@ -30,7 +31,7 @@ public struct Model3DComponent: Component {
     public var preferredFPS: Int
     /// Scene antialiasing. Default 4x.
     public var antialiasing: SCNAntialiasingMode
-    /// Background color for the SceneView. (Kept for API stability; the SCNView itself is forced clear.)
+    /// Background color for the SceneView. (Kept for API stability; SCNView is forced clear.)
     public var backgroundColor: Color
 
     /// Enable HDR rendering and tone mapping.
@@ -216,6 +217,7 @@ private struct Model3DView: View {
     @State private var isLoading = false
     @State private var loadError: String?
     @State private var cacheKey: String = ""
+    @State private var viewportSize: CGSize = .zero
 
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Model3D", category: "Model3DView")
 
@@ -223,7 +225,7 @@ private struct Model3DView: View {
         GeometryReader { geometry in
             ZStack {
                 if let scene, let pov = cameraNode {
-                    // Replaces SwiftUI.SceneView to guarantee transparent background
+                    // Transparent SceneKit view
                     TransparentSceneView(
                         scene: scene,
                         pointOfView: pov,
@@ -233,7 +235,6 @@ private struct Model3DView: View {
                     )
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .accessibilityLabel("3D model viewer")
-                    // NOTE: Do NOT add a non-clear SwiftUI background here.
                 } else if let error = loadError {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(.quaternary)
@@ -249,7 +250,6 @@ private struct Model3DView: View {
                         .fill(.quaternary)
                         .overlay(ProgressView().progressViewStyle(CircularProgressViewStyle()))
                 } else {
-                    // Keep placeholder UI but ensure it's visually neutral
                     RoundedRectangle(cornerRadius: 10)
                         .fill(.clear)
                         .overlay(
@@ -257,6 +257,28 @@ private struct Model3DView: View {
                         )
                 }
             }
+            // Track and react to viewport size for proper "scale to fit"
+            .background(
+                Color.clear
+                    .onAppear {
+                        viewportSize = geometry.size
+                    }
+                    .onChange(of: geometry.size) { newSize in
+                        viewportSize = newSize
+                        // Reframe when the size changes
+                        if let scene,
+                           let container = scene.rootNode.childNode(withName: "container", recursively: false) {
+                            Task { @MainActor in
+                                _ = setupCameraWithAutoFraming(
+                                    for: scene,
+                                    target: container,
+                                    viewportSize: newSize,
+                                    padding: 1.08
+                                )
+                            }
+                        }
+                    }
+            )
             .task(id: effectiveURLKey) { // reload when the input URL/name changes
                 await loadIfNeeded()
             }
@@ -340,7 +362,13 @@ private struct Model3DView: View {
                 scnScene.rootNode.addChildNode(container)
 
                 setupLighting(for: scnScene)
-                let pov = setupCameraWithAutoFraming(for: scnScene, target: container)
+                // Use the latest known viewport size; if zero, a sensible default fit will still occur.
+                let pov = setupCameraWithAutoFraming(
+                    for: scnScene,
+                    target: container,
+                    viewportSize: viewportSize == .zero ? CGSize(width: 800, height: 600) : viewportSize,
+                    padding: 1.08
+                )
 
                 // Cache
                 SceneCache.shared.set(scnScene, for: key)
@@ -402,8 +430,6 @@ private struct Model3DView: View {
 
     // Use cached scene
     @MainActor private func buildSceneUsingCached(_ cached: SCNScene, cacheKey: String) throws {
-        // Copy the cached scene so we can safely mutate camera/IBL per instance if desired.
-        // (SCNScene is a reference type; when reusing, avoid double-adding nodes.)
         let scnScene = cached
 
         // Ensure environment and HDR settings are applied (idempotent)
@@ -425,8 +451,13 @@ private struct Model3DView: View {
 
         updateAutoRotate(autoRotate, on: container)
 
-        // Reframe & camera
-        let pov = setupCameraWithAutoFraming(for: scnScene, target: container)
+        // Reframe & camera with current viewport size
+        let pov = setupCameraWithAutoFraming(
+            for: scnScene,
+            target: container,
+            viewportSize: viewportSize == .zero ? CGSize(width: 800, height: 600) : viewportSize,
+            padding: 1.08
+        )
 
         // Commit state
         self.scene = scnScene
@@ -464,8 +495,13 @@ private struct Model3DView: View {
         scene.rootNode.addChildNode(directionalLight)
     }
 
-    /// Creates and positions a camera that frames the target's world bounds.
-    @MainActor private func setupCameraWithAutoFraming(for scene: SCNScene, target: SCNNode) -> SCNNode {
+    /// Creates and positions a camera that frames the target's world bounds to fit the viewport.
+    @MainActor private func setupCameraWithAutoFraming(
+        for scene: SCNScene,
+        target: SCNNode,
+        viewportSize: CGSize,
+        padding: CGFloat = 1.08
+    ) -> SCNNode {
         // Remove old camera if any
         if let old = cameraNode { old.removeFromParentNode() }
 
@@ -476,7 +512,7 @@ private struct Model3DView: View {
 
         // Compute world-space bounds
         let (localMin, localMax) = target.boundingBox
-        let corners = [
+        let cornersLocal = [
             SCNVector3(localMin.x, localMin.y, localMin.z),
             SCNVector3(localMin.x, localMin.y, localMax.z),
             SCNVector3(localMin.x, localMax.y, localMin.z),
@@ -486,7 +522,7 @@ private struct Model3DView: View {
             SCNVector3(localMax.x, localMax.y, localMin.z),
             SCNVector3(localMax.x, localMax.y, localMax.z)
         ]
-        let worldCorners = corners.map { target.convertPosition($0, to: nil) }
+        let worldCorners = cornersLocal.map { target.convertPosition($0, to: nil) }
         var minCorner = worldCorners.first ?? SCNVector3Zero
         var maxCorner = worldCorners.first ?? SCNVector3Zero
         for c in worldCorners {
@@ -500,9 +536,31 @@ private struct Model3DView: View {
 
         let size = SCNVector3(maxCorner.x - minCorner.x, maxCorner.y - minCorner.y, maxCorner.z - minCorner.z)
         let center = SCNVector3((minCorner.x + maxCorner.x)/2, (minCorner.y + maxCorner.y)/2, (minCorner.z + maxCorner.z)/2)
-        let maxDimension = max(size.x, max(size.y, size.z))
-        let epsilon: Float = 1e-4
-        let distance = max(0.5, Double(max(Float(maxDimension), epsilon)) * 2.5)
+
+        // Camera parameters
+        let fovDegrees: CGFloat = 45
+        cameraNode.camera?.fieldOfView = fovDegrees
+        let fov = fovDegrees * .pi / 180
+
+        // Guard against zero/invalid size; choose a sane default aspect
+        let aspect: CGFloat = {
+            let w = max(1, viewportSize.width)
+            let h = max(1, viewportSize.height)
+            return w / h
+        }()
+
+        // Distances required to fit height and width
+        let halfH = max(0.001, CGFloat(size.y) / 2)
+        let halfW = max(0.001, CGFloat(size.x) / 2)
+
+        // Height fit: tan(vFOV/2) covers half viewport height
+        let distForHeight = halfH / tan(fov / 2)
+
+        // Width fit: tan(hFOV/2) = aspect * tan(vFOV/2)
+        let distForWidth = halfW / (aspect * tan(fov / 2))
+
+        // Pick the larger distance, add a little padding
+        let distance = max(distForHeight, distForWidth) * padding
 
         #if os(iOS) || os(tvOS) || os(watchOS)
         cameraNode.position = SCNVector3(center.x, center.y, center.z + Float(distance))
@@ -511,9 +569,12 @@ private struct Model3DView: View {
         #endif
         cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
 
-        cameraNode.camera?.fieldOfView = 45
-        cameraNode.camera?.zNear = 0.01
-        cameraNode.camera?.zFar  = distance * 50
+        cameraNode.camera?.zNear = 0.001
+        #if os(iOS) || os(tvOS) || os(watchOS)
+        cameraNode.camera?.zFar = Double(distance) * 100.0
+        #elseif os(macOS)
+        cameraNode.camera?.zFar = CGFloat(distance) * 100.0
+        #endif
         cameraNode.camera?.automaticallyAdjustsZRange = true
 
         scene.rootNode.addChildNode(cameraNode)
@@ -570,4 +631,3 @@ public typealias PlatformColor = UIColor
 import AppKit
 public typealias PlatformColor = NSColor
 #endif
-
