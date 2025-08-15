@@ -7,6 +7,7 @@ public class ComponentContext: ObservableObject {
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
     private var appState: [String: Any] = [:]
+    private var appStateCallback: ((String, Any) -> Void)?
 
     public init() {
         jsContext = JSContext()!
@@ -306,6 +307,11 @@ public class ComponentContext: ObservableObject {
             DispatchQueue.main.async {
                 self.objectWillChange.send()
             }
+            
+            // Notify Listener
+            if let swiftValue {
+                self.appStateCallback?(key, swiftValue)
+            }
         }
         
         jsContext.setObject(onUpdateAppStateFunction, forKeyedSubscript: "onUpdateAppState" as NSString)
@@ -315,5 +321,11 @@ public class ComponentContext: ObservableObject {
     public func setAppState(_ state: [String: Any]) -> Self {
         runtime.invokeMethod("setAppState", withArguments: [state])
         return self
+    }
+    
+    public func onAppStateChanged(
+        _ callback: @escaping (String, Any) -> Void
+    ) {
+        self.appStateCallback = callback
     }
 }
