@@ -83,7 +83,7 @@ extension Model3DComponent {
         preferredFPS = Int(directive["preferredFPS"] ?? 60)
         antialiasing = .multisampling4X
         backgroundColor = .clear
-        wantsHDR = directive["wantsHDR"] ?? true
+        wantsHDR = directive["wantsHDR"] ?? false
         environmentMapName = directive["environmentMapName"]
         fixZUp = directive["fixZUp"] ?? false
         resourceBundle = .main
