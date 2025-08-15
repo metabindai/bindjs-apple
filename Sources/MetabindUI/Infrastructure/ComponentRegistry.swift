@@ -27,6 +27,7 @@ extension View {
         transformEnvironment(\.componentRegistry) { registry in
             registry.register(component.name) { props, children in
                 component.makeView(context: .init(children: children, props: props))
+                    .environmentObject(ComponentContext())
             }
         }
     }
