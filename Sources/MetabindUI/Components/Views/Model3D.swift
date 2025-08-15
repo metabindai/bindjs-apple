@@ -193,8 +193,8 @@ private struct Model3DView: View {
                 await loadIfNeeded()
             }
             .onDisappear { cleanup() }
-            .onChange(of: autoRotate) { _, newValue in
-                updateAutoRotate(newValue)
+            .task(id: autoRotate) {
+                updateAutoRotate(autoRotate)
             }
         }
     }
@@ -436,7 +436,11 @@ private struct Model3DView: View {
         let epsilon: Float = 1e-4
         let distance = max(0.5, Double(max(Float(maxDimension), epsilon)) * 2.5)
 
+        #if os(iOS) || os(tvOS) || os(watchOS)
+        cameraNode.position = SCNVector3(center.x, center.y, center.z + Float(distance))
+        #elseif os(macOS)
         cameraNode.position = SCNVector3(center.x, center.y, center.z + CGFloat(distance))
+        #endif
         cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
 
         cameraNode.camera?.fieldOfView = 45
