@@ -22,7 +22,7 @@ extension EnvironmentValues {
 }
 
 extension View {
-    public func component<R: ComponentRepresentable>(_ component: R) -> some View {
+    public func withComponent<R: ComponentRepresentable>(_ component: R) -> some View {
         transformEnvironment(\.componentRegistry) { registry in
             registry.register(component.name) { props, children, componentContext in
                 component.makeView(context: .init(
