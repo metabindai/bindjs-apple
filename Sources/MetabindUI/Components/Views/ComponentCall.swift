@@ -40,6 +40,7 @@ extension ComponentCall: View {
             ForEach(children.indices, id: \.self) { index in
                 ComponentView(children[index])
             }
+            .environment(\.componentCall, self)
         }
     }
 }
@@ -48,4 +49,8 @@ extension ComponentCall: CustomStringConvertible {
     public var description: String {
         "\(name)(props: \(props))"
     }
+}
+
+extension EnvironmentValues {
+    @Entry var componentCall: ComponentCall?
 }
