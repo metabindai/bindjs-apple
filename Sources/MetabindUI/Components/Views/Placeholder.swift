@@ -24,11 +24,14 @@ extension PlaceholderComponent {
 extension PlaceholderComponent: View {
     public var body: some View {
         if let enclosingCall {
-            let _ = {
-                print(enclosingCall)
-            }()
+            if let resolved = componentRegistry.makeComponent(name, props: enclosingCall.props, children: enclosingCall.children, componentContext: componentContext) {
+                resolved
+            } else {
+                defaultPlaceholder
+            }
+        } else {
+            defaultPlaceholder
         }
-        defaultPlaceholder
     }
     
     var defaultPlaceholder: some View {
