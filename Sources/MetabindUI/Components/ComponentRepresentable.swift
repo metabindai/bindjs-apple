@@ -1,9 +1,13 @@
 import SwiftUI
 
-public protocol ComponentRepresentable {
+public protocol DefaultInitializable {
+    init()
+}
+
+public protocol ComponentRepresentable: DefaultInitializable {
     associatedtype Body: View
     
-    var name: String { get }
+    static var name: String { get }
     @ViewBuilder
     func makeView(context: Self.Context) -> Self.Body
     
