@@ -4,14 +4,10 @@ public protocol DefaultInitializable {
     init()
 }
 
-public protocol ComponentRepresentable: DefaultInitializable, DynamicProperty {
-    associatedtype Body: View
-    
+public protocol ComponentRepresentable: View, DefaultInitializable {
     static var name: String { get }
-    @ViewBuilder
-    func makeView(context: Self.Context) -> Self.Body
     
-    typealias Context = ComponentRepresentableContext
+    var context: ComponentRepresentableContext { get set }
 }
 
 public struct ComponentRepresentableContext {
