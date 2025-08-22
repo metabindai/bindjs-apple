@@ -4,7 +4,7 @@ public protocol DefaultInitializable {
     init()
 }
 
-public protocol ComponentRepresentable: DefaultInitializable {
+public protocol ComponentRepresentable: DefaultInitializable, DynamicProperty {
     associatedtype Body: View
     
     static var name: String { get }
