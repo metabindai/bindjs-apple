@@ -1,16 +1,17 @@
 import SwiftUI
 
 struct ComponentRegistry {
-    var components: [String: (ComponentRepresentableContext) -> AnyView] = [:]
+    var components: [String: (ComponentRepresentableContext) -> any View] = [:]
     
-    func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: ComponentContext) -> AnyView? {
+    func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: ComponentContext, environmentValues: EnvironmentValues) -> AnyView? {
         guard let builder = components[name] else { return nil }
-        let context = ComponentRepresentableContext(
+        let c = ComponentRepresentableContext(
             children: children,
             props: props,
-            componentContext: componentContext
+            componentContext: componentContext,
+            environmentValues: environmentValues
         )
-        return builder(context)
+        return AnyView(builder(c))
     }
 }
 
@@ -21,11 +22,7 @@ extension EnvironmentValues {
 extension View {
     public func withComponent<R: ComponentRepresentable>(_ component: R.Type) -> some View {
         transformEnvironment(\.componentRegistry) { registry in
-            registry.components[R.name] = { context in
-                var instance = R.init()
-                instance.context = context
-                return AnyView(instance)
-            }
+            registry.components[R.name] = R.makeView(context:)
         }
     }
 }

@@ -5,6 +5,7 @@ public struct PlaceholderComponent: Component {
     @Environment(\.componentCall) private var enclosingCall
     @Environment(\.componentRegistry) private var componentRegistry
     @EnvironmentObject private var componentContext: ComponentContext
+    @Environment(\.self) private var environmentValues
     
     let name: String
 }
@@ -24,7 +25,7 @@ extension PlaceholderComponent {
 extension PlaceholderComponent: View {
     public var body: some View {
         if let enclosingCall {
-            if let resolved = componentRegistry.makeComponent(name, props: enclosingCall.props, children: enclosingCall.children, componentContext: componentContext) {
+            if let resolved = componentRegistry.makeComponent(name, props: enclosingCall.props, children: enclosingCall.children, componentContext: componentContext, environmentValues: environmentValues) {
                 resolved
             } else {
                 defaultPlaceholder

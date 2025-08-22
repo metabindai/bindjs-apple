@@ -4,6 +4,7 @@ public struct ComponentCall: Component {
     public static var directiveName: String = "ComponentCall"
     @Environment(\.componentRegistry) private var componentRegistry
     @EnvironmentObject private var componentContext: ComponentContext
+    @Environment(\.self) private var environmentValues
     
     public let directive: Directive
     public var children: [Component]
@@ -34,7 +35,7 @@ public struct ComponentCall: Component {
 extension ComponentCall: View {
     
     public var body: some View {
-        if let resolved = componentRegistry.makeComponent(name, props: props, children: children, componentContext: componentContext) {
+        if let resolved = componentRegistry.makeComponent(name, props: props, children: children, componentContext: componentContext, environmentValues: environmentValues) {
             resolved
         } else {
             ForEach(children.indices, id: \.self) { index in
