@@ -4,14 +4,15 @@ public protocol DefaultInitializable {
     init()
 }
 
-public protocol ComponentRepresentable: DefaultInitializable {
-    associatedtype Body: View
+public protocol ComponentRepresentable: DefaultInitializable, View {
     
     static var name: String { get }
-    @ViewBuilder
-    static func makeView(context: Self.Context) -> Self.Body
     
     typealias Context = ComponentRepresentableContext
+}
+
+extension EnvironmentValues {
+    @Entry var componentRepresentableContext: ComponentRepresentableContext?
 }
 
 public struct ComponentRepresentableContext {

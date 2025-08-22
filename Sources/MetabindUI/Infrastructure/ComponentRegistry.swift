@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ComponentRegistry {
-    var components: [String: (ComponentRepresentableContext) -> any View] = [:]
+    var components: [String: () -> any View] = [:]
     
     func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: ComponentContext, environmentValues: EnvironmentValues) -> AnyView? {
         guard let builder = components[name] else { return nil }
@@ -11,7 +11,10 @@ struct ComponentRegistry {
             componentContext: componentContext,
             environmentValues: environmentValues
         )
-        return AnyView(builder(c))
+        return AnyView(
+            builder()
+                .environment(\.componentRepresentableContext, c)
+        )
     }
 }
 
@@ -22,7 +25,7 @@ extension EnvironmentValues {
 extension View {
     public func withComponent<R: ComponentRepresentable>(_ component: R.Type) -> some View {
         transformEnvironment(\.componentRegistry) { registry in
-            registry.components[R.name] = R.makeView(context:)
+            registry.components[R.name] = R.init
         }
     }
 }
