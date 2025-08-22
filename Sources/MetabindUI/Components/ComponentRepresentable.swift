@@ -11,7 +11,7 @@ public protocol ComponentRepresentable: DefaultInitializable, View {
     typealias Context = ComponentRepresentableContext
 }
 
-extension EnvironmentValues {
+public extension EnvironmentValues {
     @Entry var componentRepresentableContext: ComponentRepresentableContext?
 }
 
