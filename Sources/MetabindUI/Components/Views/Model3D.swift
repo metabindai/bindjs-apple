@@ -263,7 +263,7 @@ private struct Model3DView: View {
                     .onAppear {
                         viewportSize = geometry.size
                     }
-                    .onChange(of: geometry.size) { oldSize, newSize in
+                    .onChange(of: geometry.size) { newSize in
                         viewportSize = newSize
                         // Reframe when the size changes
                         if let scene,
