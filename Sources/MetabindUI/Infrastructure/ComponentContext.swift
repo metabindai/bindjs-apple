@@ -255,6 +255,14 @@ public class ComponentContext: ObservableObject {
     public func restoreForEachData(id: String) -> JSValue? {
         runtime.invokeMethod("restoreForEachData", withArguments: [id])
     }
+    
+    public func restorePickerValue(id: String) -> String? {
+        runtime.invokeMethod("restorePickerValue", withArguments: [id])?.toString()
+    }
+    
+    public func callPickerSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
 
     public func willRender() {
         runtime.invokeMethod("willRender", withArguments: [])

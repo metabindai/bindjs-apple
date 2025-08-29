@@ -39,6 +39,12 @@ public extension ComponentRewriter {
         return copy
     }
     
+    mutating func visitPicker(_ picker: PickerComponent) -> Result {
+        var copy = picker
+        copy.children = picker.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+    
     mutating func visitScrollView(_ scrollView: ScrollViewComponent) -> Result {
         var copy = scrollView
         copy.content = scrollView.content.map { $0.accept(visitor: &self) }

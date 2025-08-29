@@ -293,13 +293,38 @@ function processComponentArgs(arg1, arg2) {
 }
 
 function Picker({ args }) {
-    const [label, selection, children] = args;
-    console.log('Picker children ', selection, children);
+    const [label, binding, children] = args;
+    
+    const path = this.currentPathId('Picker');
+    const environmentId = this.storeEnvironment(path);
+    
+    let currentValueId, setterId;
+    
+    // Check if binding is a useState tuple [value, setter]
+    if (Array.isArray(binding) && binding.length === 2) {
+        const [currentValue, setter] = binding;
+        
+        // Store the current value as data
+        currentValueId = this.storeData(currentValue, path + '_value');
+        
+        // Store the setter function
+        if (typeof setter === 'function') {
+            setterId = this.storeFunction(setter, path + '_setter');
+        }
+    } else {
+        // Fallback for simple value
+        currentValueId = this.storeData(binding, path + '_value');
+    }
 
     const childrenAST = processChildren.bind(this)(children ?? []);
 
     return {
-        props: { label, selection },
+        props: { 
+            label, 
+            currentValueId, 
+            setterId, 
+            environmentId 
+        },
         children: childrenAST
     }
     
@@ -1938,6 +1963,7 @@ Object.assign(this, {
     setForEachElementId: (id) => runtime.setForEachElementId(id),
     callForEachFunction: (functionId, element, index) => customJSONStringify(runtime.callForEachFunction(functionId, element, index), null, 2),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
+    restorePickerValue: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]

@@ -17,6 +17,7 @@ public protocol ComponentVisitor {
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
+    mutating func visitPicker(_ picker: PickerComponent) -> Result
     mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result
     mutating func visitProgressView(_ progressView: ProgressViewComponent) -> Result
     mutating func visitScrollView(_ scrollView: ScrollViewComponent) -> Result
@@ -170,6 +171,10 @@ public extension ComponentVisitor {
     
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result {
         return defaultVisit(empty)
+    }
+    
+    mutating func visitPicker(_ picker: PickerComponent) -> Result {
+        return defaultVisit(picker)
     }
     
     mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result {

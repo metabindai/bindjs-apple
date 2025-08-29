@@ -31,6 +31,10 @@ private struct ComponentChildren: ComponentVisitor {
         modified.content + [modified.modifier]
     }
     
+    mutating func visitPicker(_ picker: PickerComponent) -> [any Component] {
+        picker.children
+    }
+    
     mutating func visitScrollView(_ scrollView: ScrollViewComponent) -> [any Component] {
         scrollView.content
     }
