@@ -46,110 +46,6 @@ AST.Representable = (functionId, environmentId) => {
     }
 };
 
-const componentNames = [
-    "AngularGradient",
-    "AnyView",
-    "AsyncImage",
-    "Body",
-    "Canvas",
-    "Circle",
-    "ColorPicker",
-    "Content",
-    "ContentUnavailableView",
-    "ControlGroup",
-    "ComposerGroup",
-    "ComposerAdd",
-    "ComposerChildren",
-    "FilterChildren",
-    "DrawingCanvas",
-    "DatePicker",
-    "DisclosureGroup",
-    "Divider",
-    "EditButton",
-    "EllipticalGradient",
-    "Ellipse",
-    "Capsule",
-    "EmptyModifier",
-    "EmptyView",
-    "Empty",
-    "EquatableView",
-    "EnvironmentValue",
-    "ForEach",
-    "Form",
-    "FontCustom",
-    "Gauge",
-    "GeometryReader",
-    "GeometryReader3D",
-    "Grid",
-    "GridRow",
-    "Group",
-    "GroupBox",
-    "HelpLink",
-    "HSplitView",
-    "HStack",
-    "Image",
-    "KeyframeAnimator",
-    "Label",
-    "LazyHGrid",
-    "LazyHStack",
-    "LazyVGrid",
-    "LazyVStack",
-    "LinearGradient",
-    "Link",
-    "List",
-    "Material",
-    "Menu",
-    "MenuButton",
-    "MultiDatePicker",
-    "Model3D",
-    "NavigationLink",
-    "NavigationSplitView",
-    "NavigationStack",
-    "NavigationView",
-    "NewDocumentButton",
-    "PasteButton",
-    "Path",
-    "PhaseAnimator",
-    "Picker",
-    "Placeholder",
-    "ProgressView",
-    "ReactRepresentable",
-    "DOMIdentifable",
-    "RadialGradient",
-    "Rectangle",
-    "RenameButton",
-    "RoundedRectangle",
-    "ScrollView",
-    "ScrollViewReader",
-    "Section",
-    "SecureField",
-    "SettingsLink",
-    "Shader",
-    "ShareLink",
-    "Shape",
-    "SignInWithAppleButton",
-    "Slider",
-    "Spacer",
-    "Stepper",
-    "Table",
-    "TabView",
-    "Text",
-    "TextEditor",
-    "TextField",
-    "TextFieldLink",
-    "Toggle",
-    "ToolbarItem",
-    "ToolbarItemGroup",
-    "ToolbarTitleMenu",
-    "UnevenRoundedRectangle",
-    "ViewThatFits",
-    "VSplitView",
-    "VStack",
-    "Video",
-    "WindowVisibilityToggle",
-    "ZStack"
-];
-
 function Color({ args }) {
 
     const [props] = args ?? [];
@@ -329,6 +225,82 @@ function Button({ args }) {
     return {
         props: { handlerId, label: finalLabel, environmentId },
         children: []
+    }
+    
+}
+
+function GenericComponent({ args }) {
+    var { props, children } = processComponentArgs(args[0], args[1]);
+
+    // If props isnt a dictionary contain within value
+    if (typeof props != 'object' || typeof props == 'function') {
+        props = { rawValue: props };
+    }
+
+    // Expand functions in props
+    props = this.processProps(props);
+
+    /**
+     * Execute children
+     */
+    const childrenAST = processChildren.bind(this)(children);
+
+    return { props, children: childrenAST }
+}
+
+function processChildren(children) {
+    if (!children) {
+        return [];
+    }
+
+    /**
+     * Execute children
+     */
+    const childrenAST = (children ?? []).flatMap((child, index) => {
+        this.hookState.childIndex = index;
+
+        let content = typeof child === 'function' ? child() : child;
+        if (typeof content === 'function') {
+            content = content();
+        }
+        return content
+    });
+
+    // Reset
+    this.hookState.childIndex = 0;
+
+    return childrenAST
+}
+
+function processComponentArgs(arg1, arg2) {
+    // Allow children to be passed as the first argument, including as a single component (function)
+    const childrenFirstArg = arg1 != null && arg2 == null && Array.isArray(arg1);
+    const singleComponentChild = arg1 != null && arg2 == null && typeof arg1 === 'function' && arg1._component;
+    const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg && !singleComponentChild;
+
+    const props =
+        rawValueFirstArg ? { rawValue: arg1 }
+            : childrenFirstArg ? {}
+                : singleComponentChild ? {}
+                    : arg1;
+
+    const children =
+        childrenFirstArg ? arg1
+            : singleComponentChild ? [arg1]
+                : arg2;
+
+    return { props, children };
+}
+
+function Picker({ args }) {
+    const [label, selection, children] = args;
+    console.log('Picker children ', selection, children);
+
+    const childrenAST = processChildren.bind(this)(children ?? []);
+
+    return {
+        props: { label, selection },
+        children: childrenAST
     }
     
 }
@@ -571,69 +543,6 @@ GenericModifier.environmentValue = (name, args) => {
     return { key: name, value: args[0] }
 };
 
-function GenericComponent({ args }) {
-    var { props, children } = processComponentArgs(args[0], args[1]);
-
-    // If props isnt a dictionary contain within value
-    if (typeof props != 'object' || typeof props == 'function') {
-        props = { rawValue: props };
-    }
-
-    // Expand functions in props
-    props = this.processProps(props);
-
-    /**
-     * Execute children
-     */
-    const childrenAST = processChildren.bind(this)(children);
-
-    return { props, children: childrenAST }
-}
-
-function processChildren(children) {
-    if (!children) {
-        return [];
-    }
-
-    /**
-     * Execute children
-     */
-    const childrenAST = (children ?? []).flatMap((child, index) => {
-        this.hookState.childIndex = index;
-
-        let content = typeof child === 'function' ? child() : child;
-        if (typeof content === 'function') {
-            content = content();
-        }
-        return content
-    });
-
-    // Reset
-    this.hookState.childIndex = 0;
-
-    return childrenAST
-}
-
-function processComponentArgs(arg1, arg2) {
-    // Allow children to be passed as the first argument, including as a single component (function)
-    const childrenFirstArg = arg1 != null && arg2 == null && Array.isArray(arg1);
-    const singleComponentChild = arg1 != null && arg2 == null && typeof arg1 === 'function' && arg1._component;
-    const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg && !singleComponentChild;
-
-    const props =
-        rawValueFirstArg ? { rawValue: arg1 }
-            : childrenFirstArg ? {}
-                : singleComponentChild ? {}
-                    : arg1;
-
-    const children =
-        childrenFirstArg ? arg1
-            : singleComponentChild ? [arg1]
-                : arg2;
-
-    return { props, children };
-}
-
 function AnimationComponent({ args, name }) {
     const typeMap = {
         'Spring' : 'spring',
@@ -860,6 +769,47 @@ function Stroke({ args, content }) {
     return { ast: content }
 }
 
+function ButtonStyle({ args , name }) {
+
+    // If arg is a function, store it and return handler id
+    // If arg is props, process them and return props
+    const processArg = (arg) => {
+        if (arg == null) {
+            return {}
+        }
+
+        // Arg is a handler function
+        if (typeof arg === 'function' && arg._component) {
+
+            let ast = arg();
+            let name = ast.props.name;
+            let props = ast.props.props || {};
+            
+            return { name, props }
+
+        // Arg is a string
+        } else if (typeof arg === 'string') {
+
+            return { name: arg, props: {} }
+
+        } else {
+            return {}
+        }
+
+    };
+
+    // An 'on' handler can take either one or two arguments.
+    // First or second may be a function or an object.
+    // Second argument is optional but would be a function if present.
+    let props = {
+        props: {
+            ...processArg(args[0])
+        },
+    };
+
+    return props
+}
+
 function ForEach({ args }) {
 
     const [data, callback] = args;
@@ -983,6 +933,19 @@ function makeComponent (component) {
     f._component = true;
 
     return f
+}
+
+async function getContent(content) {
+    // Assumes content prop is passed.
+    let contentId = content?._content;
+
+    if (this.getContent == null || contentId == null) {
+        return null
+
+    // Call the getContent property assigned to the runtime with the contentId.
+    } else {
+        return await this.getContent(contentId)
+    }
 }
 
 /**
@@ -1134,7 +1097,114 @@ funcs.titleCase = (input) => {
         .join(' ')
 };
 
-class YapJSRuntime {
+/**
+ * Built in component names
+ */
+const componentNames = [
+    "AngularGradient",
+    "AnyView",
+    "AsyncImage",
+    "Body",
+    "Canvas",
+    "Circle",
+    "ColorPicker",
+    "Content",
+    "ContentUnavailableView",
+    "ControlGroup",
+    "ComposerGroup",
+    "ComposerAdd",
+    "ComposerChildren",
+    "FilterChildren",
+    "DrawingCanvas",
+    "DatePicker",
+    "DisclosureGroup",
+    "Divider",
+    "EditButton",
+    "EllipticalGradient",
+    "Ellipse",
+    "Capsule",
+    "EmptyModifier",
+    "EmptyView",
+    "Empty",
+    "EquatableView",
+    "EnvironmentValue",
+    "ForEach",
+    "Form",
+    "FontCustom",
+    "Gauge",
+    "GeometryReader",
+    "GeometryReader3D",
+    "Grid",
+    "GridRow",
+    "Group",
+    "GroupBox",
+    "HelpLink",
+    "HSplitView",
+    "HStack",
+    "Image",
+    "KeyframeAnimator",
+    "Label",
+    "LazyHGrid",
+    "LazyHStack",
+    "LazyVGrid",
+    "LazyVStack",
+    "LinearGradient",
+    "Link",
+    "List",
+    "Material",
+    "Menu",
+    "MenuButton",
+    "MultiDatePicker",
+    "Model3D",
+    "NavigationLink",
+    "NavigationSplitView",
+    "NavigationStack",
+    "NavigationView",
+    "NewDocumentButton",
+    "PasteButton",
+    "Path",
+    "PhaseAnimator",
+    "Picker",
+    "Placeholder",
+    "ProgressView",
+    "ReactRepresentable",
+    "DOMIdentifable",
+    "RadialGradient",
+    "Rectangle",
+    "RenameButton",
+    "RoundedRectangle",
+    "ScrollView",
+    "ScrollViewReader",
+    "Section",
+    "SecureField",
+    "SettingsLink",
+    "Shader",
+    "ShareLink",
+    "Shape",
+    "SignInWithAppleButton",
+    "Slider",
+    "Spacer",
+    "Stepper",
+    "Table",
+    "TabView",
+    "Text",
+    "TextEditor",
+    "TextField",
+    "TextFieldLink",
+    "Toggle",
+    "ToolbarItem",
+    "ToolbarItemGroup",
+    "ToolbarTitleMenu",
+    "UnevenRoundedRectangle",
+    "ViewThatFits",
+    "VSplitView",
+    "VStack",
+    "Video",
+    "WindowVisibilityToggle",
+    "ZStack"
+];
+
+class ComposeJSRuntime {
     constructor(options) {
         console.log('JSRuntime: init');
         this.options = options ?? { expandForEach: false };
@@ -1163,9 +1233,19 @@ class YapJSRuntime {
 
         this.resetState();
         this.registerBuiltInCallbacks();
-        this.registerASTComponents(componentNames);
+        this.registerBuiltInComponents();
+
         this.needsRerender = () => {
             console.log('Needs rerender not implemented');
+        };
+
+        // Default open url implementation. Can be overriden
+        this.onOpenURL = (url, resultCallback) => {
+            console.log('onOpenURL', url);
+            window.open(url, '_blank');
+            if (resultCallback) {
+                resultCallback(true);
+            }
         };
 
         // Callback to update the app state.
@@ -1256,12 +1336,18 @@ class YapJSRuntime {
         for (const componentName of componentNames) {
             this.#registerBuiltInComponent(componentName);
         }
+    }
+
+    registerBuiltInComponents() {
+
+        this.registerASTComponents(componentNames);
 
         // Register specific handlers for inbuilt components
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
+        this.#registerBuiltInComponent('Picker', Picker);
 
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
@@ -1269,7 +1355,7 @@ class YapJSRuntime {
         this.#registerBuiltInModifier('font', FontModifier);
         this.#registerBuiltInModifier('fill', Fill);
         this.#registerBuiltInModifier('stroke', Stroke);
-        
+        this.#registerBuiltInModifier('buttonStyle', ButtonStyle);
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
@@ -1321,6 +1407,9 @@ class YapJSRuntime {
 
         // makeComponent
         this.registerCallback('makeComponent', makeComponent.bind(this));
+
+        // getContent
+        this.registerCallback('getContent', getContent.bind(this));
 
         // Prevent top in browser from being interpreted as a function
         this.registerCallback('top', () => { });
@@ -1407,34 +1496,30 @@ class YapJSRuntime {
     }
 
     /**
+     * Open URL handling
+     * @param {*} url
+     */
+    openURLAction(url, resultCallback) {
+        if (this.onOpenURL) {
+            this.onOpenURL(url, resultCallback);
+        } else if (resultCallback) {
+            resultCallback(false);
+        }
+    }
+
+    /**
      * Register initial environment
      * @param {*} environment
      */
     registerEnvironment(environment = {}) {
-        //this.storedEnvironments = {}
-        this.environment = environment;
+        this.environment = { openURL: this.openURLAction.bind(this), ...environment };
     }
 
     /**
      * AppState
      */
     registerAppState(state) {
-        const oldState = this.appState || {};
         this.appState = state;
-        
-        // Notify listeners of all changes
-        for (const key in state) {
-            if (oldState[key] !== state[key]) {
-                this.onUpdateAppState(key, state[key], this.appState);
-            }
-        }
-        
-        // Notify about removed keys
-        for (const key in oldState) {
-            if (!(key in state)) {
-                this.onUpdateAppState(key, undefined, this.appState);
-            }
-        }
     }
 
     updatedAppState(key, value, newState, completionCallback) {
@@ -1789,7 +1874,7 @@ class YapJSRuntime {
         return this.#makeComponent((...componentArgs) => {
 
             const handler = this.componentRegistry[type] ?? this.componentRegistry['GenericComponent'];
-            const { props, children, ast } = handler.bind(this)({ args: componentArgs, name: type });
+            const { props, children, ast } = handler.bind(this)({ args: args, name: type });
 
             /**
              * Component AST
@@ -1826,6 +1911,7 @@ class YapJSRuntime {
 
 
 
+
 // MARK: - After the runtime...
 
 // Custom JSON stringify that preserves Infinity, -Infinity, and NaN
@@ -1838,7 +1924,7 @@ function customJSONStringify(value, replacer, space) {
     }, space);
 }
 
-const runtime = new YapJSRuntime();
+const runtime = new ComposeJSRuntime();
 
 Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),
@@ -1864,5 +1950,6 @@ Object.assign(this, {
     debug: () => console.log(customJSONStringify(runtime.components)),
     reset: () => runtime.reset(),
     setAppState: (state) => runtime.registerAppState(state),
+    setOnOpenURL: (callback) => runtime.onOpenURL = callback
 });
 

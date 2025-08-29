@@ -6,6 +6,7 @@ public class ComponentContext: ObservableObject {
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
+    private var onOpenURLCallback: ((URL, @escaping (Bool) -> Void) -> Void)?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
 
@@ -21,6 +22,7 @@ public class ComponentContext: ObservableObject {
         setupNeedsRerender()
         setupWithAnimation()
         setupNavigate()
+        setupOnOpenURL()
         setupPerformAction()
         setupAppStateListener()
     }
@@ -116,6 +118,33 @@ public class ComponentContext: ObservableObject {
         }
         jsContext.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
         _ = jsContext.evaluateScript("runtime.navigateCallback = navigateCallback")
+    }
+    
+    private func setupOnOpenURL() {
+        let onOpenURLFunction: @convention(block) (String, JSValue?) -> Void = { [weak self] urlString, resultCallback in
+            guard let self = self else { return }
+            
+            let swiftResultCallback: (Bool) -> Void = { success in
+                if let resultCallback = resultCallback, !resultCallback.isNull && !resultCallback.isUndefined {
+                    _ = resultCallback.call(withArguments: [success])
+                }
+            }
+            
+            guard let url = URL(string: urlString) else {
+                // Invalid URL - report failure
+                swiftResultCallback(false)
+                return
+            }
+            
+            if let callback = self.onOpenURLCallback {
+                callback(url, swiftResultCallback)
+            } else {
+                // No callback set - just report failure
+                swiftResultCallback(false)
+            }
+        }
+        
+        runtime.invokeMethod("setOnOpenURL", withArguments: [onOpenURLFunction])
     }
     
     private func setupPerformAction() {
@@ -290,6 +319,12 @@ public class ComponentContext: ObservableObject {
     
     public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
         self.navigateCallback = callback
+    }
+    
+    // MARK: - OpenURL Callback
+    
+    public func onOpenURL(_ callback: @escaping (_ url: URL, _ completion: @escaping (_ success: Bool) -> Void) -> Void) {
+        self.onOpenURLCallback = callback
     }
     
     // MARK: - App State Management
