@@ -80,6 +80,7 @@ public protocol ComponentVisitor {
     mutating func visitFontWidth(_ fontWidth: FontWidthComponent) -> Result
     mutating func visitForegroundStyle(_ foregroundStyle: ForegroundStyleComponent) -> Result
     mutating func visitFrame(_ frame: FrameComponent) -> Result
+    mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result
     mutating func visitHidden(_ hidden: HiddenComponent) -> Result
     mutating func visitID(_ id: IDComponent) -> Result
@@ -402,6 +403,10 @@ public extension ComponentVisitor {
     
     mutating func visitFrame(_ frame: FrameComponent) -> Result {
         return defaultVisit(frame)
+    }
+    
+    mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result {
+        return defaultVisit(pickerStyle)
     }
     
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result {
