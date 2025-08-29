@@ -107,6 +107,7 @@ public protocol ComponentVisitor {
     mutating func visitScaledToFit(_ scaledToFit: ScaledToFitComponent) -> Result
     mutating func visitShadow(_ shadow: ShadowComponent) -> Result
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result
+    mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
@@ -508,6 +509,10 @@ public extension ComponentVisitor {
     
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result {
         return defaultVisit(strikethrough)
+    }
+    
+    mutating func visitTag(_ tag: TagComponent) -> Result {
+        return defaultVisit(tag)
     }
     
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result {
