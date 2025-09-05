@@ -75,6 +75,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     } else {
         FlexibleFrameComponent(from: directive)
     }
+    case GlassEffectComponent.directiveName: GlassEffectComponent(from: directive)
     case GrayscaleComponent.directiveName: GrayscaleComponent(from: directive)
     case HiddenComponent.directiveName: HiddenComponent(from: directive)
     case IDComponent.directiveName: IDComponent(from: directive)
@@ -211,6 +212,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as FontWidthComponent: content.modifier(m)
         case let m as ForegroundStyleComponent: content.modifier(m)
         case let m as FrameComponent: content.modifier(m)
+        case let m as GlassEffectComponent: content.modifier(m)
         case let m as GrayscaleComponent: content.modifier(m)
         case let m as HiddenComponent: content.modifier(m)
         case let m as IDComponent: content.modifier(m)
