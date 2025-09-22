@@ -293,38 +293,12 @@ function processComponentArgs(arg1, arg2) {
 }
 
 function Picker({ args }) {
-    const [label, binding, children] = args;
-    
-    const path = this.currentPathId('Picker');
-    const environmentId = this.storeEnvironment(path);
-    
-    let currentValueId, setterId;
-    
-    // Check if binding is a useState tuple [value, setter]
-    if (Array.isArray(binding) && binding.length === 2) {
-        const [currentValue, setter] = binding;
-        
-        // Store the current value as data
-        currentValueId = this.storeData(currentValue, path + '_value');
-        
-        // Store the setter function
-        if (typeof setter === 'function') {
-            setterId = this.storeFunction(setter, path + '_setter');
-        }
-    } else {
-        // Fallback for simple value
-        currentValueId = this.storeData(binding, path + '_value');
-    }
+    const [label, selection, children] = args;
 
     const childrenAST = processChildren.bind(this)(children ?? []);
 
     return {
-        props: { 
-            label, 
-            currentValueId, 
-            setterId, 
-            environmentId 
-        },
+        props: { label, selection },
         children: childrenAST
     }
     
@@ -702,19 +676,20 @@ function extractPropsByType(node, typeName) {
     if (typeof node === 'function') {
         ast = node();
     }
+
     if (typeof ast === 'object' && ast !== null) {
         if (ast?.type === typeName && typeof ast.props === 'object') {
             const { children, ...restProps } = ast.props;
             return { ...restProps };
         }
+
         // Recurse into children if they exist
         const astChildren = ast?.props?.children;
         if (astChildren) {
             const children = Array.isArray(astChildren) ? astChildren : [astChildren];
             for (const child of children) {
                 const result = extractPropsByType(child, typeName);
-                if (result)
-                    return result;
+                if (result) return result;
             }
         }
     }
@@ -1018,15 +993,16 @@ function convertComponentProps(props) {
 
         // Fast-path component call
         if (item && typeof item === 'object') {
-            // Check for component-like structure with componentId and name
-            if (item.componentId != null && item.name && callFn) {
+
+            // Check for component-like structure with _type == 'ComponentInstance' and _component
+            if (item._component != null && item._type == 'ComponentInstance' && callFn) {
 
                 // Wrap in makeComponent, so the function is called at runtime (rather than parsing of props time)
                 // So environment works correctly.
                 const result = makeComponent(() => {
-                    return callFn(item.name, 'body', item.props);
+                    return callFn(item._component, 'body', item);
                 });
-                //callFn(item.name, 'body', item.props);
+                
                 return [result, true];
             }
 
@@ -1231,14 +1207,11 @@ const componentNames = [
 
 class ComposeJSRuntime {
     constructor(options) {
-        console.log('JSRuntime: init');
         this.options = options ?? { expandForEach: false };
         this.reset();
     }
 
     reset() {
-        console.log('JSRuntime: reset');
-
         this.context = {};
         this.components = {};
         this.functionCache = {};
@@ -1308,8 +1281,6 @@ class ComposeJSRuntime {
 
     resetState() {
 
-        console.log('JSRuntime: resetState');
-
         // Hook state needs to keep track of two things
         // - Component path. A unique path for the current component that's consistent across renders.
         // - Component hook storage. Storage for the hooks based on the component path.
@@ -1342,8 +1313,6 @@ class ComposeJSRuntime {
     }
 
     resetStorage() {
-        console.log('JSRuntime: resetStorage');
-
         this.storedEnvironments = {};
         this.storedFunctions = {};
         this.storedData = {};
@@ -1351,8 +1320,6 @@ class ComposeJSRuntime {
     }
     
     resetCache(componentName) {
-        console.log('JSRuntime: resetCache ', componentName);
-
         this.functionCache[componentName] = {};
     }
 
@@ -1410,7 +1377,6 @@ class ComposeJSRuntime {
      * @param {*} environment
      */
     registerBuiltInCallbacks() {
-        console.log('registerBuiltInCallbacks');
 
         this.registerCallback('useEnvironment', () => {
             return this.environment
@@ -1478,7 +1444,7 @@ class ComposeJSRuntime {
         }
     }
 
-    registerComponent(componentName, content, entryPoint)  {
+    registerComponent(componentName, content, entryPoint = 'body')  {
         const name = componentName.replace(/\s/g, '');
         this.callStack = [];
         this.functionCache[name] = {};
@@ -1494,7 +1460,7 @@ class ComposeJSRuntime {
 
                // It's assumed a component returns an inbuilt component.
                // Run the returned function to generate the ast
-               let ast = componentFunction();
+               let ast = componentFunction ? componentFunction() : null;
 
                if (ast && ast._component) {
                     ast = ast();
@@ -1679,7 +1645,7 @@ class ComposeJSRuntime {
      */
     currentPathId(name) {
         const { path, childIndex } = this.hookState;
-        let id = [...path, name, childIndex].join(',');
+        let id = [this.rendererId ?? 0, ...path, name, childIndex].join(',');
         return id
     }
 
