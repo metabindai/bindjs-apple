@@ -363,6 +363,11 @@ public class ComponentContext: ObservableObject {
         _ = jsContext.evaluateScript("runtime.onUpdateAppState = onUpdateAppState")
     }
     
+    public func updateAppState(key: String, value: Any) {
+        // Update runtime app state
+        runtime.invokeMethod("updatedAppState", withArguments: [key, value, nil])
+    }
+
     public func setAppState(_ state: [String: Any]) -> Self {
         runtime.invokeMethod("setAppState", withArguments: [state])
         return self

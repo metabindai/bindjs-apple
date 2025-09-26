@@ -209,7 +209,7 @@ function Button({ args }) {
     // If a single arg is passed and it's an object, use it as { action, label }
     // If two args are passed, use the first as label and the second as action
     const { action, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
-                                        ? arg1 
+                                        ? arg1
                                         : { label: arg1, action: arg2  };
 
 
@@ -222,9 +222,9 @@ function Button({ args }) {
     // Process label
     const { label: finalLabel } = this.processProps({ label });
 
-    return { 
-        props: { handlerId, label: finalLabel, environmentId }, 
-        children: []  
+    return {
+        props: { handlerId, label: finalLabel, environmentId },
+        children: []
     }
     
 }
@@ -237,7 +237,7 @@ function GenericComponent({ args }) {
         props = { rawValue: props };
     }
 
-    // Expand functions in props 
+    // Expand functions in props
     props = this.processProps(props);
 
     /**
@@ -297,15 +297,15 @@ function Picker({ args }) {
 
     const setFunction = selection[1] ?? (() => { });
 
-    const id = this.currentPathId('Picker');    
+    const id = this.currentPathId('Picker');
     const environmentId = this.storeEnvironment(id);
     const setFunctionId = this.storeFunction(setFunction, id);
     const dataId = this.storeData(selection[0], id);
 
     const childrenAST = processChildren.bind(this)(children ?? []);
 
-    return { 
-        props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId }, 
+    return {
+        props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId },
         children: childrenAST
     }
     
@@ -453,7 +453,7 @@ function Opacity({ args, content }) {
 
         // If the content is not a Color component, we just return it as is
         // but we can still apply the opacity to the parent element
-        return { 
+        return {
             props: { rawValue: opacity },
             children: content
         }
@@ -490,7 +490,7 @@ function OnHandler({ args , name }) {
     // Second argument is optional but would be a function if present.
     return {
         props: {
-            ...processArg(args[0]), 
+            ...processArg(args[0]),
             ...processArg(args[1])
         },
     }
@@ -532,7 +532,7 @@ function GenericModifier({ args, name }) {
     var props = args[0] == null ? modifierDefaults[name] : args[0];
 
     // Handle passing single value
-    if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) { 
+    if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) {
         if (typeof props == 'function') {
             props = props();
         }
@@ -649,7 +649,7 @@ function ComposerGroup({ args, name }) {
     if (!children) {
         let propName = props.property || props.rawValue || props.group;
         if (propName == 'children') {
-            children = env?.content?.children || [];   
+            children = env?.content?.children || [];
         } else {
             children = env?.content?.layoutProps?.[props.rawValue ?? props.property] || [];
         }
@@ -665,8 +665,8 @@ function ComposerGroup({ args, name }) {
         //     return true
         // }
 
-        // return (childGroupName === groupName) 
-    });   
+        // return (childGroupName === groupName)
+    });
 
     
     const result = {
@@ -727,7 +727,7 @@ function EnvironmentValue({ args }) {
 }
 
 EnvironmentValue.environmentValue = (name, args) => {
-    return { key: args[0], value: args[1] } 
+    return { key: args[0], value: args[1] }
 };
 
 // Normalise .fill modifier and pass into to the component it's applied to as a prop
@@ -824,7 +824,7 @@ function ForEach({ args }) {
     const expand = this.options.expandForEach;
     const count = Array.isArray(data) ? data.length : 0;
 
-    var ast = null;  
+    var ast = null;
 
     if (expand) {
         const children = data.map((element, index) => {
@@ -837,7 +837,7 @@ function ForEach({ args }) {
         });
         ast = AST.ForEach(null, null, count, null, children);
     } else {
-        const id = this.currentPathId('ForEach');    
+        const id = this.currentPathId('ForEach');
         const environmentId = this.storeEnvironment(id);
         const functionId = this.storeFunction(callback, id);
         const dataId = this.storeData(data, id);
@@ -850,16 +850,16 @@ function ForEach({ args }) {
 
 function Content({ args }) {
 
-    const id = this.currentPathId('Content');    
+    const id = this.currentPathId('Content');
     const environmentId = this.storeEnvironment(id);
 
     const contentId = typeof args[0] === 'object' ? args[0]?._content : args[0];
 
-    const props = { 
+    const props = {
         environmentId,
         id: contentId
     };
-    return { props } 
+    return { props }
 }
 
 function useState(initialValue) {
@@ -887,14 +887,14 @@ function useState(initialValue) {
         //console.log(`useState callback value [${value}]`)
 
         // Update state
-        hooks[hookIndex] = value;                
+        hooks[hookIndex] = value;
 
         // Trigger a re-render is required due to state changing
         rerenderCallback(rendererId);
-        return value                
+        return value
     };
 
-    return [hooks[this.hookState.currentComponent.hookIndex++], callback]    
+    return [hooks[this.hookState.currentComponent.hookIndex++], callback]
 }
 
 function useAppState(key, defaultValue) {
@@ -934,8 +934,8 @@ function makeComponent (component) {
     //console.log('registerCallback - makeComponent ', component, componentIndex)
 
     // Create body function
-    let f = (props, children) =>   
-        this.makeComponent((props, children) => body(props, children), props, children, componentIndex);  
+    let f = (props, children) =>
+        this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
     
     f._component = true;
 
@@ -946,7 +946,7 @@ async function getContent(content) {
     // Assumes content prop is passed.
     let contentId = content?._content;
 
-    if (this.getContent == null || contentId == null) {  
+    if (this.getContent == null || contentId == null) {
         return null
 
     // Call the getContent property assigned to the runtime with the contentId.
@@ -969,7 +969,7 @@ async function getContent(content) {
  * }
  *
  * The function assumes `this.call(name, 'body', props)` is available for resolving components.
- * 
+ *
  * Efficiency:
  * - Arrays and objects are only cloned if any of their children change.
  * - Component calls are only made when matching shape is detected.
@@ -1061,7 +1061,7 @@ function withAnimation(arg1, arg2) {
 
     console.log('withAnimation', options);
 
-    let handlerId = this.storeFunction(callback, this.currentPathId('withAnimation'));   
+    let handlerId = this.storeFunction(callback, this.currentPathId('withAnimation'));
     if (this.withAnimation) {
         this.withAnimation(handlerId, options);
     } else {
@@ -1222,11 +1222,11 @@ class ComposeJSRuntime {
         this.context = {};
         this.components = {};
         this.functionCache = {};
-        this.modifierFunctions = {};        
-        this.callStack = []; 
+        this.modifierFunctions = {};
+        this.callStack = [];
         this.environment = {};
         this.storedEnvironments = {};
-        this.storedFunctions = {};   
+        this.storedFunctions = {};
         this.storedData = {};
         this.storedHookStates = {};
         this.hookState = {};
@@ -1240,8 +1240,8 @@ class ComposeJSRuntime {
         this.registerBuiltInCallbacks();
         this.registerBuiltInComponents();
 
-        this.needsRerender = () => { 
-            console.log('Needs rerender not implemented');   
+        this.needsRerender = () => {
+            console.log('Needs rerender not implemented');
         };
 
         // Default open url implementation. Can be overriden
@@ -1265,8 +1265,8 @@ class ComposeJSRuntime {
             console.log('Navigate not implemented', path, options);
         };
 
-        this.withAnimation = (handlerId) => {    
-            console.log('With animation not implemented', handlerId);   
+        this.withAnimation = (handlerId) => {
+            console.log('With animation not implemented', handlerId);
             // Provide default implementation.
             //
             // this.withAnimation should be overridden by the renderer to wrap the animation in a context
@@ -1280,8 +1280,8 @@ class ComposeJSRuntime {
 
     willRender() {
         this.hookState.path = [];
-        this.hookState.makeComponentIndex = 0; 
-        this.hookState.childIndex = 0; 
+        this.hookState.makeComponentIndex = 0;
+        this.hookState.childIndex = 0;
         this.hookState.modifierId = null;
         this.hookState.forEachElementId = null;
     }
@@ -1296,7 +1296,7 @@ class ComposeJSRuntime {
             // Current component path
             path: [],
 
-            // Current index in an array of children. Used to create the path if no id 
+            // Current index in an array of children. Used to create the path if no id
             childIndex : 0,
 
             // Current id set by a modifier. Used to create the path if set.
@@ -1321,18 +1321,18 @@ class ComposeJSRuntime {
 
     resetStorage() {
         this.storedEnvironments = {};
-        this.storedFunctions = {};   
+        this.storedFunctions = {};
         this.storedData = {};
         this.storedHookStates = {};
     }
     
     resetCache(componentName) {
-        this.functionCache[componentName] = {};  
+        this.functionCache[componentName] = {};
     }
 
     registerASTComponents(componentNames) {
         // Construct AST functions for inbuilt components.
-        for (const componentName of componentNames) {    
+        for (const componentName of componentNames) {
             this.#registerBuiltInComponent(componentName);
         }
     }
@@ -1349,7 +1349,7 @@ class ComposeJSRuntime {
         this.#registerBuiltInComponent('Picker', Picker);
 
         // Register specific handlers for inbuilt modifiers
-        this.#registerBuiltInModifier('padding', Padding);   
+        this.#registerBuiltInModifier('padding', Padding);
         this.#registerBuiltInModifier('opacity', Opacity);
         this.#registerBuiltInModifier('font', FontModifier);
         this.#registerBuiltInModifier('fill', Fill);
@@ -1381,9 +1381,9 @@ class ComposeJSRuntime {
 
     /**
      * Register built in callbacks available to components
-     * @param {*} environment 
-     */    
-    registerBuiltInCallbacks() {    
+     * @param {*} environment
+     */
+    registerBuiltInCallbacks() {
 
         this.registerCallback('useEnvironment', () => {
             return this.environment
@@ -1422,18 +1422,18 @@ class ComposeJSRuntime {
      */
     #registerBuiltInComponent(name, callback) {
         if (callback) {
-            this.componentRegistry[name] = callback; 
+            this.componentRegistry[name] = callback;
         }
 
         this.context[name] = (...args) => {
             return this.#makeInBuiltComponent(name, args)
-        }; 
+        };
     }
 
     /**
      * Registers a built in modifier using a callback
      */
-    #registerBuiltInModifier(name, callback) {  
+    #registerBuiltInModifier(name, callback) {
         this.modifierRegistry[name] = callback;
     }
 
@@ -1443,17 +1443,17 @@ class ComposeJSRuntime {
 
     /**
      * Register the JS of one or more components
-     * @param {*} components 
+     * @param {*} components
      */
-    registerComponents(components, entryPoint = 'body') {    
+    registerComponents(components, entryPoint = 'body') {
         for (const componentName of Object.keys(components)) {
-            this.registerComponent(componentName, components[componentName], entryPoint);    
-        }   
+            this.registerComponent(componentName, components[componentName], entryPoint);
+        }
     }
 
     registerComponent(componentName, content, entryPoint = 'body')  {
         const name = componentName.replace(/\s/g, '');
-        this.callStack = []; 
+        this.callStack = [];
         this.functionCache[name] = {};
         this.components[name] = content;
 
@@ -1487,15 +1487,15 @@ class ComposeJSRuntime {
      /**
      * Register callback to be made available to the runtime
      * @param {*} callbackName
-     * @param {*} callback 
+     * @param {*} callback
      */
-    registerCallback(callbackName, callback) {  
+    registerCallback(callbackName, callback) {
         this.context[callbackName] = callback;
     }
 
     /**
      * Open URL handling
-     * @param {*} url 
+     * @param {*} url
      */
     openURLAction(url, resultCallback) {
         if (this.onOpenURL) {
@@ -1507,9 +1507,9 @@ class ComposeJSRuntime {
 
     /**
      * Register initial environment
-     * @param {*} environment 
+     * @param {*} environment
      */
-    registerEnvironment(environment = {}) {  
+    registerEnvironment(environment = {}) {
         this.environment = { openURL: this.openURLAction.bind(this), ...environment };
     }
 
@@ -1532,23 +1532,23 @@ class ComposeJSRuntime {
 
     /**
      * Restores an environment by id
-     * @param {*} environmentId 
+     * @param {*} environmentId
      */
-    restoreEnvironment(environmentId) { 
+    restoreEnvironment(environmentId) {
         let env = this.storedEnvironments[environmentId];
         if (env) {
             this.environment = env;
         }
 
-        let hookState = this.storedHookStates[environmentId];    
+        let hookState = this.storedHookStates[environmentId];
         if (hookState) {
-            this.hookState.path = [...hookState.path];            
+            this.hookState.path = [...hookState.path];
         }
     }
 
-    getEnvironment(environmentId) { 
+    getEnvironment(environmentId) {
         return this.storedEnvironments[environmentId]
-    }    
+    }
 
     debugEnvironment() {
         console.log('Envionment:');
@@ -1564,10 +1564,10 @@ class ComposeJSRuntime {
     unregisterComponent(componentName) {
         delete this.components[componentName];
         delete this.functionCache[componentName];
-        delete this.context[componentName];  
+        delete this.context[componentName];
     }
 
-    setRendererId(id) { 
+    setRendererId(id) {
         this.rendererId = id;
     }
 
@@ -1577,13 +1577,13 @@ class ComposeJSRuntime {
     callComponent(componentName, params, children, ...args) {
         let body = this.context[componentName];
         if (body) {
-            let b = body(params, children, ...args);  
+            let b = body(params, children, ...args);
             if (typeof b === 'function' && b._component) {
                 return b()
             }
-        } 
+        }
         return null
-    } 
+    }
 
     convertComponentProps(props) {
         return convertComponentProps.bind(this)(props)
@@ -1591,22 +1591,22 @@ class ComposeJSRuntime {
 
     /**
      * Calls a function within a registered component
-     * @param {*} componentName 
-     * @param {*} componentEntryPoint 
-     * @returns 
+     * @param {*} componentName
+     * @param {*} componentEntryPoint
+     * @returns
      */
     call(componentName, componentEntryPoint = 'body', params, children, ...args) {
         const componentKeys = Object.keys(this.context);
         const functionList = componentKeys.join(', ');
     
         let func = null;
-        if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {  
+        if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {
             //console.log(`[cache hit ${componentName}.${componentEntryPoint}]`)
             func = this.functionCache[componentName][componentEntryPoint];
         } else {
             //console.log(`[constructing ${componentName}.${componentEntryPoint}]`)
             func = new Function(`{ ${functionList} }`, `${this.components[componentName]}; return ${componentEntryPoint}`)(this.context);
-            this.functionCache[componentName][componentEntryPoint] = func;   
+            this.functionCache[componentName][componentEntryPoint] = func;
         }
 
         return func(params, children, ...args)
@@ -1614,11 +1614,11 @@ class ComposeJSRuntime {
 
     /**
      * Process the props for a component or a modifier ,expanding functions in arrays or values
-     * @param {*} props 
-     * @returns 
+     * @param {*} props
+     * @returns
      */
-    processProps(props) { 
-        if (props == null || typeof props != 'object') {  
+    processProps(props) {
+        if (props == null || typeof props != 'object') {
             return props
         }
         
@@ -1628,7 +1628,7 @@ class ComposeJSRuntime {
             
             // Expand functions in arrays
             if (Array.isArray(value)) {
-                newProps[key] = value.map(v => 
+                newProps[key] = value.map(v =>
                     (typeof v === 'function' && v._component) ? v() : v
                 );
 
@@ -1636,10 +1636,10 @@ class ComposeJSRuntime {
             } else if (typeof value === 'object' && value !== null) {
                 newProps[key] = this.processProps(value);
 
-            // Expand functions if value of key 
+            // Expand functions if value of key
             } else if (typeof value === 'function' && value._component) {
                 newProps[key] = newProps[key]();
-            } 
+            }
         });
         return newProps
     }
@@ -1652,7 +1652,7 @@ class ComposeJSRuntime {
      */
     currentPathId(name) {
         const { path, childIndex } = this.hookState;
-        let id = [this.rendererId ?? 0, ...path, name, childIndex].join(',');  
+        let id = [this.rendererId ?? 0, ...path, name, childIndex].join(',');
         return id
     }
 
@@ -1661,7 +1661,7 @@ class ComposeJSRuntime {
      */
     #makeModifier(name, f) {
 
-        const makeModifier = this.#makeModifier.bind(this);    
+        const makeModifier = this.#makeModifier.bind(this);
 
         return (...args) => {
 
@@ -1672,7 +1672,7 @@ class ComposeJSRuntime {
                     // Capture the hook state so it can be maintained once the content is executed
                     const capturedHookState = {...this.hookState};
 
-                    // If this modifier is an id, store the name into the hook state so it can be used 
+                    // If this modifier is an id, store the name into the hook state so it can be used
                     // for the hook path
                     if (name == 'id') {
                         this.hookState.modifierId = args[0];
@@ -1680,7 +1680,7 @@ class ComposeJSRuntime {
 
                     // Will be a function to an inbuilt when modifying a custom component
                     let content = f();
-                    if (typeof content === 'function') {    
+                    if (typeof content === 'function') {
                         content = content();
                     }
 
@@ -1697,7 +1697,7 @@ class ComposeJSRuntime {
                  * Find modifier that handles the content for this modifier.
                  * GenericModifier is the default if no specific modifier is found.
                  */
-                const modifierFunction = this.modifierRegistry[name] ?? this.modifierRegistry['GenericModifier'];    
+                const modifierFunction = this.modifierRegistry[name] ?? this.modifierRegistry['GenericModifier'];
                 if (!modifierFunction) {
                     console.warn(`Modifier ${name} not found`);
                     return {}
@@ -1710,14 +1710,14 @@ class ComposeJSRuntime {
                     } else {
                         return arg
                     }
-                });  
+                });
 
                 // Execute environment function provided by the modifier function if available
-                var capturedEnvironment = null;  
+                var capturedEnvironment = null;
                 if (modifierFunction.environmentValue) {
                     const result = modifierFunction.environmentValue(name, processedArgs, this.environment);
 
-                    // If the modifier function returns a value, store it in the environment. 
+                    // If the modifier function returns a value, store it in the environment.
                     if (result) {
                         capturedEnvironment = {...this.environment};
                         const { key, value } = result;
@@ -1737,7 +1737,7 @@ class ComposeJSRuntime {
                 const { props: modifierProps, ast: modifierAst } = modifierFunction.bind(this)({ args: processedArgs, content: content, name: name });
 
                 /**
-                 * Modifier function can return either an AST or a new set of props. 
+                 * Modifier function can return either an AST or a new set of props.
                  */
 
                 // If the modifier function returns an AST, use it directly
@@ -1745,14 +1745,14 @@ class ComposeJSRuntime {
 
                     return modifierAst
 
-                // Otherwise, use the props to create a new modifier    
+                // Otherwise, use the props to create a new modifier
                 } else {
                     return AST.ModifiedContent(AST.Directive(name, modifierProps, []), content)
                 }
                  
             };
             
-            return new Proxy(modifierContent, {   
+            return new Proxy(modifierContent, {
                 get: function(target, prop, receiver) {
                     if (prop == 'toJSON' || prop == 'type' || prop == 'children' || prop == 'props') {
                         return target[prop]
@@ -1761,12 +1761,12 @@ class ComposeJSRuntime {
 
                         return makeModifier(modifierName, modifierContent, ...arguments)
                     }
-                }    
+                }
             })
         }
     }
 
-    makeComponent(body, props, children) { 
+    makeComponent(body, props, children) {
         return this.#makeComponent(body, props, children)
     }
     
@@ -1798,7 +1798,7 @@ class ComposeJSRuntime {
             let hookStorage = componentHookStore[hookKey] ?? (componentHookStore[hookKey] = []);
 
             // Setup component hook state for the component we're about to call
-            currentComponent.hookStorage = hookStorage;            
+            currentComponent.hookStorage = hookStorage;
             currentComponent.hookIndex = 0;
 
             // Call the content function
@@ -1825,38 +1825,38 @@ class ComposeJSRuntime {
         })
     }
 
-    #generateUniqueID() {   
-        return Math.random().toString(36).substring(7)   
+    #generateUniqueID() {
+        return Math.random().toString(36).substring(7)
     }
 
-    storeEnvironment(environmentId) { 
+    storeEnvironment(environmentId) {
         const id = environmentId ?? this.#generateUniqueID();
         if (this.environment) {
             this.storedEnvironments[id] = {...this.environment};
         }
         if (this.hookState) {
-            this.storedHookStates[id] = { path: [...this.hookState.path] }; 
+            this.storedHookStates[id] = { path: [...this.hookState.path] };
         }
         return id
     }
 
-    restoreFunction(functionId) {   
+    restoreFunction(functionId) {
         return this.storedFunctions[functionId]
     }
 
     storeFunction(f, functionId) {
         const id = functionId ?? this.#generateUniqueID();
-        this.storedFunctions[id] = f;    
+        this.storedFunctions[id] = f;
         return id
     }
 
-    restoreData(dataId) {   
+    restoreData(dataId) {
         return this.storedData[dataId]
     }
 
     storeData(data, dataId ) {
         const id = dataId ?? this.#generateUniqueID();
-        this.storedData[id] = data;  
+        this.storedData[id] = data;
         return id
     }
 
@@ -1871,8 +1871,8 @@ class ComposeJSRuntime {
         
         return this.#makeComponent((...componentArgs) => {
 
-            const handler = this.componentRegistry[type] ?? this.componentRegistry['GenericComponent'];    
-            const { props, children, ast } = handler.bind(this)({ args: args, name: type });    
+            const handler = this.componentRegistry[type] ?? this.componentRegistry['GenericComponent'];
+            const { props, children, ast } = handler.bind(this)({ args: args, name: type });
 
             /**
              * Component AST
@@ -1880,21 +1880,21 @@ class ComposeJSRuntime {
             if (ast) {
                 return ast
             } else {
-                return AST.Directive(type, {...props}, children ?? [])  
+                return AST.Directive(type, {...props}, children ?? [])
             }
 
-        }, args[0], args[1], type) 
+        }, args[0], args[1], type)
     }
 
     /**
-     * 
+     *
      * Calls the contents of a ForEach function with a specific element and index.
-     * 
-     * @param {string} functionId 
-     * @param {string?} environmentId 
-     * @param {any} element 
-     * @param {number} index 
-     * @returns 
+     *
+     * @param {string} functionId
+     * @param {string?} environmentId
+     * @param {any} element
+     * @param {number} index
+     * @returns
      */
     callForEachFunction(functionId, element, index) {
         let f = this.restoreFunction(functionId);
@@ -1949,6 +1949,7 @@ Object.assign(this, {
     debug: () => console.log(customJSONStringify(runtime.components)),
     reset: () => runtime.reset(),
     setAppState: (state) => runtime.registerAppState(state),
+    updatedAppState: (key, value, completionCallback) => runtime.updatedAppState(key, value, (s) => ({ ...s, [key]: value }), completionCallback),
     setOnOpenURL: (callback) => runtime.onOpenURL = callback
 });
 
