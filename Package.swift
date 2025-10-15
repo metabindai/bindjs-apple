@@ -4,10 +4,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "MetabindUI",
+    name: "composejs-ios",
     platforms: [
         .macOS(.v14),
-        .iOS(.v16),
+        .iOS(.v17),
         .watchOS(.v6),
         .tvOS(.v13),
         .visionOS(.v1)
@@ -15,8 +15,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "MetabindUI",
-            targets: ["MetabindUI"]),
+            name: "ComposeJS",
+            targets: ["ComposeJS"]),
     ],
     dependencies: [
         .package(url: "https://github.com/exyte/SVGView", from: "1.0.6"),
@@ -26,7 +26,7 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "MetabindUI",
+            name: "ComposeJS",
             dependencies: [
                 .product(name: "SVGView", package: "SVGView"),
                 .product(name: "GLTFKit2", package: "GLTFKit2")
@@ -34,10 +34,6 @@ let package = Package(
             resources: [
                 .copy("Resources/JSRuntime.js")
             ]
-        ),
-        .testTarget(
-            name: "MetabindUITests",
-            dependencies: ["MetabindUI"]
         ),
     ]
 )
