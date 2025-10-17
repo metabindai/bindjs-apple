@@ -112,6 +112,7 @@ private struct ContextHostView: View {
                 }
                 context.view(for: "_body")
             }
+            .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .onChange(of: content) { _, newContent in
             reregisterIfNeeded(newContent)
