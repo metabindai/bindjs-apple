@@ -102,14 +102,15 @@ private struct ContextHostView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            RenderEffect {
-                setupNavigation()
-                setupAppState()
-                setupHooks()
-                setupEnvironment(geometry: geometry)
+        ZStack {
+            GeometryReader { geometry in
+                RenderEffect {
+                    setupNavigation()
+                    setupAppState()
+                    setupHooks()
+                    setupEnvironment(geometry: geometry)
+                }
             }
-
             context.view(for: "_body")
         }
         .onChange(of: content) { _, newContent in
