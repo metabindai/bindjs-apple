@@ -195,6 +195,8 @@ public class ComponentContext: ObservableObject {
         let _ = willRender()
         if let component = componentWithName(name, arguments: arguments) {
             ComponentView(component)
+                .contentTransition(.interpolate)
+                .environment(\.contentTransitionAddsDrawingGroup, true)
                 .environmentObject(self)
                 .id(name)
         }
