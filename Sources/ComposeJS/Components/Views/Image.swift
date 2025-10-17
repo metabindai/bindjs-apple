@@ -44,16 +44,7 @@ extension ImageComponent {
 
 extension ImageComponent: View {
     public var body: some View {
-        if let name = name {
-            if resizable {
-                Image(name)
-                    .resizable()
-            } else {
-                Image(name)
-            }
-        } else if let svg = svg {
-            SVGImageView(svgData: svg, resizable: resizable)
-        } else if let url = url {
+        if let url = url {
             if url.pathExtension.lowercased() == "svg" {
                 SVGURLView(url: url, resizable: resizable)
             } else {
@@ -68,6 +59,15 @@ extension ImageComponent: View {
                         .fill(.quaternary)
                 }
             }
+        } else if let name = name {
+            if resizable {
+                Image(name)
+                    .resizable()
+            } else {
+                Image(name)
+            }
+        } else if let svg = svg {
+            SVGImageView(svgData: svg, resizable: resizable)
         } else if let systemName = systemName {
             Image(systemName: systemName)
         }
