@@ -103,7 +103,7 @@ private struct ContextHostView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
+            VStack {
                 RenderEffect {
                     setupNavigation()
                     setupAppState()
