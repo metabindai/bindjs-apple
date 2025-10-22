@@ -90,6 +90,7 @@ public protocol ComponentVisitor {
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result
+    mutating func visitMask(_ mask: MaskComponent) -> Result
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result
@@ -445,7 +446,11 @@ public extension ComponentVisitor {
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result {
         return defaultVisit(lineSpacing)
     }
-    
+
+    mutating func visitMask(_ mask: MaskComponent) -> Result {
+        return defaultVisit(mask)
+    }
+
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result {
         return defaultVisit(minimumScaleFactor)
     }
