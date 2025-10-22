@@ -115,7 +115,9 @@ private struct ContextHostView: View {
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .onChange(of: content) { _, newContent in
-            reregisterIfNeeded(newContent)
+            withAnimation(.snappy) {
+                reregisterIfNeeded(newContent)
+            }
         }
     }
 
