@@ -58,9 +58,7 @@ public class ComponentContext: ObservableObject {
 
     private func setupNeedsRerender() {
         let rerender: @convention(block) () -> Void = { [weak self] in
-            DispatchQueue.main.async {
-                self?.objectWillChange.send()
-            }
+            self?.objectWillChange.send()
         }
         jsContext.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
         _ = jsContext.evaluateScript("runtime.needsRerender = needsRerender")
