@@ -34,7 +34,7 @@ extension ImageComponent {
         url = directive["url"]
         systemName = directive["systemName"]
         svg = directive["svg"]
-        resizable = directive["resizable"] ?? true
+        resizable = directive["resizable"] ?? false
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
