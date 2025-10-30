@@ -1212,7 +1212,7 @@ const componentNames = [
     "ZStack"
 ];
 
-class ComposeJSRuntime {
+class BindJSRuntime {
     constructor(options) {
         this.options = options ?? { expandForEach: false };
         this.reset();
@@ -1922,7 +1922,7 @@ function customJSONStringify(value, replacer, space) {
     }, space);
 }
 
-const runtime = new ComposeJSRuntime();
+const runtime = new BindJSRuntime();
 
 Object.assign(this, {
     setComponents: (args) => runtime.registerComponents(args),

@@ -5,13 +5,13 @@
 
 import SwiftUI
 import Combine
-import ComposeJS
+import BindJS
 
 // MARK: - Pure Rendering View (No Networking)
 
 /// Pure rendering view - accepts compiled content data only
 /// Works like SwiftUI's Image - you provide the data, it renders
-public struct ComposeJSView: View {
+public struct BindJSView: View {
     let content: ResolvedContent
 
     public init(content: ResolvedContent) {
