@@ -430,6 +430,27 @@ function applyEdges(mask, length, target) {
     }
 }
 
+function Resizable({ args, content }) {
+
+    const resizable = args[0];
+
+    if (content && content.type === 'Image') {
+
+        // If the content is a Image component, we need to modify its prop directly
+        const imageProps = content.props;
+        imageProps.resizable = resizable == false ? false : true ;
+
+        // Return the Image directly
+        return { ast: content }
+
+    } else {
+        return {
+            props: { rawValue: resizable },
+            children: content
+        }
+    }
+}
+
 function Opacity({ args, content }) {
 
     const opacity = args[0];
@@ -1355,6 +1376,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('fill', Fill);
         this.#registerBuiltInModifier('stroke', Stroke);
         this.#registerBuiltInModifier('buttonStyle', ButtonStyle);
+        this.#registerBuiltInModifier('resizable', Resizable);
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
