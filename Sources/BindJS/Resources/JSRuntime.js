@@ -838,6 +838,33 @@ function ButtonStyle({ args , name }) {
     return props
 }
 
+/**
+ * Modifier that supports content as a first or second argument.
+ * If two arguments are provided, the first is treated as props and the second as content.
+ *
+ * Used for modifiers like background and overlay.
+ */
+function ContentModifier({ args, content }) {
+
+    var modifierContent = null;
+    var props = {};
+    
+    if (args.length == 2) {
+        modifierContent = args[1];
+        props = args[0];
+    } else if (args.length == 1) {
+        modifierContent = args[0];
+    }
+
+    if (typeof modifierContent == 'function') {
+        modifierContent = modifierContent();
+    }
+
+    return {
+        props: { ...props, content: modifierContent },
+    }
+}
+
 function ForEach({ args }) {
 
     const [data, callback] = args;
@@ -1378,6 +1405,9 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('buttonStyle', ButtonStyle);
         this.#registerBuiltInModifier('resizable', Resizable);
 
+        this.#registerBuiltInModifier('background', ContentModifier);
+        this.#registerBuiltInModifier('overlay', ContentModifier);
+        
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 

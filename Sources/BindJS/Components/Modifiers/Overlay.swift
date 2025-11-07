@@ -3,7 +3,7 @@ import SwiftUI
 public struct OverlayComponent: Component {
     public static var directiveName: String = "overlay"
     
-    public var content: [Component]
+    public var content: Component
     public var alignment: Alignment
 }
 
@@ -12,7 +12,7 @@ extension OverlayComponent {
         guard directive.type == Self.directiveName else { return nil }
         
         self.alignment = directive["alignment"] ?? .center
-        self.content = directive.children.compactMap { makeComponent($0) }
+        self.content = directive["content"].flatMap { makeComponent($0) } ?? EmptyComponent()
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -23,9 +23,7 @@ extension OverlayComponent {
 extension OverlayComponent: ViewModifier {
     public func body(content: Content) -> some View {
         content.overlay(alignment: alignment) {
-            ForEach(self.content.indices, id: \.self) { index in
-                ComponentView(self.content[index])
-            }
+            ComponentView(self.content)
         }
     }
 }

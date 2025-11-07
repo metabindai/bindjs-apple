@@ -154,7 +154,7 @@ public extension ComponentRewriter {
     
     mutating func visitBackground(_ background: BackgroundComponent) -> Result {
         var copy = background
-        copy.style = background.style.accept(visitor: &self)
+        copy.content = background.content.accept(visitor: &self)
         return copy
     }
     
@@ -172,7 +172,7 @@ public extension ComponentRewriter {
     
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result {
         var copy = overlay
-        copy.content = overlay.content.map { $0.accept(visitor: &self) }
+        copy.content = overlay.content.accept(visitor: &self) 
         return copy
     }
 }
