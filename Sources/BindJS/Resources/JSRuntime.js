@@ -430,6 +430,27 @@ function applyEdges(mask, length, target) {
     }
 }
 
+function Resizable({ args, content }) {
+
+    const resizable = args[0];
+
+    if (content && content.type === 'Image') {
+
+        // If the content is a Image component, we need to modify its prop directly
+        const imageProps = content.props;
+        imageProps.resizable = resizable == false ? false : true ;
+
+        // Return the Image directly
+        return { ast: content }
+
+    } else {
+        return {
+            props: { rawValue: resizable },
+            children: content
+        }
+    }
+}
+
 function Opacity({ args, content }) {
 
     const opacity = args[0];
@@ -815,6 +836,33 @@ function ButtonStyle({ args , name }) {
     };
 
     return props
+}
+
+/**
+ * Modifier that supports content as a first or second argument.
+ * If two arguments are provided, the first is treated as props and the second as content.
+ *
+ * Used for modifiers like background and overlay.
+ */
+function ContentModifier({ args, content }) {
+
+    var modifierContent = null;
+    var props = {};
+    
+    if (args.length == 2) {
+        modifierContent = args[1];
+        props = args[0];
+    } else if (args.length == 1) {
+        modifierContent = args[0];
+    }
+
+    if (typeof modifierContent == 'function') {
+        modifierContent = modifierContent();
+    }
+
+    return {
+        props: { ...props, content: modifierContent },
+    }
 }
 
 function ForEach({ args }) {
@@ -1355,7 +1403,11 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('fill', Fill);
         this.#registerBuiltInModifier('stroke', Stroke);
         this.#registerBuiltInModifier('buttonStyle', ButtonStyle);
+        this.#registerBuiltInModifier('resizable', Resizable);
 
+        this.#registerBuiltInModifier('background', ContentModifier);
+        this.#registerBuiltInModifier('overlay', ContentModifier);
+        
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 

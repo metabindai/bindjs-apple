@@ -122,7 +122,7 @@ private struct ComponentChildren: ComponentVisitor {
     }
     
     mutating func visitBackground(_ background: BackgroundComponent) -> [any Component] {
-        [background.style]
+        [background.content]
     }
     
     mutating func visitBorder(_ border: BorderComponent) -> [any Component] {
@@ -134,6 +134,6 @@ private struct ComponentChildren: ComponentVisitor {
     }
     
     mutating func visitOverlay(_ overlay: OverlayComponent) -> [any Component] {
-        overlay.content
+        [overlay.content]
     }
 }

@@ -3,14 +3,14 @@ import SwiftUI
 public struct BackgroundComponent: Component {
     public static var directiveName: String = "background"
     
-    public var style: Component
+    public var content: Component
 }
 
 extension BackgroundComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         
-        style = directive.rawValue().flatMap { makeComponent($0) } ?? EmptyComponent()
+        content = directive["content"].flatMap { makeComponent($0) } ?? EmptyComponent()
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -20,7 +20,7 @@ extension BackgroundComponent {
 
 extension BackgroundComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        switch style {
+        switch content {
         case let color as ColorComponent:
             content.background(color.swiftUI)
         case let linearGradient as LinearGradientComponent:
@@ -36,7 +36,7 @@ extension BackgroundComponent: ViewModifier {
         case is EmptyComponent:
             content.background()
         default:
-            content.background(ComponentView(style))
+            content.background(ComponentView(self.content))
         }
     }
 }

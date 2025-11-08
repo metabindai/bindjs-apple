@@ -18,7 +18,7 @@ import SVGView
 
 public struct ImageComponent: Component {
     public static var directiveName: String = "Image"
-    
+    public var contentMode: AspectImageContentMode? = nil
     public var name: String?
     public var url: URL?
     public var systemName: String?
@@ -29,7 +29,16 @@ public struct ImageComponent: Component {
 extension ImageComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
-        
+            
+        switch directive["contentMode"] as String? {
+            case "fill":
+                contentMode = .fill
+            case "fit":
+                contentMode = .fit
+            default:
+                contentMode = nil
+        }
+
         name = directive["name"]
         url = directive["url"]
         systemName = directive["systemName"]
@@ -50,7 +59,7 @@ extension ImageComponent: View {
             } else {
                 AsyncImageView(url: url) { image in
                     if resizable {
-                        image.resizable()
+                        AspectContentImage(image, mode: contentMode)
                     } else {
                         image
                     }
@@ -70,6 +79,61 @@ extension ImageComponent: View {
             SVGImageView(svgData: svg, resizable: resizable)
         } else if let systemName = systemName {
             Image(systemName: systemName)
+        }
+    }
+}
+
+// MARK: - contentMode aspect support
+public enum AspectImageContentMode : String {
+    case fit
+    case fill
+}
+
+struct AspectContentImage: View {
+    let image: Image
+    let mode: AspectImageContentMode?
+    
+    init(_ image: Image, mode: AspectImageContentMode? = nil) {
+        self.image = image
+        self.mode = mode
+    }
+    
+    var body : some View {
+        switch mode {
+            // Fill, or fit into container.
+            case .fill, .fit:
+                aspectContent
+            
+            // Stretch
+            default:
+                image.resizable()
+        }
+    }
+    
+    var aspectContent: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            
+            image
+                .resizable()
+                .modifier(AspectImageContentSizingMode(mode: mode))
+                .frame(width: size.width, height: size.height)
+                .clipped()
+        }
+    }
+}
+
+private struct AspectImageContentSizingMode: ViewModifier {
+    let mode: AspectImageContentMode?
+    
+    func body(content: Content) -> some View {
+        switch mode {
+        case .fit:
+            content.scaledToFit()
+        case .fill:
+            content.scaledToFill()
+        default:
+            content
         }
     }
 }
@@ -379,7 +443,7 @@ private final class ImageLoader: ObservableObject {
                     desiredSize: desiredSize,
                     scale: scale
                 )
-                let swiftImg = platformImg.swiftUIImage().resizable()
+                let swiftImg = platformImg.swiftUIImage()
                 phase = .success(swiftImg)
             } catch {
                 phase = .failure(error)
