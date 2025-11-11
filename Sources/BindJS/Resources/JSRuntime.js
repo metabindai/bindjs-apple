@@ -731,7 +731,7 @@ function FontModifier({ args, content }) {
     
     let options = {};
     if (customProps) {
-        options = { custom: customProps, rawValue: arg };
+        options = { custom: customProps, rawValue: arg() };
     } else {
         options = { rawValue: arg };
     }
