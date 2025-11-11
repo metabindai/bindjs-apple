@@ -9,7 +9,8 @@ public class ComponentContext: ObservableObject {
     private var onOpenURLCallback: ((URL, @escaping (Bool) -> Void) -> Void)?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
-
+    private var jsTimers: JSTimers
+    
     public init() {
         jsContext = JSContext()!
         jsContext.exceptionHandler = { _, exception in
@@ -17,6 +18,8 @@ public class ComponentContext: ObservableObject {
                 print("JS Error: \(exception)")
             }
         }
+        jsTimers = JSTimers()
+        jsTimers.install(in: jsContext)
         runtime = jsContext.evaluateScript(Self.loadRuntime())
         setupConsoleLog()
         setupNeedsRerender()
