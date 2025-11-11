@@ -124,8 +124,6 @@ struct AnyDecodable: Decodable {
             value = NSNull()
         } else if let b = try? container.decode(Bool.self) {
             value = b
-        } else if let i = try? container.decode(Int.self) {
-            value = i
         } else if let d = try? container.decode(Double.self) {
             value = d
         } else if let s = try? container.decode(String.self) {
