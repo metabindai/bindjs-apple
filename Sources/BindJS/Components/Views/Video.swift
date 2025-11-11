@@ -45,7 +45,6 @@ public struct VideoComponent: Component, View {
             loop: loop,
             contentMode: contentMode
         )
-        .aspectRatio(contentMode: .fit)
     }
 }
 
