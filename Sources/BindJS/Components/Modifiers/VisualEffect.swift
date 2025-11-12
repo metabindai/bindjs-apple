@@ -93,30 +93,44 @@ func geometryCallbackData(for geometry: GeometryProxy) -> [String: Any] {
     }
         
     let geometryFrame: @convention(block) (JSValue) -> [String: Double] = { coordinateSpaceValue in
-        guard let name = coordinateSpaceValue.toString()?.lowercased() else {
+        guard let name = coordinateSpaceValue.toString() else {
             return [:]
         }
 
         let rect: CGRect
-        switch name {
-        case "scrollview":
-            rect = geometry.frame(in: .scrollView)
-        case "global":
-            rect = geometry.frame(in: .global)
-        case "local":
-            fallthrough
-        default:
+        if name.isEmpty {
             rect = geometry.frame(in: .local)
+        } else {
+            switch name {
+            case "scrollView":
+                rect = geometry.frame(in: .scrollView)
+            case "global":
+                rect = geometry.frame(in: .global)
+            case "local":
+                rect = geometry.frame(in: .local)
+            default:
+                rect = geometry.frame(in: .named(name))
+            }
         }
 
         return frameDictionary(from: rect)
     }
             
     let boundsFrame: @convention(block) (JSValue) -> [String: Double] = { coordinateSpaceValue in
-        guard let name = coordinateSpaceValue.toString()?.lowercased() else {
-            return [:]
+        // Safely extract and normalize name
+        let name = coordinateSpaceValue.toString() ?? ""
+
+        let rect: CGRect?
+
+        switch name {
+        case "scrollView":
+            rect = geometry.bounds(of: .scrollView)
+        default:
+            rect = geometry.bounds(of: .named(name))
         }
-        if let rect: CGRect = geometry.bounds(of: .scrollView) {
+
+        // Return the dictionary only if we got a valid rect
+        if let rect = rect {
             return frameDictionary(from: rect)
         } else {
             return [:]
