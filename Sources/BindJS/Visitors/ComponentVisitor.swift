@@ -68,6 +68,7 @@ public protocol ComponentVisitor {
     mutating func visitContrast(_ contrast: ContrastComponent) -> Result
     mutating func visitControlSize(_ controlSize: ControlSizeComponent) -> Result
     mutating func visitCornerRadius(_ cornerRadius: CornerRadiusComponent) -> Result
+    mutating func visitCoordinateSpace(_ coordinateSpace: CoordinateSpaceComponent) -> Result
     mutating func visitDisabled(_ disabled: DisabledComponent) -> Result
     mutating func visitAutocorrectionDisabled(_ autocorrectionDisabled: AutocorrectionDisabledComponent) -> Result
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result
@@ -359,6 +360,10 @@ public extension ComponentVisitor {
     
     mutating func visitCornerRadius(_ cornerRadius: CornerRadiusComponent) -> Result {
         return defaultVisit(cornerRadius)
+    }
+    
+    mutating func visitCoordinateSpace(_ coordinateSpace: CoordinateSpaceComponent) -> Result {
+        return defaultVisit(coordinateSpace)
     }
     
     mutating func visitDisabled(_ disabled: DisabledComponent) -> Result {
