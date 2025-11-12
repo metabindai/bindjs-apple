@@ -114,6 +114,7 @@ public protocol ComponentVisitor {
     mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
+    mutating func visitTint(_ tint: TintComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
@@ -541,6 +542,10 @@ public extension ComponentVisitor {
     
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result {
         return defaultVisit(textSelection)
+    }
+    
+    mutating func visitTint(_ tint: TintComponent) -> Result {
+        return defaultVisit(tint)
     }
     
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result {
