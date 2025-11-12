@@ -118,6 +118,7 @@ public protocol ComponentVisitor {
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
+    mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
 
@@ -558,6 +559,10 @@ public extension ComponentVisitor {
     
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result {
         return defaultVisit(underline)
+    }
+    
+    mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result {
+        return defaultVisit(visualEffect)
     }
     
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {

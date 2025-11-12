@@ -1,0 +1,134 @@
+import SwiftUI
+import JavaScriptCore
+
+public struct VisualEffectComponent: Component {
+    public static var directiveName: String = "visualEffect"
+    
+    public let handlerId: String
+    
+    @EnvironmentObject private var context: ComponentContext
+}
+
+extension VisualEffectComponent {
+    public init?(from directive: Directive) {
+        guard directive.type == Self.directiveName else { return nil }
+        handlerId = directive["handlerId"] ?? ""
+    }
+    
+    public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
+        visitor.visitVisualEffect(self)
+    }
+}
+
+struct CombinedVisualEffect: ViewModifier {
+    
+    let handlerId: String
+
+    @EnvironmentObject private var context: ComponentContext
+
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
+            content
+                .visualEffect { effect, geometry in
+                    // Call into JS to compute the offset
+                    let result = context.callEventHandler(
+                        id: handlerId,
+                        arguments: geometryCallbackData(for: geometry)
+                    )
+                    
+                    // Expect a JS dict like:
+                    // { "offset": { "x": 12, "y": 23 }, "opacity": 0.2, etc.. }
+                    let dict = result?.toDictionary() as? [String: Any]
+
+                    // Extract values (defaulting to neutral)
+                    
+                    // Offset
+                    let offsetDict = dict?["offset"] as? [String: Any]
+                    let x = offsetDict?["x"] as? Double ?? 0
+                    let y = offsetDict?["y"] as? Double ?? 0
+                    
+                    // Opacity
+                    let opacity = dict?["opacity"] as? Double ?? 1
+                    
+                    // Scale
+                    let scaleDict = dict?["scale"] as? [String: Any]
+                    let scaleX = scaleDict?["x"] as? Double ?? 1
+                    let scaleY = scaleDict?["y"] as? Double ?? 1
+
+                    // Blur
+                    let blur = dict?["blur"] as? Double ?? 0
+                    
+                    // Apply all transformations in one call chain
+                    return effect
+                        .offset(x: x, y: y)
+                        .scaleEffect(x: scaleX, y: scaleY, anchor: .bottom)
+                        .opacity(opacity)
+                        .blur(radius: blur)
+                }
+        } else {
+            content
+        }
+    }
+}
+
+extension VisualEffectComponent: ViewModifier {
+    public func body(content: Content) -> some View {
+        content.modifier(CombinedVisualEffect(handlerId: handlerId))
+    }
+}
+
+
+func geometryCallbackData(for geometry: GeometryProxy) -> [String: Any] {
+    func frameDictionary(from rect: CGRect) -> [String: Double] {
+        [
+            "minX": rect.minX,
+            "minY": rect.minY,
+            "maxX": rect.maxX,
+            "maxY": rect.maxY,
+            "width": rect.width,
+            "height": rect.height,
+            "midX": rect.midX,
+            "midY": rect.midY
+        ]
+    }
+        
+    let geometryFrame: @convention(block) (JSValue) -> [String: Double] = { coordinateSpaceValue in
+        guard let name = coordinateSpaceValue.toString()?.lowercased() else {
+            return [:]
+        }
+
+        let rect: CGRect
+        switch name {
+        case "scrollview":
+            rect = geometry.frame(in: .scrollView)
+        case "global":
+            rect = geometry.frame(in: .global)
+        case "local":
+            fallthrough
+        default:
+            rect = geometry.frame(in: .local)
+        }
+
+        return frameDictionary(from: rect)
+    }
+            
+    let boundsFrame: @convention(block) (JSValue) -> [String: Double] = { coordinateSpaceValue in
+        guard let name = coordinateSpaceValue.toString()?.lowercased() else {
+            return [:]
+        }
+        if let rect: CGRect = geometry.bounds(of: .scrollView) {
+            return frameDictionary(from: rect)
+        } else {
+            return [:]
+        }
+    }
+    
+    return [
+        "size": [
+            "width" : geometry.size.width,
+            "height" : geometry.size.height
+        ],
+        "frame": geometryFrame,
+        "bounds" : boundsFrame
+    ]
+}

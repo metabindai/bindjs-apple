@@ -113,6 +113,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case TrackingComponent.directiveName: TrackingComponent(from: directive)
     case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
     case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
+    case VisualEffectComponent.directiveName: VisualEffectComponent(from: directive)
     case ZIndexComponent.directiveName: ZIndexComponent(from: directive)
         
     // Values
@@ -252,6 +253,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)
+        case let m as VisualEffectComponent: content.modifier(m)
         case let m as ZIndexComponent: content.modifier(m)
         
         // Any other modifier

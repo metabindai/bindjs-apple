@@ -865,6 +865,121 @@ function ContentModifier({ args, content }) {
     }
 }
 
+class VisualEffectBuilder {
+    constructor() {
+        this.result = {};
+    }
+
+    blur(radius) {
+        this.result.blur = radius;
+        return this;
+    }
+
+    saturation(amount) {
+        this.result.saturation = amount;
+        return this;
+    }
+
+    brightness(amount) {
+        this.result.brightness = amount;
+        return this;
+    }
+
+    contrast(amount) {
+        this.result.contrast = amount;
+        return this;
+    }
+
+    colorInvert() {
+        this.result.colorInvert = true;
+        return this;
+    }
+
+    grayscale(amount = 1) {
+        this.result.grayscale = amount;
+        return this;
+    }
+
+    blendMode(mode) {
+        this.result.blendMode = mode;
+        return this;
+    }
+
+    opacity(amount) {
+        this.result.opacity = amount;
+        return this;
+    }
+
+    offset({ x, y }) {
+        this.result.offset = { x, y };
+        return this;
+    }
+
+    // supports both scale({x,y}) and scale(value)
+    scale(value) {
+        if (typeof value === "object" && value !== null) {
+            const { x, y } = value;
+            this.result.scale = { x, y };
+        } else {
+            this.result.scale = { x: value, y: value };
+        }
+        return this;
+    }
+
+    rotation(degrees) {
+        this.result.rotation = degrees;
+        return this;
+    }
+
+    transform(matrix) {
+        // Minimal placeholder: could be decomposed later
+        this.result.offset = { x: matrix.tx, y: matrix.ty };
+        return this;
+    }
+
+    translation({ x, y }) {
+        return this.offset({ x, y });
+    }
+
+    reset() {
+        this.result = {};
+        return this;
+    }
+
+    build() {
+        return { ...this.result };
+    }
+
+    toJSON() {
+        return this.build();
+    }
+}
+
+function VisualEffectModifier({ args, name }) {
+
+    // Handler function
+    var handler = (geometry) => {
+        let builder = new VisualEffectBuilder();
+        return args[0](builder, geometry).build();
+    }
+     
+    if (handler == null) {
+        return {
+            props: {
+                handlerId: null
+            }
+        }
+    } else {
+        return {
+            props: {
+                handlerId: this.storeFunction(handler, this.currentPathId(name))
+            }
+        }
+    }
+}
+
+
+
 function ForEach({ args }) {
 
     const [data, callback] = args;
@@ -1407,6 +1522,7 @@ class BindJSRuntime {
 
         this.#registerBuiltInModifier('background', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
+        this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
@@ -1958,7 +2074,6 @@ class BindJSRuntime {
     }
 
 }
-
 
 
 
