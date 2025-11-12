@@ -54,19 +54,55 @@ struct CombinedVisualEffect: ViewModifier {
                     let scaleDict = dict?["scale"] as? [String: Any]
                     let scaleX = scaleDict?["x"] as? Double ?? 1
                     let scaleY = scaleDict?["y"] as? Double ?? 1
+                    let anchor = unitPoint(from: scaleDict?["anchor"] as? String)
 
                     // Blur
                     let blur = dict?["blur"] as? Double ?? 0
                     
+                    // Rotation
+                    let rotation = dict?["rotation"] as? Double ?? 0
+                    
+                    // Transform matrix
+                    var transform = CGAffineTransform.identity
+                    if let t = dict?["transform"] as? [String: Any] {
+                        transform = CGAffineTransform(
+                            a: t["m11"] as? CGFloat ?? 1,
+                            b: t["m12"] as? CGFloat ?? 0,
+                            c: t["m21"] as? CGFloat ?? 0,
+                            d: t["m22"] as? CGFloat ?? 1,
+                            tx: t["tx"] as? CGFloat ?? 0,
+                            ty: t["ty"] as? CGFloat ?? 0
+                        )
+                    }
+                    
                     // Apply all transformations in one call chain
                     return effect
                         .offset(x: x, y: y)
-                        .scaleEffect(x: scaleX, y: scaleY, anchor: .bottom)
+                        .scaleEffect(x: scaleX, y: scaleY, anchor: anchor)
                         .opacity(opacity)
                         .blur(radius: blur)
+                        .rotationEffect(.degrees(rotation))
+                        .transformEffect(transform)
                 }
         } else {
             content
+        }
+    }
+    
+    func unitPoint(from anchorName: String?) -> UnitPoint {
+        guard let name = anchorName?.lowercased() else { return .center }
+        
+        switch name {
+        case "topleft", "top-leading":         return .topLeading
+        case "top", "topcenter":               return .top
+        case "topright", "top-trailing":       return .topTrailing
+        case "leading", "left":                return .leading
+        case "center", "middle":               return .center
+        case "trailing", "right":              return .trailing
+        case "bottomleft", "bottom-leading":   return .bottomLeading
+        case "bottom", "bottomcenter":         return .bottom
+        case "bottomright", "bottom-trailing": return .bottomTrailing
+        default:                               return .center
         }
     }
 }

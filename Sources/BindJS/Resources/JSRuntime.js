@@ -875,36 +875,6 @@ class VisualEffectBuilder {
         return this;
     }
 
-    saturation(amount) {
-        this.result.saturation = amount;
-        return this;
-    }
-
-    brightness(amount) {
-        this.result.brightness = amount;
-        return this;
-    }
-
-    contrast(amount) {
-        this.result.contrast = amount;
-        return this;
-    }
-
-    colorInvert() {
-        this.result.colorInvert = true;
-        return this;
-    }
-
-    grayscale(amount = 1) {
-        this.result.grayscale = amount;
-        return this;
-    }
-
-    blendMode(mode) {
-        this.result.blendMode = mode;
-        return this;
-    }
-
     opacity(amount) {
         this.result.opacity = amount;
         return this;
@@ -918,27 +888,46 @@ class VisualEffectBuilder {
     // supports both scale({x,y}) and scale(value)
     scale(value) {
         if (typeof value === "object" && value !== null) {
-            const { x, y } = value;
-            this.result.scale = { x, y };
+            this.result.scale = value;
         } else {
             this.result.scale = { x: value, y: value };
         }
         return this;
     }
 
-    rotation(degrees) {
-        this.result.rotation = degrees;
+    rotation(value) {
+        if (typeof value === "object" && value !== null) {
+            let degrees = value.degrees ? value.degrees : value.radians * (180 / Math.PI);
+            this.result.rotation = degrees;
+            return this;
+        } else {
+            this.result.rotation = value;
+        }
         return this;
     }
 
     transform(matrix) {
-        // Minimal placeholder: could be decomposed later
-        this.result.offset = { x: matrix.tx, y: matrix.ty };
-        return this;
-    }
+        // Only include keys that are defined (so we don't send undefined values to Swift)
+        const { m11, m12, m21, m22, tx, ty } = matrix || {};
 
-    translation({ x, y }) {
-        return this.offset({ x, y });
+        // Build transform object only if there's something meaningful to send
+        const hasTransform =
+            m11 !== undefined || m12 !== undefined ||
+            m21 !== undefined || m22 !== undefined ||
+            tx  !== undefined || ty  !== undefined;
+
+        if (hasTransform) {
+            this.result.transform = {
+                m11: m11 ?? 1,
+                m12: m12 ?? 0,
+                m21: m21 ?? 0,
+                m22: m22 ?? 1,
+                tx:  tx  ?? 0,
+                ty:  ty  ?? 0,
+            };
+        }
+
+        return this;
     }
 
     reset() {
@@ -950,9 +939,6 @@ class VisualEffectBuilder {
         return { ...this.result };
     }
 
-    toJSON() {
-        return this.build();
-    }
 }
 
 function VisualEffectModifier({ args, name }) {
