@@ -77,12 +77,12 @@ struct CombinedVisualEffect: ViewModifier {
                     
                     // Apply all transformations in one call chain
                     return effect
-                        .offset(x: x, y: y)
-                        .scaleEffect(x: scaleX, y: scaleY, anchor: anchor)
-                        .opacity(opacity)
-                        .blur(radius: blur)
-                        .rotationEffect(.degrees(rotation))
-                        .transformEffect(transform)
+                            .offset(x: x, y: y)
+                            .scaleEffect(x: scaleX, y: scaleY, anchor: anchor)
+                            .opacity(opacity)
+                            .blur(radius: blur)
+                            .rotationEffect(.degrees(rotation))
+                            .transformEffect(transform)
                 }
         } else {
             content
@@ -93,16 +93,16 @@ struct CombinedVisualEffect: ViewModifier {
         guard let name = anchorName?.lowercased() else { return .center }
         
         switch name {
-        case "topleft", "top-leading":         return .topLeading
-        case "top", "topcenter":               return .top
-        case "topright", "top-trailing":       return .topTrailing
-        case "leading", "left":                return .leading
-        case "center", "middle":               return .center
-        case "trailing", "right":              return .trailing
-        case "bottomleft", "bottom-leading":   return .bottomLeading
-        case "bottom", "bottomcenter":         return .bottom
-        case "bottomright", "bottom-trailing": return .bottomTrailing
-        default:                               return .center
+            case "topleading":       return .topLeading
+            case "top":              return .top
+            case "toptrailing":      return .topTrailing
+            case "leading":          return .leading
+            case "center":           return .center
+            case "trailing":         return .trailing
+            case "bottomleading":    return .bottomLeading
+            case "bottom":           return .bottom
+            case "bottomtrailing":   return .bottomTrailing
+            default:                 return .center
         }
     }
 }
