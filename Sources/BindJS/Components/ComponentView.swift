@@ -62,6 +62,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case ContrastComponent.directiveName: ContrastComponent(from: directive)
     case ControlSizeComponent.directiveName: ControlSizeComponent(from: directive)
     case CornerRadiusComponent.directiveName: CornerRadiusComponent(from: directive)
+    case CoordinateSpaceComponent.directiveName: CoordinateSpaceComponent(from: directive)
     case DisabledComponent.directiveName: DisabledComponent(from: directive)
     case DynamicTypeSizeComponent.directiveName: DynamicTypeSizeComponent(from: directive)
     case FixedSizeComponent.directiveName: FixedSizeComponent(from: directive)
@@ -113,6 +114,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case TrackingComponent.directiveName: TrackingComponent(from: directive)
     case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
     case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
+    case VisualEffectComponent.directiveName: VisualEffectComponent(from: directive)
     case ZIndexComponent.directiveName: ZIndexComponent(from: directive)
         
     // Values
@@ -204,6 +206,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ContrastComponent: content.modifier(m)
         case let m as ControlSizeComponent: content.modifier(m)
         case let m as CornerRadiusComponent: content.modifier(m)
+        case let m as CoordinateSpaceComponent: content.modifier(m)
         case let m as DisabledComponent: content.modifier(m)
         case let m as DynamicTypeSizeComponent: content.modifier(m)
         case let m as FixedSizeComponent: content.modifier(m)
@@ -252,6 +255,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)
+        case let m as VisualEffectComponent: content.modifier(m)
         case let m as ZIndexComponent: content.modifier(m)
         
         // Any other modifier
