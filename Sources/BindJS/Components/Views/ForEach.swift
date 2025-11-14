@@ -35,7 +35,7 @@ extension ForEachComponent: View {
             ForEach(0..<count, id: \.self) { index in
                 if let item = data.atIndex(index),
                    let jsValue = context.callForEachFunction(id: functionId, element: item, index: Int32(index)),
-                   let directive = try? jsValue.decode(Directive.self),
+                   let directive = jsValue.toDirective(),
                    let component = makeComponent(directive)
                 {
                     ComponentView(component)
