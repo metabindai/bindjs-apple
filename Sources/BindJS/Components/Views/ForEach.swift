@@ -34,9 +34,8 @@ extension ForEachComponent: View {
            case _ = context.restoreEnvironment(id: environmentId) {
             ForEach(0..<count, id: \.self) { index in
                 if let item = data.atIndex(index),
-                   let json = context.callForEachFunction(id: functionId, element: item, index: Int32(index))?.toString(),
-                   let data = json.data(using: .utf8),
-                   let directive = try? JSONDecoder().decode(Directive.self, from: data),
+                   let jsValue = context.callForEachFunction(id: functionId, element: item, index: Int32(index)),
+                   let directive = try? jsValue.decode(Directive.self),
                    let component = makeComponent(directive)
                 {
                     ComponentView(component)
