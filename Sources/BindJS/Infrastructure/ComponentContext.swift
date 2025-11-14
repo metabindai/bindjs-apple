@@ -204,19 +204,11 @@ public class ComponentContext: ObservableObject {
     }
     
     public func componentWithName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
-        guard let jsValue = runtime.invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: jsContext)!]]) else {
-            return nil
-        }
-
-        // Decode directly from JSValue
-               let decoder = JSONDecoder()
-               decoder.allowsJSON5 = true
-
-        guard let directive = try? jsValue.decode(Directive.self, decoder: decoder),
+        guard let jsValue = runtime.invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: jsContext)!]]),
+              let directive = jsValue.toDirective(),
               let component = makeComponent(directive) else {
         return nil
     }
-
         return component
     }
 
