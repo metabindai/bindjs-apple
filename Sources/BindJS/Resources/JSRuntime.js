@@ -885,7 +885,7 @@ class VisualEffectBuilder {
         return this;
     }
 
-    // supports both scale({x,y}) and scale(value)
+    // supports both scale({x,y,anchor}) and scale(value)
     scale(value) {
         if (typeof value === "object" && value !== null) {
             this.result.scale = value;
@@ -947,8 +947,8 @@ function VisualEffectModifier({ args, name }) {
     var handler = (geometry) => {
         let builder = new VisualEffectBuilder();
         return args[0](builder, geometry).build();
-    }
-     
+    };
+
     if (handler == null) {
         return {
             props: {
@@ -963,8 +963,6 @@ function VisualEffectModifier({ args, name }) {
         }
     }
 }
-
-
 
 function ForEach({ args }) {
 
@@ -1010,6 +1008,58 @@ function Content({ args }) {
     };
     return { props }
 }
+
+const getComponentData = (child) => {
+    let ast = child();
+    let data = findComponentDataInAST(ast);
+    return data ?? { name: null, props: {}  }
+};
+
+const findComponentDataInAST = (node) => {
+    if (!node) return null;
+
+    // Base case: If this node is not one of the excluded types, return its type/name
+    if (node.type !== "ModifiedComponent" && node.type !== "DOMIdentifable") {
+        // For ComponentCall nodes, prefer props.name (since "type" would just be "ComponentCall")
+        if (node.type === "ComponentCall") {
+            return {
+                name: node.name ?? node.props?.name ?? null,
+                props: node.props?.props ?? {}
+            }
+        } else {
+            return {
+                name: node.type,
+                props: node.props ?? {}
+            }
+        }
+    }
+
+    // Otherwise, explore its children or content recursively
+    const children =
+        node.props?.children ??
+        node.content ??
+        node.props?.content ?? // current iOS implementation.
+        (node.modifier?.props?.children ?? []);
+
+    if (Array.isArray(children)) {
+        for (const child of children) {
+            const result = findComponentDataInAST(child);
+            if (result) return result;
+        }
+    } else if (children) {
+        return findComponentDataInAST(children);
+    }
+
+    // Also look into modifier content if present
+    if (Array.isArray(node.content)) {
+        for (const child of node.content) {
+            const result = findComponentDataInAST(child);
+            if (result) return result;
+        }
+    }
+
+    return null;
+};
 
 function useState(initialValue) {
     
@@ -1361,6 +1411,44 @@ const componentNames = [
     "ZStack"
 ];
 
+function SheetModifier({ args, name }) {
+
+    // Assume args[0] contains the props
+    const props = args[0] ?? { isPresented: false };
+
+    // Extract isPresented binding. First arg is the getter, second is the setter
+    const isPresented = props.isPresented
+    const setIsPresented = props.setIsPresented ?? (() => { });
+
+    // Extract onDismiss handler if provided
+    const onDismiss = props.onDismiss;
+
+    const content = props.content
+    
+    // Return AST representation when content handler is called.
+    const contentHandler = content ? () => {
+        // Execute handler, then AST function.
+        return content()();
+    } : () => {
+        return null;
+    };
+
+    return {
+        props: {
+            // Store isPresented binding handlers
+            isPresented: isPresented,
+            setIsPresentedHandlerId: setIsPresented ? this.storeFunction(setIsPresented, this.currentPathId(name + '_setPresented')) : null,
+
+            // Store content handler
+            contentHandlerId: this.storeFunction(contentHandler, this.currentPathId(name + '_content')),
+
+            // Store onDismiss handler if provided
+            dismissHandlerId: onDismiss ? this.storeFunction(onDismiss, this.currentPathId(name + '_dismiss')) : null,
+        }
+    }
+}
+
+
 class BindJSRuntime {
     constructor(options) {
         this.options = options ?? { expandForEach: false };
@@ -1509,6 +1597,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('background', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
+        this.#registerBuiltInModifier('sheet', SheetModifier);
         
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
@@ -1548,6 +1637,7 @@ class BindJSRuntime {
             this.registerCallback(key, funcs[key]);
         }
 
+        
         // useState
         this.registerCallback('useState', useState.bind(this));
 
@@ -1562,6 +1652,9 @@ class BindJSRuntime {
 
         // getContent
         this.registerCallback('getContent', getContent.bind(this));
+
+        // getComponentData
+        this.registerCallback('getComponentData', getComponentData.bind(this));
 
         // Prevent top in browser from being interpreted as a function
         this.registerCallback('top', () => { });
@@ -2060,7 +2153,6 @@ class BindJSRuntime {
     }
 
 }
-
 
 
 // MARK: - After the runtime...
