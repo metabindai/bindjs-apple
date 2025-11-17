@@ -105,12 +105,14 @@ public protocol ComponentVisitor {
     mutating func visitOpacity(_ opacity: OpacityComponent) -> Result
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result
     mutating func visitPadding(_ padding: PaddingComponent) -> Result
+    mutating func visitPresentationDetents(_ presentationDetents: PresentationDetentsComponent) -> Result
     mutating func visitRotationEffect(_ rotationEffect: RotationEffectComponent) -> Result
     mutating func visitSaturation(_ saturation: SaturationComponent) -> Result
     mutating func visitScaleEffect(_ scaleEffect: ScaleEffectComponent) -> Result
     mutating func visitScaledToFill(_ scaledToFill: ScaledToFillComponent) -> Result
     mutating func visitScaledToFit(_ scaledToFit: ScaledToFitComponent) -> Result
     mutating func visitShadow(_ shadow: ShadowComponent) -> Result
+    mutating func visitSheet(_ sheet: SheetComponent) -> Result
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result
     mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
@@ -510,6 +512,10 @@ public extension ComponentVisitor {
         return defaultVisit(padding)
     }
     
+    mutating func visitPresentationDetents(_ presentationDetents: PresentationDetentsComponent) -> Result {
+        return defaultVisit(presentationDetents)
+    }
+    
     mutating func visitRotationEffect(_ rotationEffect: RotationEffectComponent) -> Result {
         return defaultVisit(rotationEffect)
     }
@@ -532,6 +538,10 @@ public extension ComponentVisitor {
     
     mutating func visitShadow(_ shadow: ShadowComponent) -> Result {
         return defaultVisit(shadow)
+    }
+    
+    mutating func visitSheet(_ sheet: SheetComponent) -> Result {
+        return defaultVisit(sheet)
     }
     
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result {
