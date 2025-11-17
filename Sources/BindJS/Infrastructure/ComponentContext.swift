@@ -192,9 +192,11 @@ public class ComponentContext: ObservableObject {
     }
 
     @ViewBuilder
-    public func view(for name: String, arguments: [String: Any] = [:]) -> (some View)? {
-        let _ = willRender()
-        if let component = componentWithName(name, arguments: arguments) {
+    public func viewForName(_ name: String, arguments: [String: Any] = [:]) -> (some View)? {
+        
+        let _ = runtime.invokeMethod("willRender", withArguments: [])
+        
+        if let component = componentForName(name, arguments: arguments) {
             ComponentView(component)
                 .contentTransition(.numericText())
                 .environment(\.contentTransitionAddsDrawingGroup, true)
@@ -207,6 +209,7 @@ public class ComponentContext: ObservableObject {
         guard let jsValue = runtime.invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: jsContext)!]]),
               let directive = jsValue.toDirective(),
               let component = makeComponent(directive) else {
+    public func componentForName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
         return nil
     }
         return component
@@ -259,21 +262,14 @@ public class ComponentContext: ObservableObject {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 
-    public func willRender() {
-        runtime.invokeMethod("willRender", withArguments: [])
-    }
-
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
-        let needsRerenderFunction: @convention(block) () -> Void = { [weak self] in
-            DispatchQueue.main.async {
-                withAnimation {
-                    self?.objectWillChange.send()
-                }
-            }
-        }
-        runtime.context.setObject(needsRerenderFunction, forKeyedSubscript: "needsRerender" as NSString)
-        runtime.context.evaluateScript("runtime.needsRerender = needsRerender")
+        setupNeedsRerender()
+        setupWithAnimation()
+        setupNavigate()
+        setupOnOpenURL()
+        setupPerformAction()
+        setupAppStateListener()
     }
 
     private static func loadRuntime() -> String {

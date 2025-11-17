@@ -110,7 +110,7 @@ private struct ContextHostView: View {
                     setupHooks()
                     setupEnvironment(geometry: geometry)
                 }
-                context.view(for: "_body")
+                context.viewForName("_body")
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
