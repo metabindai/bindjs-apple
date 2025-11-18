@@ -1417,13 +1417,13 @@ function SheetModifier({ args, name }) {
     const props = args[0] ?? { isPresented: false };
 
     // Extract isPresented binding. First arg is the getter, second is the setter
-    const isPresented = props.isPresented
+    const isPresented = props.isPresented;
     const setIsPresented = props.setIsPresented ?? (() => { });
 
     // Extract onDismiss handler if provided
     const onDismiss = props.onDismiss;
 
-    const content = props.content
+    const content = props.content;
     
     // Return AST representation when content handler is called.
     const contentHandler = content ? () => {
@@ -1448,6 +1448,12 @@ function SheetModifier({ args, name }) {
     }
 }
 
+const Detent = {
+    medium: { detentType: 'medium' },
+    large: { detentType: 'large' },
+    fraction: (value) => ({ detentType: 'fraction', value }),
+    height: (value) => ({ detentType: 'height', value }),
+};
 
 class BindJSRuntime {
     constructor(options) {
@@ -1617,6 +1623,7 @@ class BindJSRuntime {
 
         // Register layout group
         this.#registerHelperComponent('LayoutGroup', LayoutGroup);
+        this.#registerHelperComponent('Detent', Detent);
 
         // Regster environment value modiifer
         this.#registerBuiltInModifier('environment', EnvironmentValue);
