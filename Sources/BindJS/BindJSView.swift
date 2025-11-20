@@ -27,7 +27,7 @@ public struct BindJSView: View {
 
 extension EnvironmentValues {
     @Entry var onNavigation: ((ContentLink) -> Void)?
-    @Entry var appStateBinding: Binding<[String: Any]>?
+    @Entry var appStorage: UserDefaults = .standard
     @Entry var componentEnvironment: [String: Any] = [:]
 }
 
@@ -35,7 +35,7 @@ extension EnvironmentValues {
 
 public struct MetabindContext {
     public var onNavigation: ((ContentLink) -> Void)?
-    public var appState: Binding<[String: Any]>?
+    public var appStorage: UserDefaults?
     var environment: [String: Any] = [:]
 
     mutating public func environment(_ key: String, value: Any) {
@@ -52,7 +52,11 @@ public extension View {
                 env.merge(context.environment, uniquingKeysWith: { _, new in new })
             }
             .environment(\.onNavigation, context.onNavigation)
-            .environment(\.appStateBinding, context.appState)
+            .transformEnvironment(\.appStorage) { storage in
+                if let customStorage = context.appStorage {
+                    storage = customStorage
+                }
+            }
     }
 }
 
@@ -76,7 +80,7 @@ private struct ContextHostView: View {
     @State private var registeredContentHash: Int
 
     @Environment(\.onNavigation) private var onNavigation
-    @Environment(\.appStateBinding) private var appStateBinding
+    @Environment(\.appStorage) private var appStorage
     @Environment(\.self) private var environment
     @Environment(\.componentEnvironment) private var componentEnvironment
     @Environment(\.openURL) private var openURL
@@ -148,17 +152,7 @@ private struct ContextHostView: View {
     }
 
     private func setupAppState() {
-        guard let appStateBinding else { return }
-
-        context.onAppStateChanged { _, _ in
-            // prevent mid-render mutations during the initial set
-        }
-        _ = context.setAppState(appStateBinding.wrappedValue)
-        context.onAppStateChanged { key, value in
-            var d = appStateBinding.wrappedValue
-            d[key] = value
-            appStateBinding.wrappedValue = d
-        }
+        context.setAppStorage(appStorage)
     }
 
     private func setupEnvironment(geometry: GeometryProxy) {
