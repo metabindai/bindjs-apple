@@ -6,7 +6,7 @@ public class ComponentContext: ObservableObject {
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
-    private var onOpenURLCallback: ((URL, @escaping (Bool) -> Void) -> Void)?
+    private var openURL: OpenURLAction?
     private var jsTimers: JSTimers
     private var userDefaults: UserDefaults?
     private let appStateKey = "bindjs.appState"
@@ -129,27 +129,27 @@ public class ComponentContext: ObservableObject {
     private func setupOnOpenURL() {
         let onOpenURLFunction: @convention(block) (String, JSValue?) -> Void = { [weak self] urlString, resultCallback in
             guard let self = self else { return }
-            
+
             let swiftResultCallback: (Bool) -> Void = { success in
                 if let resultCallback = resultCallback, !resultCallback.isNull && !resultCallback.isUndefined {
                     _ = resultCallback.call(withArguments: [success])
                 }
             }
-            
+
             guard let url = URL(string: urlString) else {
                 // Invalid URL - report failure
                 swiftResultCallback(false)
                 return
             }
-            
-            if let callback = self.onOpenURLCallback {
-                callback(url, swiftResultCallback)
+
+            if let openURL = self.openURL {
+                openURL(url, completion: swiftResultCallback)
             } else {
-                // No callback set - just report failure
+                // No openURL set - just report failure
                 swiftResultCallback(false)
             }
         }
-        
+
         runtime.invokeMethod("setOnOpenURL", withArguments: [onOpenURLFunction])
     }
     
@@ -369,10 +369,10 @@ public class ComponentContext: ObservableObject {
         self.navigateCallback = callback
     }
     
-    // MARK: - OpenURL Callback
-    
-    public func onOpenURL(_ callback: @escaping (_ url: URL, _ completion: @escaping (_ success: Bool) -> Void) -> Void) {
-        self.onOpenURLCallback = callback
+    // MARK: - OpenURL
+
+    public func setOpenURL(_ openURL: OpenURLAction) {
+        self.openURL = openURL
     }
     
     // MARK: - App State Management

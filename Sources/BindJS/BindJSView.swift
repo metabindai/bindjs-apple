@@ -148,7 +148,7 @@ private struct ContextHostView: View {
     }
 
     private func setupHooks() {
-        context.onOpenURL(openURL.callAsFunction(_:completion:))
+        context.setOpenURL(openURL)
     }
 
     private func setupAppState() {
