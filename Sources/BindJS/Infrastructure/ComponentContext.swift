@@ -7,14 +7,11 @@ public class ComponentContext: ObservableObject {
     private var actions: [String: (Any?) -> Any?] = [:]
     private var navigateCallback: ((ContentLink) -> Void)?
     private var openURL: OpenURLAction?
+    private var appState: [String: Any] = [:]
+    private var appStateCallback: ((String, Any) -> Void)?
     private var jsTimers: JSTimers
-    private var userDefaults: UserDefaults?
-    private let appStateKey = "bindjs.appState"
-    private var isLoadingFromDefaults = false
-
+    
     private var componentCache: [String: Component] = [:]
-
-    private static let appStateDidChangeNotification = Notification.Name("BindJSAppStateDidChange")
     
     public init() {
         jsContext = JSContext()!
@@ -380,24 +377,25 @@ public class ComponentContext: ObservableObject {
     private func setupAppStateListener() {
         let onUpdateAppStateFunction: @convention(block) (String, JSValue, JSValue) -> Void = { [weak self] key, value, state in
             guard let self = self else { return }
-
-            if !self.isLoadingFromDefaults,
-               let userDefaults = self.userDefaults,
-               let dict = state.toObject() as? [String: Any],
-               let data = try? JSONSerialization.data(withJSONObject: dict) {
-                userDefaults.set(data, forKey: self.appStateKey)
-                NotificationCenter.default.post(
-                    name: Self.appStateDidChangeNotification,
-                    object: nil,
-                    userInfo: ["key": key, "value": value.toObject() as Any]
-                )
-            }
-
+            
+            // Convert JSValue to Swift objects
+            let swiftValue = value.toObject()
+            let swiftState = state.toObject() as? [String: Any] ?? [:]
+            
+            // Update internal app state
+            self.appState = swiftState
+            
+            // Trigger UI update
             DispatchQueue.main.async {
                 self.objectWillChange()
             }
+            
+            // Notify Listener
+            if let swiftValue {
+                self.appStateCallback?(key, swiftValue)
+            }
         }
-
+        
         jsContext.setObject(onUpdateAppStateFunction, forKeyedSubscript: "onUpdateAppState" as NSString)
         _ = jsContext.evaluateScript("runtime.onUpdateAppState = onUpdateAppState")
     }
@@ -407,27 +405,14 @@ public class ComponentContext: ObservableObject {
         runtime.invokeMethod("updatedAppState", withArguments: [key, value, nil])
     }
 
-    public func setAppStorage(_ userDefaults: UserDefaults) {
-        self.userDefaults = userDefaults
-
-        if let data = userDefaults.data(forKey: appStateKey),
-           let state = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            isLoadingFromDefaults = true
-            runtime.invokeMethod("setAppState", withArguments: [state])
-            isLoadingFromDefaults = false
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: Self.appStateDidChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self,
-                  let key = notification.userInfo?["key"] as? String,
-                  let value = notification.userInfo?["value"] else { return }
-            self.isLoadingFromDefaults = true
-            self.updateAppState(key: key, value: value)
-            self.isLoadingFromDefaults = false
-        }
+    public func setAppState(_ state: [String: Any]) -> Self {
+        runtime.invokeMethod("setAppState", withArguments: [state])
+        return self
+    }
+    
+    public func onAppStateChanged(
+        _ callback: @escaping (String, Any) -> Void
+    ) {
+        self.appStateCallback = callback
     }
 }
