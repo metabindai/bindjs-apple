@@ -272,6 +272,14 @@ public class BindJSContext: ObservableObject {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 
+    public func restoreTextEditorValue(id: String) -> String? {
+        runtime.invokeMethod("restoreTextEditorValue", withArguments: [id])?.toString()
+    }
+
+    public func callTextEditorSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()

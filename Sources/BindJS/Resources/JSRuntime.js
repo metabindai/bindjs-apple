@@ -308,7 +308,24 @@ function Picker({ args }) {
         props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId },
         children: childrenAST
     }
-    
+
+}
+
+function TextEditor({ args }) {
+    const [text] = args;
+
+    // text is a binding array: [getter, setter]
+    const getText = text[0];
+    const setText = text[1] ?? (() => { });
+
+    const id = this.currentPathId('TextEditor');
+    const environmentId = this.storeEnvironment(id);
+    const setFunctionId = this.storeFunction(setText, id);
+    const dataId = this.storeData(getText, id);
+
+    return {
+        props: { currentValueId: dataId, setterId: setFunctionId, environmentId }
+    }
 }
 
 // SwiftUI default padding value in points
@@ -1658,6 +1675,7 @@ class BindJSRuntime {
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
         this.#registerBuiltInComponent('Picker', Picker);
+        this.#registerBuiltInComponent('TextEditor', TextEditor);
 
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
@@ -2279,6 +2297,7 @@ Object.assign(this, {
     callForEachFunction: (functionId, element, index) => runtime.callForEachFunction(functionId, element, index),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restorePickerValue: (dataId) => runtime.restoreData(dataId),
+    restoreTextEditorValue: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]
