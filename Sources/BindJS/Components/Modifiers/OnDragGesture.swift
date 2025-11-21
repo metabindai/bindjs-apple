@@ -38,7 +38,7 @@ struct OnDragGestureWrapper<Content: View>: View {
     @GestureState private var translation: CGSize = .zero
     @GestureState private var velocity: CGSize = .zero
 
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
 
     private func callHandler(_ newPhase: GesturePhase) {
         _ = context.callEventHandler(

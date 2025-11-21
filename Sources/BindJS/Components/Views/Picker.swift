@@ -3,7 +3,7 @@ import SwiftUI
 public struct PickerComponent: Component {
     public static var directiveName: String = "Picker"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public var label: String
     public var currentValueId: String?

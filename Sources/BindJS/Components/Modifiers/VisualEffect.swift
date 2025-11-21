@@ -6,7 +6,7 @@ public struct VisualEffectComponent: Component {
     
     public let handlerId: String
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
 }
 
 extension VisualEffectComponent {
@@ -24,7 +24,7 @@ struct CombinedVisualEffect: ViewModifier {
     
     let handlerId: String
 
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
 
     func body(content: Content) -> some View {
         if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {

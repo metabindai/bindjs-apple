@@ -34,7 +34,7 @@ struct OnLongPressGestureWrapper<Content: View>: View {
     
     @GestureState private var phase: GesturePhase = .possible
     @GestureState private var location: CGPoint = .zero
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     private func callHandler(_ newPhase: GesturePhase) {
         _ = context.callEventHandler(

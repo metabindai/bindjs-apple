@@ -3,7 +3,7 @@ import SwiftUI
 public struct SheetComponent: Component {
     public static var directiveName: String = "sheet"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     @State var content: Component
 

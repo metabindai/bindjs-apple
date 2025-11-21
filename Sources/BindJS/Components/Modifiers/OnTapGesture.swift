@@ -3,7 +3,7 @@ import SwiftUI
 public struct OnTapGestureComponent: Component {
     public static var directiveName: String = "onTapGesture"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public var count: Int
     public let handlerId: String

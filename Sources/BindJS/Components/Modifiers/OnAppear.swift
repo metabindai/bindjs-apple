@@ -3,7 +3,7 @@ import SwiftUI
 public struct OnAppearComponent: Component {
     public static var directiveName: String = "onAppear"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public let handlerId: String
 }

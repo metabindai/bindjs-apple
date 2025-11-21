@@ -4,7 +4,7 @@ import JavaScriptCore
 public struct ForEachComponent: Component {
     public static var directiveName: String = "ForEach"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public let dataId: String
     public let count: Int

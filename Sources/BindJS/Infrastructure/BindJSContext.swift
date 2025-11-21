@@ -1,7 +1,7 @@
 import SwiftUI
 import JavaScriptCore
 
-public class ComponentContext: ObservableObject {
+public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]

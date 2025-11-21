@@ -3,7 +3,7 @@ import SwiftUI
 public struct OnDisappearComponent: Component {
     public static var directiveName: String = "onDisappear"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public let handlerId: String
 }

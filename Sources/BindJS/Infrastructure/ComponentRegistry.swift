@@ -3,7 +3,7 @@ import SwiftUI
 struct ComponentRegistry {
     var components: [String: () -> any View] = [:]
     
-    func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: ComponentContext, environmentValues: EnvironmentValues) -> AnyView? {
+    func makeComponent(_ name: String, props: [String: Any], children: [Component], componentContext: BindJSContext, environmentValues: EnvironmentValues) -> AnyView? {
         guard let builder = components[name] else { return nil }
         let c = ComponentRepresentableContext(
             children: children,
