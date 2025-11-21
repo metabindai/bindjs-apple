@@ -13,6 +13,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case EllipticalGradientComponent.directiveName: EllipticalGradientComponent(from: directive)
     case EmptyComponent.directiveName: EmptyComponent(from: directive)
     case ForEachComponent.directiveName: ForEachComponent(from: directive)
+    case GeometryReaderComponent.directiveName: GeometryReaderComponent(from: directive)
     case GroupComponent.directiveName: GroupComponent(from: directive)
     case HStackComponent.directiveName: HStackComponent(from: directive)
     case ImageComponent.directiveName: ImageComponent(from: directive)
@@ -147,6 +148,7 @@ public struct ComponentView: View {
         case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
         case let empty as EmptyComponent: empty
         case let forEach as ForEachComponent: forEach
+        case let geometryReader as GeometryReaderComponent: geometryReader
         case let group as GroupComponent: group
         case let hStack as HStackComponent: hStack
         case let image as ImageComponent: image

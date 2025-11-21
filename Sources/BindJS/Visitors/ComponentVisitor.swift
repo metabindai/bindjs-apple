@@ -10,6 +10,7 @@ public protocol ComponentVisitor {
     mutating func visitColor(_ color: ColorComponent) -> Result
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
+    mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
     mutating func visitGroup(_ group: GroupComponent) -> Result
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
@@ -152,7 +153,11 @@ public extension ComponentVisitor {
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result {
         return defaultVisit(forEach)
     }
-    
+
+    mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result {
+        return defaultVisit(geometryReader)
+    }
+
     mutating func visitGroup(_ group: GroupComponent) -> Result {
         return defaultVisit(group)
     }

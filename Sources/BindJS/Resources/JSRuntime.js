@@ -995,6 +995,39 @@ function ForEach({ args }) {
     return { ast }
 }
 
+function GeometryReader({ args }) {
+    const callback = args[0];
+
+    if (!callback || typeof callback !== 'function') {
+        return {
+            props: {
+                handlerId: null
+            }
+        }
+    }
+
+    // Wrap the callback to unwrap component functions
+    const handler = (geometry) => {
+        let result = callback(geometry);
+        // Unwrap component functions (_component marker)
+        while (result && result._component) {
+            result = result();
+        }
+        return result;
+    };
+
+    const id = this.currentPathId('GeometryReader');
+    const handlerId = this.storeFunction(handler, id);
+    const environmentId = this.storeEnvironment(id);
+
+    return {
+        props: {
+            handlerId,
+            environmentId
+        }
+    }
+}
+
 function Content({ args }) {
 
     const id = this.currentPathId('Content');
@@ -1588,6 +1621,7 @@ class BindJSRuntime {
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
         this.#registerBuiltInComponent('ForEach', ForEach);
+        this.#registerBuiltInComponent('GeometryReader', GeometryReader);
         this.#registerBuiltInComponent('Content', Content);
         this.#registerBuiltInComponent('Picker', Picker);
 
