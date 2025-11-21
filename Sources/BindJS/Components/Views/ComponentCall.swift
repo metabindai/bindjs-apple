@@ -3,7 +3,7 @@ import SwiftUI
 public struct ComponentCall: Component {
     public static var directiveName: String = "ComponentCall"
     @Environment(\.componentRegistry) private var componentRegistry
-    @EnvironmentObject private var componentContext: ComponentContext
+    @EnvironmentObject private var componentContext: BindJSContext
     @Environment(\.self) private var environmentValues
     
     public let directive: Directive

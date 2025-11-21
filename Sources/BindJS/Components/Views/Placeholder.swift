@@ -4,7 +4,7 @@ public struct PlaceholderComponent: Component {
     public static var directiveName: String = "Placeholder"
     @Environment(\.componentCall) private var enclosingCall
     @Environment(\.componentRegistry) private var componentRegistry
-    @EnvironmentObject private var componentContext: ComponentContext
+    @EnvironmentObject private var componentContext: BindJSContext
     @Environment(\.self) private var environmentValues
     
     let name: String

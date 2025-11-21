@@ -18,10 +18,10 @@ public extension EnvironmentValues {
 public struct ComponentRepresentableContext {
     public let children: [Component]
     public let props: [String: Any]
-    public let componentContext: ComponentContext
+    public let componentContext: BindJSContext
     public let environmentValues: EnvironmentValues
     
-    public init(children: [Component], props: [String: Any], componentContext: ComponentContext, environmentValues: EnvironmentValues) {
+    public init(children: [Component], props: [String: Any], componentContext: BindJSContext, environmentValues: EnvironmentValues) {
         self.children = children
         self.props = props
         self.componentContext = componentContext

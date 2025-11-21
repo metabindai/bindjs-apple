@@ -3,7 +3,7 @@ import SwiftUI
 public struct ButtonComponent: Component {
     public static var directiveName: String = "Button"
     
-    @EnvironmentObject private var context: ComponentContext
+    @EnvironmentObject private var context: BindJSContext
     
     public var label: Component
     public let handlerId: String

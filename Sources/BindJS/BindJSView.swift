@@ -26,44 +26,28 @@ public struct BindJSView: View {
 // MARK: - Environment Values
 
 extension EnvironmentValues {
-    @Entry var onNavigation: ((ContentLink) -> Void)?
-    @Entry var appStateBinding: Binding<[String: Any]>?
-    @Entry var componentEnvironment: [String: Any] = [:]
+    @Entry public var bindJS: BindJSConfiguration = .init()
 }
 
-// MARK: - Metabind Context for Configuration
-
-public struct MetabindContext {
-    public var onNavigation: ((ContentLink) -> Void)?
+public struct BindJSConfiguration {
+    public var environment: [String: any Codable] = [:]
     public var appState: Binding<[String: Any]>?
-    var environment: [String: Any] = [:]
+    public var onNavigation: ((ContentLink) -> Void)?
 
-    mutating public func environment(_ key: String, value: Any) {
-        environment[key] = value
+    public init(
+        environment: [String: any Codable] = [:],
+        appState: Binding<[String: Any]>? = nil,
+        onNavigation: ((ContentLink) -> Void)? = nil
+    ) {
+        self.environment = environment
+        self.appState = appState
+        self.onNavigation = onNavigation
     }
 }
 
 public extension View {
-    func metabind(_ transform: (_ context: inout MetabindContext) -> Void) -> some View {
-        var context = MetabindContext()
-        transform(&context)
-        return self
-            .transformEnvironment(\.componentEnvironment) { env in
-                env.merge(context.environment, uniquingKeysWith: { _, new in new })
-            }
-            .environment(\.onNavigation, context.onNavigation)
-            .environment(\.appStateBinding, context.appState)
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func conditional(_ condition: Bool, @ViewBuilder content: (_ view: Self) -> some View) -> some View {
-        if condition {
-            content(self)
-        } else {
-            self
-        }
+    func bindJS(_ configuration: BindJSConfiguration) -> some View {
+        environment(\.bindJS, configuration)
     }
 }
 
@@ -72,20 +56,18 @@ private extension View {
 private struct ContextHostView: View {
     let content: ResolvedContent
 
-    @StateObject private var context: ComponentContext
+    @StateObject private var context: BindJSContext
     @State private var registeredContentHash: Int
 
-    @Environment(\.onNavigation) private var onNavigation
-    @Environment(\.appStateBinding) private var appStateBinding
+    @Environment(\.bindJS) private var bindJS
     @Environment(\.self) private var environment
-    @Environment(\.componentEnvironment) private var componentEnvironment
     @Environment(\.openURL) private var openURL
 
     init(content: ResolvedContent) {
         self.content = content
 
         // Create and register context
-        let ctx = ComponentContext()
+        let ctx = BindJSContext()
 
         // Register package components
         for (name, source) in content.package.components {
@@ -139,7 +121,7 @@ private struct ContextHostView: View {
 
     private func setupNavigation() {
         context.onNavigate { link in
-            onNavigation?(link)
+            bindJS.onNavigation?(link)
         }
     }
 
@@ -148,7 +130,7 @@ private struct ContextHostView: View {
     }
 
     private func setupAppState() {
-        guard let appStateBinding else { return }
+        guard let appStateBinding = bindJS.appState else { return }
 
         context.onAppStateChanged { _, _ in
             // prevent mid-render mutations during the initial set
@@ -165,7 +147,7 @@ private struct ContextHostView: View {
         let builder = EnvironmentBuilder(
             geometry: geometry,
             environment: environment,
-            componentEnvironment: componentEnvironment
+            componentEnvironment: bindJS.environment
         )
         _ = context.setEnvironment(builder.build())
     }
@@ -186,7 +168,7 @@ private struct RenderEffect: View {
 private struct EnvironmentBuilder {
     let geometry: GeometryProxy
     let environment: EnvironmentValues
-    let componentEnvironment: [String: Any]
+    let componentEnvironment: [String: any Codable]
 
     func build() -> [String: Any] {
         var result: [String: Any] = [:]
@@ -228,10 +210,34 @@ private struct EnvironmentBuilder {
 
         // Merge custom environment overrides
         for (key, value) in componentEnvironment {
-            result[key] = value
+            result[key] = Self.serializeCodable(value)
         }
 
         return result
+    }
+
+    /// Serializes a Codable value to a JSON-compatible type (dictionary, array, or primitive)
+    private static func serializeCodable(_ value: any Codable) -> Any {
+        // Helper to encode using a wrapper
+        func encodeValue<T: Encodable>(_ v: T) -> Any? {
+            do {
+                let data = try JSONEncoder().encode(v)
+                let jsonObject = try JSONSerialization.jsonObject(with: data)
+                return jsonObject
+            } catch {
+                return nil
+            }
+        }
+
+        // Try to encode if value conforms to Encodable
+        if let encodable = value as? any Encodable {
+            if let encoded = encodeValue(encodable) {
+                return encoded
+            }
+        }
+
+        // Fallback: return as-is (works for primitives that are already JSON-compatible)
+        return value
     }
 
     private func buildGeometry() -> [String: Any] {
