@@ -10,9 +10,7 @@ public class BindJSContext: ObservableObject {
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
     private var jsTimers: JSTimers
-    
-    private var componentCache: [String: Component] = [:]
-    
+
     public init() {
         jsContext = JSContext()!
         jsContext.exceptionHandler = { _, exception in
@@ -195,9 +193,9 @@ public class BindJSContext: ObservableObject {
 
     @ViewBuilder
     public func viewForName(_ name: String, arguments: [String: Any] = [:]) -> (some View)? {
-        
+
         let _ = runtime.invokeMethod("willRender", withArguments: [])
-        
+
         if let component = componentForName(name, arguments: arguments) {
             ComponentView(component)
                 .contentTransition(.numericText())
@@ -206,58 +204,24 @@ public class BindJSContext: ObservableObject {
                 .id(name)
         }
     }
-    
-    private func cacheKeyForName(_ name: String, arguments: [String: Any]) -> String {
-        do {
-            let data = try JSONSerialization.data(withJSONObject: arguments, options: [.sortedKeys])
-            if let jsonString = String(data: data, encoding: .utf8) {
-                return name + jsonString
-            } else {
-                return name + arguments.description
-            }
-        } catch {
-            return name + arguments.description
-        }
-    }
-    
-    public func componentForName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
-//        let t0 = CFAbsoluteTimeGetCurrent()
-        
-        let key = cacheKeyForName(name, arguments: arguments)
-        
-        if let cached = componentCache[key] {
-//            print("Component Cache Hit for \(name), total: \(Int((CFAbsoluteTimeGetCurrent() - t0) * 1_000_000))µs")
-            return cached
-        }
 
+    public func componentForName(_ name: String, arguments: [String: Any] = [:]) -> Component? {
         guard let jsValue = runtime.invokeMethod("callComponent", withArguments: [[name, JSValue(object: arguments, in: jsContext)!]]) else {
             return nil
         }
-
-//        let t1 = CFAbsoluteTimeGetCurrent()
 
         guard let directive = jsValue.toDirective() else {
             return nil
         }
 
-//        let t2 = CFAbsoluteTimeGetCurrent()
-
         guard let component = makeComponent(directive) else {
             return nil
         }
-
-//        let t3 = CFAbsoluteTimeGetCurrent()
-
-        // Print once at the end (microseconds)
-//        print("JS: \(Int((t1 - t0) * 1_000_000))µs | toDirective: \(Int((t2 - t1) * 1_000_000))µs | makeComponent: \(Int((t3 - t2) * 1_000_000))µs | TOTAL: \(Int((t3 - t0) * 1_000_000))µs")
-        
-        componentCache[key] = component
 
         return component
     }
     
     private func objectWillChange() {
-        componentCache.removeAll()
         objectWillChange.send()
     }
 
