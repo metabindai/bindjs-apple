@@ -27,6 +27,9 @@ public protocol ComponentVisitor {
     mutating func visitSpacer(_ spacer: SpacerComponent) -> Result
     mutating func visitText(_ text: TextComponent) -> Result
     mutating func visitTextEditor(_ textEditor: TextEditorComponent) -> Result
+    mutating func visitTextField(_ textField: TextFieldComponent) -> Result
+    mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result
+    mutating func visitToggle(_ toggle: ToggleComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
@@ -223,7 +226,19 @@ public extension ComponentVisitor {
     mutating func visitTextEditor(_ textEditor: TextEditorComponent) -> Result {
         return defaultVisit(textEditor)
     }
-    
+
+    mutating func visitTextField(_ textField: TextFieldComponent) -> Result {
+        return defaultVisit(textField)
+    }
+
+    mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result {
+        return defaultVisit(secureField)
+    }
+
+    mutating func visitToggle(_ toggle: ToggleComponent) -> Result {
+        return defaultVisit(toggle)
+    }
+
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {
         return defaultVisit(unresolved)
     }

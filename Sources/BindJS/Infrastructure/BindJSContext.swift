@@ -272,6 +272,30 @@ public class BindJSContext: ObservableObject {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 
+    public func restoreTextFieldValue(id: String) -> String? {
+        runtime.invokeMethod("restoreTextFieldValue", withArguments: [id])?.toString()
+    }
+
+    public func callTextFieldSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
+    public func restoreSecureFieldValue(id: String) -> String? {
+        runtime.invokeMethod("restoreSecureFieldValue", withArguments: [id])?.toString()
+    }
+
+    public func callSecureFieldSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
+    public func restoreToggleValue(id: String) -> Bool? {
+        runtime.invokeMethod("restoreToggleValue", withArguments: [id])?.toBool()
+    }
+
+    public func callToggleSetter(id: String, value: Bool) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()
