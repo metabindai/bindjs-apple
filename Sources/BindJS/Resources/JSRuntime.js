@@ -1,9 +1,9 @@
 const AST = {};
 
 AST.Directive = (name, args = {}, children) => {
-    var props = {...args};
-    props['children'] =  children ?? [];
-    
+    var props = { ...args };
+    props['children'] = children ?? [];
+
     return {
         'type': name,
         'props': props
@@ -17,15 +17,15 @@ AST.ModifiedContent = (modifier, component) => {
     return {
         'type': 'ModifiedComponent',
         'props': {
-            'modifier': {...modifier},
+            'modifier': { ...modifier },
             'content': content
         }
     }
 };
 
-AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
+AST.ForEach = (dataId, functionId, count, environmentId, children) => {
     return {
-        'type' : 'ForEach',
+        'type': 'ForEach',
         'props': {
             'dataId': dataId,
             'functionId': functionId,
@@ -38,7 +38,7 @@ AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
 
 AST.Representable = (functionId, environmentId) => {
     return {
-        'type' : 'Representable',
+        'type': 'Representable',
         'props': {
             'functionId': functionId,
             'environmentId': environmentId
@@ -58,7 +58,7 @@ function Color({ args }) {
         // Normalize the color input
         colorProps = normalizeColor(props);
     }
-    
+
 
     return { props: colorProps, children: [] }
 }
@@ -75,20 +75,20 @@ function isNamedColor(value) {
 function hexToRgba(hex) {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
     } else if (hex.length === 4) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
     }
     let r = 0, g = 0, b = 0, a = 1;
     if (hex.length === 6) {
-        r = parseInt(hex.substring(0,2), 16);
-        g = parseInt(hex.substring(2,4), 16);
-        b = parseInt(hex.substring(4,6), 16);
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
     } else if (hex.length === 8) {
-        r = parseInt(hex.substring(0,2), 16);
-        g = parseInt(hex.substring(2,4), 16);
-        b = parseInt(hex.substring(4,6), 16);
-        a = parseInt(hex.substring(6,8), 16) / 255;
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+        a = parseInt(hex.substring(6, 8), 16) / 255;
     }
     return { r, g, b, a };
 }
@@ -100,12 +100,12 @@ function hsvToRgb(h, s, v) {
     let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     let m = v - c;
     let r1 = 0, g1 = 0, b1 = 0;
-    if (h < 60)      { r1 = c; g1 = x; b1 = 0; }
-    else if (h < 120){ r1 = x; g1 = c; b1 = 0; }
-    else if (h < 180){ r1 = 0; g1 = c; b1 = x; }
-    else if (h < 240){ r1 = 0; g1 = x; b1 = c; }
-    else if (h < 300){ r1 = x; g1 = 0; b1 = c; }
-    else             { r1 = c; g1 = 0; b1 = x; }
+    if (h < 60) { r1 = c; g1 = x; b1 = 0; }
+    else if (h < 120) { r1 = x; g1 = c; b1 = 0; }
+    else if (h < 180) { r1 = 0; g1 = c; b1 = x; }
+    else if (h < 240) { r1 = 0; g1 = x; b1 = c; }
+    else if (h < 300) { r1 = x; g1 = 0; b1 = c; }
+    else { r1 = c; g1 = 0; b1 = x; }
     const rgb = {
         r: Math.round((r1 + m) * 255),
         g: Math.round((g1 + m) * 255),
@@ -209,16 +209,16 @@ function Button({ args }) {
     // If a single arg is passed and it's an object, use it as { action, label }
     // If two args are passed, use the first as label and the second as action
     const { action, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
-                                        ? arg1
-                                        : { label: arg1, action: arg2  };
+        ? arg1
+        : { label: arg1, action: arg2 };
 
 
-                                        
+
     // Store the action, get the handlerId to be provided in the AST props.
     const path = this.currentPathId();
     const handlerId = this.storeFunction(action, path);
     const environmentId = this.storeEnvironment(path);
-       
+
     // Process label
     const { label: finalLabel } = this.processProps({ label });
 
@@ -226,7 +226,7 @@ function Button({ args }) {
         props: { handlerId, label: finalLabel, environmentId },
         children: []
     }
-    
+
 }
 
 function GenericComponent({ args }) {
@@ -438,7 +438,7 @@ function Resizable({ args, content }) {
 
         // If the content is a Image component, we need to modify its prop directly
         const imageProps = content.props;
-        imageProps.resizable = resizable == false ? false : true ;
+        imageProps.resizable = resizable == false ? false : true;
 
         // Return the Image directly
         return { ast: content }
@@ -481,7 +481,27 @@ function Opacity({ args, content }) {
     }
 }
 
-function OnHandler({ args , name }) {
+function OnChangeModifier({ args, name }) {
+    const [value, handler] = args;
+
+    if (!handler || typeof handler !== 'function') {
+        return { props: { watcherId: null } }
+    }
+
+    const watcherId = this.currentPathId(name);
+
+    // Ensure value is always a getter function
+    const getValue = typeof value === 'function' ? value : () => value;
+
+    // Register the watcher for this value
+    this.registerOnChangeWatcher(watcherId, getValue, handler);
+
+    return {
+        props: { watcherId }
+    }
+}
+
+function OnHandler({ args, name }) {
 
     // If arg is a function, store it and return handler id
     // If arg is props, process them and return props
@@ -493,9 +513,9 @@ function OnHandler({ args , name }) {
         // Arg is a handler function
         if (typeof arg === 'function') {
 
-            return { handlerId:  this.storeFunction(arg, this.currentPathId(name)) }
+            return { handlerId: this.storeFunction(arg, this.currentPathId(name)) }
 
-        // Arg is a dictionary of props
+            // Arg is a dictionary of props
         } else if (typeof arg === 'object' && !Array.isArray(arg)) {
 
             return arg
@@ -538,7 +558,7 @@ var modifiersToAddToEnvironment = [
     'imageScale',
     'colorScheme',
     'environment',
-    
+
     // EnvironmentValues from Environment.tsx
     'displayScale',
     'dynamicTypeSize',
@@ -572,14 +592,14 @@ GenericModifier.environmentValue = (name, args) => {
 
 function AnimationComponent({ args, name }) {
     const typeMap = {
-        'Spring' : 'spring',
-        'EaseIn' : 'easeIn',
-        'EaseOut' : 'easeOut',
-        'EaseInOut' : 'easeInOut',
-        'Linear' : 'linear',
-        'Bouncy' : 'bouncy',
-        'Snappy' : 'snappy',
-        'InterpolatingSpring' : 'interpolatingSpring',
+        'Spring': 'spring',
+        'EaseIn': 'easeIn',
+        'EaseOut': 'easeOut',
+        'EaseInOut': 'easeInOut',
+        'Linear': 'linear',
+        'Bouncy': 'bouncy',
+        'Snappy': 'snappy',
+        'InterpolatingSpring': 'interpolatingSpring',
     };
 
     console.log('AnimationComponent', name, args);
@@ -592,31 +612,31 @@ function AnimationComponent({ args, name }) {
     return { props }
 }
 
-function AnimationModifier({ args,  name, content }) {
+function AnimationModifier({ args, name, content }) {
 
     const value = args[0];
-    
+
     // Add the value directly to the props of the content
     const props = content.props;
     props[name] = value;
-    
+
     // Return the AnimationComponent directly to squash the modifier.
     return { ast: content }
 }
 
 const propertyNameMap = {
-    'PropertyString'  : 'string',
-    'PropertyNumber'  : 'number',
-    'PropertyBoolean' : 'boolean',
-    'PropertyEnum'    : 'enum',
-    'PropertyDate'    : 'date',
-    'PropertyArray'   : 'array',
-    'PropertyAsset'   : 'asset',
-    'PropertyGroup'   : 'group',
-    'PropertyContent' : 'content',
+    'PropertyString': 'string',
+    'PropertyNumber': 'number',
+    'PropertyBoolean': 'boolean',
+    'PropertyEnum': 'enum',
+    'PropertyDate': 'date',
+    'PropertyArray': 'array',
+    'PropertyAsset': 'asset',
+    'PropertyGroup': 'group',
+    'PropertyContent': 'content',
     'PropertyComponent': 'component',
     'PropertyComponentList': 'componentList',
-    'PropertyChildren' : 'children',
+    'PropertyChildren': 'children',
 };
 
 function PropertyComponent({ args, name }) {
@@ -626,7 +646,7 @@ function PropertyComponent({ args, name }) {
         type: propertyNameMap[name] || 'unknown',
         ...props,
     };
-    
+
     return result;
 }
 
@@ -636,12 +656,12 @@ function LayoutGroup({ args, name }) {
     const result = {
         ...props,
     };
-    
+
     return result;
 }
 
 function ComposerGroup({ args, name }) {
-    const props = { };
+    const props = {};
 
     const env = this.environment;
     var children = null;
@@ -689,12 +709,12 @@ function ComposerGroup({ args, name }) {
         // return (childGroupName === groupName)
     });
 
-    
+
     const result = {
         props: this.processProps(props),
         children: childrenAST
     };
-    
+
     return result;
 }
 
@@ -728,7 +748,7 @@ function FontModifier({ args, content }) {
     const [arg] = args;
 
     const customProps = extractPropsByType(arg, 'FontCustom');
-    
+
     let options = {};
     if (customProps) {
         options = { custom: customProps, rawValue: arg() };
@@ -764,7 +784,7 @@ function Fill({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.fill = this.processProps({ ...style });
 
-    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.fill = this.processProps({ style: style });
     }
@@ -786,18 +806,18 @@ function Stroke({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.stroke = this.processProps({ ...style });
 
-    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.stroke = this.processProps({ style: style });
     } else if (typeof style === 'number') {
         shapeProps.stroke = { lineWidth: style };
     }
-    
+
     // Return the Color directly
     return { ast: content }
 }
 
-function ButtonStyle({ args , name }) {
+function ButtonStyle({ args, name }) {
 
     // If arg is a function, store it and return handler id
     // If arg is props, process them and return props
@@ -812,10 +832,10 @@ function ButtonStyle({ args , name }) {
             let ast = arg();
             let name = ast.props.name;
             let props = ast.props.props || {};
-            
+
             return { name, props }
 
-        // Arg is a string
+            // Arg is a string
         } else if (typeof arg === 'string') {
 
             return { name: arg, props: {} }
@@ -848,7 +868,7 @@ function ContentModifier({ args, content }) {
 
     var modifierContent = null;
     var props = {};
-    
+
     if (args.length == 2) {
         modifierContent = args[1];
         props = args[0];
@@ -914,7 +934,7 @@ class VisualEffectBuilder {
         const hasTransform =
             m11 !== undefined || m12 !== undefined ||
             m21 !== undefined || m22 !== undefined ||
-            tx  !== undefined || ty  !== undefined;
+            tx !== undefined || ty !== undefined;
 
         if (hasTransform) {
             this.result.transform = {
@@ -922,8 +942,8 @@ class VisualEffectBuilder {
                 m12: m12 ?? 0,
                 m21: m21 ?? 0,
                 m22: m22 ?? 1,
-                tx:  tx  ?? 0,
-                ty:  ty  ?? 0,
+                tx: tx ?? 0,
+                ty: ty ?? 0,
             };
         }
 
@@ -1012,7 +1032,7 @@ function Content({ args }) {
 const getComponentData = (child) => {
     let ast = child();
     let data = findComponentDataInAST(ast);
-    return data ?? { name: null, props: {}  }
+    return data ?? { name: null, props: {} }
 };
 
 const findComponentDataInAST = (node) => {
@@ -1062,10 +1082,10 @@ const findComponentDataInAST = (node) => {
 };
 
 function useState(initialValue) {
-    
+
     // Sanity check
     if (this.hookState.currentComponent == null) {
-        return [initialValue, () => {}]
+        return [initialValue, () => { }]
     }
 
     // Get current state
@@ -1073,7 +1093,7 @@ function useState(initialValue) {
     const hookIndex = this.hookState.currentComponent.hookIndex;
 
     //console.log(`useState index ${currentHook} value ${hooks[currentHook]} initialValue ${initialValue}`);
-    
+
     // Initialise hook with initialValue if needed
     hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex];
 
@@ -1122,7 +1142,7 @@ function useNavigate() {
     return this.navigateCallback
 }
 
-function makeComponent (component) {
+function makeComponent(component) {
 
     // Pass body directly or in dictionary
     let body = component.body ? component.body : component;
@@ -1135,7 +1155,7 @@ function makeComponent (component) {
     // Create body function
     let f = (props, children) =>
         this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
-    
+
     f._component = true;
 
     return f
@@ -1148,7 +1168,7 @@ async function getContent(content) {
     if (this.getContent == null || contentId == null) {
         return null
 
-    // Call the getContent property assigned to the runtime with the contentId.
+        // Call the getContent property assigned to the runtime with the contentId.
     } else {
         return await this.getContent(contentId)
     }
@@ -1208,7 +1228,7 @@ function convertComponentProps(props) {
                 const result = makeComponent(() => {
                     return callFn(item._component, 'body', item);
                 });
-                
+
                 return [result, true];
             }
 
@@ -1475,7 +1495,7 @@ function SheetModifier({ args, name }) {
     const onDismiss = props.onDismiss;
 
     const content = props.content;
-    
+
     // Return AST representation when content handler is called.
     const contentHandler = content ? () => {
         // Execute handler, then AST function.
@@ -1543,6 +1563,9 @@ class BindJSRuntime {
         this.hookState = {};
         this.modifierRegistry = { GenericModifier };
         this.componentRegistry = { GenericComponent };
+
+        // onChange watchers: { watcherId: { value, handler, trigger } }
+        this.onChangeWatchers = {};
 
         // Default app state that can be managed by the renderer. Can be overridden by the renderer.
         this.appState = {};
@@ -1675,6 +1698,7 @@ class BindJSRuntime {
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit'].map(name => this.#registerBuiltInModifier(name, OnHandler));
+        this.#registerBuiltInModifier('onChange', OnChangeModifier);
 
         // Register animation components
         ['Spring', 'Linear', 'EaseIn', 'EaseOut', 'EaseInOut', 'Bouncy', 'Snappy', 'InterpolatingSpring'].map(name => this.#registerBuiltInComponent(name, AnimationComponent));
@@ -2249,6 +2273,42 @@ class BindJSRuntime {
         return result
     }
 
+    registerOnChangeWatcher(watcherId, getValue, handler) {
+        const currentValue = getValue();
+
+        if (!this.onChangeWatchers[watcherId]) {
+            // First time - initialize watcher
+            this.onChangeWatchers[watcherId] = {
+                getValue: getValue,
+                previousValue: currentValue,
+                handler: handler,
+                trigger: 0
+            };
+        } else {
+            // Update on subsequent renders - re-evaluate the value
+            const watcher = this.onChangeWatchers[watcherId];
+            const newValue = getValue();
+
+            // Check if value changed (shallow equality)
+            if (newValue !== watcher.previousValue) {
+                watcher.previousValue = newValue;
+                watcher.trigger++;
+            }
+        }
+    }
+
+    restoreOnChangeTrigger(watcherId) {
+        return this.onChangeWatchers[watcherId]?.trigger ?? 0;
+    }
+
+    triggerOnChangeHandler(watcherId) {
+        const watcher = this.onChangeWatchers[watcherId];
+        if (watcher && watcher.handler) {
+            const currentValue = watcher.previousValue;
+            watcher.handler(currentValue);
+        }
+    }
+
 }
 
 
@@ -2279,6 +2339,8 @@ Object.assign(this, {
     callForEachFunction: (functionId, element, index) => runtime.callForEachFunction(functionId, element, index),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restorePickerValue: (dataId) => runtime.restoreData(dataId),
+    restoreOnChangeTrigger: (watcherId) => runtime.restoreOnChangeTrigger(watcherId),
+    triggerOnChangeHandler: (watcherId) => runtime.triggerOnChangeHandler(watcherId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]

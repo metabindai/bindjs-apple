@@ -263,7 +263,15 @@ public class BindJSContext: ObservableObject {
     public func restoreForEachData(id: String) -> JSValue? {
         runtime.invokeMethod("restoreForEachData", withArguments: [id])
     }
-    
+
+    public func restoreOnChangeTrigger(id: String) -> Int {
+        Int(runtime.invokeMethod("restoreOnChangeTrigger", withArguments: [id])?.toInt32() ?? 0)
+    }
+
+    public func triggerOnChangeHandler(id: String) {
+        _ = runtime.invokeMethod("triggerOnChangeHandler", withArguments: [id])
+    }
+
     public func restorePickerValue(id: String) -> String? {
         runtime.invokeMethod("restorePickerValue", withArguments: [id])?.toString()
     }

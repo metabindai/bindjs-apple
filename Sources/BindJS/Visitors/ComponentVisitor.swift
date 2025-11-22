@@ -104,6 +104,7 @@ public protocol ComponentVisitor {
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
     mutating func visitOffset(_ offset: OffsetComponent) -> Result
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result
+    mutating func visitOnChange(_ onChange: OnChangeComponent) -> Result
     mutating func visitOnDisappear(_ onDisappear: OnDisappearComponent) -> Result
     mutating func visitOnDragGesture(_ onDragGesture: OnDragGestureComponent) -> Result
     mutating func visitOnLongPressGesture(_ onLongPressGesture: OnLongPressGestureComponent) -> Result
@@ -518,7 +519,11 @@ public extension ComponentVisitor {
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result {
         return defaultVisit(onAppear)
     }
-    
+
+    mutating func visitOnChange(_ onChange: OnChangeComponent) -> Result {
+        return defaultVisit(onChange)
+    }
+
     mutating func visitOnDisappear(_ onDisappear: OnDisappearComponent) -> Result {
         return defaultVisit(onDisappear)
     }
