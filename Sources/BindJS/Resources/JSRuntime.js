@@ -308,7 +308,50 @@ function Picker({ args }) {
         props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId },
         children: childrenAST
     }
-    
+
+}
+
+function List({ args }) {
+    const [selectionOrChildren, childrenIfSelection] = args;
+
+    let selection = null;
+    let children = null;
+    let currentSelectionId = null;
+    let selectionSetterId = null;
+
+    // Determine if first arg is selection binding or children
+    if (Array.isArray(selectionOrChildren) && selectionOrChildren.length === 2 && typeof selectionOrChildren[1] === 'function') {
+        // First arg is selection binding [getter, setter]
+        selection = selectionOrChildren;
+        children = childrenIfSelection;
+
+        const getSelection = selection[0];
+        const setSelection = selection[1] ?? (() => { });
+
+        const id = this.currentPathId('List');
+        const environmentId = this.storeEnvironment(id);
+        selectionSetterId = this.storeFunction(setSelection, id);
+        currentSelectionId = this.storeData(getSelection, id);
+
+        const childrenAST = processChildren.bind(this)(children ?? []);
+
+        return {
+            props: { currentSelectionId, selectionSetterId, environmentId },
+            children: childrenAST
+        }
+    } else {
+        // First arg is children (no selection)
+        children = selectionOrChildren;
+
+        const id = this.currentPathId('List');
+        const environmentId = this.storeEnvironment(id);
+        const childrenAST = processChildren.bind(this)(children ?? []);
+
+        return {
+            props: { environmentId },
+            children: childrenAST
+        }
+    }
 }
 
 // SwiftUI default padding value in points
@@ -1657,6 +1700,7 @@ class BindJSRuntime {
         this.#registerBuiltInComponent('Button', Button);
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
+        this.#registerBuiltInComponent('List', List);
         this.#registerBuiltInComponent('Picker', Picker);
 
         // Register specific handlers for inbuilt modifiers
@@ -2271,6 +2315,7 @@ Object.assign(this, {
     callForEachFunction: (functionId, element, index) => runtime.callForEachFunction(functionId, element, index),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restorePickerValue: (dataId) => runtime.restoreData(dataId),
+    restoreListSelection: (dataId) => runtime.restoreData(dataId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]

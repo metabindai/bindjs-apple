@@ -14,6 +14,7 @@ public protocol ComponentVisitor {
     mutating func visitGroup(_ group: GroupComponent) -> Result
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
+    mutating func visitList(_ list: ListComponent) -> Result
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
@@ -169,7 +170,11 @@ public extension ComponentVisitor {
     mutating func visitImage(_ image: ImageComponent) -> Result {
         return defaultVisit(image)
     }
-    
+
+    mutating func visitList(_ list: ListComponent) -> Result {
+        return defaultVisit(list)
+    }
+
     mutating func visitMaterial(_ material: MaterialComponent) -> Result {
         return defaultVisit(material)
     }
