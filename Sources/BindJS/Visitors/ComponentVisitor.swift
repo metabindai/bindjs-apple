@@ -13,6 +13,8 @@ public protocol ComponentVisitor {
     mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
     mutating func visitGroup(_ group: GroupComponent) -> Result
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
     mutating func visitList(_ list: ListComponent) -> Result
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
@@ -176,7 +178,15 @@ public extension ComponentVisitor {
     mutating func visitHStack(_ hStack: HStackComponent) -> Result {
         return defaultVisit(hStack)
     }
-    
+
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result {
+        return defaultVisit(lazyHStack)
+    }
+
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result {
+        return defaultVisit(lazyVStack)
+    }
+
     mutating func visitImage(_ image: ImageComponent) -> Result {
         return defaultVisit(image)
     }

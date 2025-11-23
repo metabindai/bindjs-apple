@@ -16,6 +16,8 @@ func makeComponent(_ directive: Directive) -> Component? {
     case GeometryReaderComponent.directiveName: GeometryReaderComponent(from: directive)
     case GroupComponent.directiveName: GroupComponent(from: directive)
     case HStackComponent.directiveName: HStackComponent(from: directive)
+    case LazyHStackComponent.directiveName: LazyHStackComponent(from: directive)
+    case LazyVStackComponent.directiveName: LazyVStackComponent(from: directive)
     case ImageComponent.directiveName: ImageComponent(from: directive)
     case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
     case ListComponent.directiveName: ListComponent(from: directive)
@@ -162,6 +164,8 @@ public struct ComponentView: View {
         case let geometryReader as GeometryReaderComponent: geometryReader
         case let group as GroupComponent: group
         case let hStack as HStackComponent: hStack
+        case let lazyHStack as LazyHStackComponent: lazyHStack
+        case let lazyVStack as LazyVStackComponent: lazyVStack
         case let image as ImageComponent: image
         case let linearGradient as LinearGradientComponent: linearGradient
         case let list as ListComponent: list

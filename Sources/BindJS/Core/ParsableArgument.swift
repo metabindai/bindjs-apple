@@ -339,11 +339,22 @@ extension SafeAreaRegions: ParsableArgument {
 public enum TextSelectabilityArgument: ParsableArgument {
     case enabled
     case disabled
-    
+
     init?(rawValue: String) {
         switch rawValue {
         case "enabled": self = .enabled
         case "disabled": self = .disabled
+        default: return nil
+        }
+    }
+}
+
+extension PinnedScrollableViews: ParsableArgument {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "sectionHeaders": self = .sectionHeaders
+        case "sectionFooters": self = .sectionFooters
+        case "all": self = [.sectionHeaders, .sectionFooters]
         default: return nil
         }
     }
