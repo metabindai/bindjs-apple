@@ -15,6 +15,7 @@ public protocol ComponentVisitor {
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
     mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result
     mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result
+    mutating func visitLabel(_ label: LabelComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
     mutating func visitList(_ list: ListComponent) -> Result
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
@@ -185,6 +186,10 @@ public extension ComponentVisitor {
 
     mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result {
         return defaultVisit(lazyVStack)
+    }
+    
+    mutating func visitLabel(_ label: LabelComponent) -> Result {
+        return defaultVisit(label)
     }
 
     mutating func visitImage(_ image: ImageComponent) -> Result {
