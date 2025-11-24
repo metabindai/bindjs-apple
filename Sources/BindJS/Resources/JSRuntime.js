@@ -1670,6 +1670,7 @@ class BindJSRuntime {
 
         this.#registerBuiltInModifier('background', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
+        this.#registerBuiltInModifier('contextMenu', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
 
