@@ -20,6 +20,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case LazyVStackComponent.directiveName: LazyVStackComponent(from: directive)
     case LabelComponent.directiveName: LabelComponent(from: directive)
     case ImageComponent.directiveName: ImageComponent(from: directive)
+    case MenuComponent.directiveName: MenuComponent(from: directive)
     case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
     case ListComponent.directiveName: ListComponent(from: directive)
     case MaterialComponent.directiveName: MaterialComponent(from: directive)
@@ -169,6 +170,7 @@ public struct ComponentView: View {
         case let lazyVStack as LazyVStackComponent: lazyVStack
         case let label as LabelComponent: label
         case let image as ImageComponent: image
+        case let menu as MenuComponent: menu
         case let linearGradient as LinearGradientComponent: linearGradient
         case let list as ListComponent: list
         case let material as MaterialComponent: material

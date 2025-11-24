@@ -18,6 +18,7 @@ public protocol ComponentVisitor {
     mutating func visitLabel(_ label: LabelComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
     mutating func visitList(_ list: ListComponent) -> Result
+    mutating func visitMenu(_ menu: MenuComponent) -> Result
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
@@ -198,6 +199,10 @@ public extension ComponentVisitor {
 
     mutating func visitList(_ list: ListComponent) -> Result {
         return defaultVisit(list)
+    }
+    
+    mutating func visitMenu(_ menu: MenuComponent) -> Result {
+        return defaultVisit(menu)
     }
 
     mutating func visitMaterial(_ material: MaterialComponent) -> Result {
