@@ -26,7 +26,9 @@ public struct Model3DComponent: Component {
     public var autoRotate: Bool
     /// Allow user camera control via SceneKit's trackball controller.
     public var cameraControl: Bool
-
+    /// Amount to pad the camera viewport by
+    public var cameraPadding: Double
+    
     /// Scene frame rate hint. Default 60.
     public var preferredFPS: Int
     /// Scene antialiasing. Default 4x.
@@ -79,9 +81,11 @@ extension Model3DComponent {
             position = .zero
         }
 
+        
         autoRotate = directive["autoRotate"] ?? false
         cameraControl = directive["cameraControl"] ?? true
-
+        cameraPadding = directive["cameraPadding"] ?? 1.08;
+        
         preferredFPS = Int(directive["preferredFPS"] ?? 60)
         antialiasing = .multisampling4X
         backgroundColor = .clear
@@ -107,6 +111,7 @@ extension Model3DComponent: View {
             position: position,
             autoRotate: autoRotate,
             cameraControl: cameraControl,
+            cameraPadding: cameraPadding,
             preferredFPS: preferredFPS,
             antialiasing: antialiasing,
             backgroundColor: backgroundColor,
@@ -204,6 +209,7 @@ private struct Model3DView: View {
     let position: SIMD3<Float>
     let autoRotate: Bool
     let cameraControl: Bool
+    let cameraPadding: Double
     let preferredFPS: Int
     let antialiasing: SCNAntialiasingMode
     let backgroundColor: Color
@@ -273,7 +279,7 @@ private struct Model3DView: View {
                                     for: scene,
                                     target: container,
                                     viewportSize: newSize,
-                                    padding: 1.08
+                                    padding: cameraPadding
                                 )
                             }
                         }
@@ -367,7 +373,7 @@ private struct Model3DView: View {
                     for: scnScene,
                     target: container,
                     viewportSize: viewportSize == .zero ? CGSize(width: 800, height: 600) : viewportSize,
-                    padding: 1.08
+                    padding: cameraPadding
                 )
 
                 // Cache
@@ -456,7 +462,7 @@ private struct Model3DView: View {
             for: scnScene,
             target: container,
             viewportSize: viewportSize == .zero ? CGSize(width: 800, height: 600) : viewportSize,
-            padding: 1.08
+            padding: cameraPadding
         )
 
         // Commit state
@@ -500,9 +506,8 @@ private struct Model3DView: View {
         for scene: SCNScene,
         target: SCNNode,
         viewportSize: CGSize,
-        padding: CGFloat = 1.08
+        padding: CGFloat
     ) -> SCNNode {
-        // Remove old camera if any
         if let old = cameraNode { old.removeFromParentNode() }
 
         let cameraNode = SCNNode()
@@ -510,9 +515,15 @@ private struct Model3DView: View {
         cameraNode.camera = SCNCamera()
         cameraNode.camera?.wantsHDR = wantsHDR
 
-        // Compute world-space bounds
+        // Calculate World Bounding Box
         let (localMin, localMax) = target.boundingBox
         let cornersLocal = [
+            SCNVector3(localMin.x, localMin.y, localMin.z),
+            SCNVector3(localMax.x, localMax.y, localMax.z)
+        ]
+        
+        // Create the 8 corners
+        let allCorners = [
             SCNVector3(localMin.x, localMin.y, localMin.z),
             SCNVector3(localMin.x, localMin.y, localMax.z),
             SCNVector3(localMin.x, localMax.y, localMin.z),
@@ -522,62 +533,78 @@ private struct Model3DView: View {
             SCNVector3(localMax.x, localMax.y, localMin.z),
             SCNVector3(localMax.x, localMax.y, localMax.z)
         ]
-        let worldCorners = cornersLocal.map { target.convertPosition($0, to: nil) }
-        var minCorner = worldCorners.first ?? SCNVector3Zero
-        var maxCorner = worldCorners.first ?? SCNVector3Zero
+
+        let worldCorners = allCorners.map { target.convertPosition($0, to: nil) }
+        
+        var minCorner = worldCorners[0]
+        var maxCorner = worldCorners[0]
+        
         for c in worldCorners {
-            minCorner.x = Swift.min(minCorner.x, c.x)
-            minCorner.y = Swift.min(minCorner.y, c.y)
-            minCorner.z = Swift.min(minCorner.z, c.z)
-            maxCorner.x = Swift.max(maxCorner.x, c.x)
-            maxCorner.y = Swift.max(maxCorner.y, c.y)
-            maxCorner.z = Swift.max(maxCorner.z, c.z)
+            minCorner.x = min(minCorner.x, c.x)
+            minCorner.y = min(minCorner.y, c.y)
+            minCorner.z = min(minCorner.z, c.z)
+            maxCorner.x = max(maxCorner.x, c.x)
+            maxCorner.y = max(maxCorner.y, c.y)
+            maxCorner.z = max(maxCorner.z, c.z)
         }
 
-        let size = SCNVector3(maxCorner.x - minCorner.x, maxCorner.y - minCorner.y, maxCorner.z - minCorner.z)
-        let center = SCNVector3((minCorner.x + maxCorner.x)/2, (minCorner.y + maxCorner.y)/2, (minCorner.z + maxCorner.z)/2)
+        let center = SCNVector3(
+            (minCorner.x + maxCorner.x) / 2,
+            (minCorner.y + maxCorner.y) / 2,
+            (minCorner.z + maxCorner.z) / 2
+        )
 
-        // Camera parameters
+        // Calculate Bounding Sphere Radius
+        // We find the distance from the center to the furthest corner.
+        var maxRadius: Float = 0
+        for c in worldCorners {
+            let dx = c.x - center.x
+            let dy = c.y - center.y
+            let dz = c.z - center.z
+            let dist = sqrt(dx*dx + dy*dy + dz*dz)
+            if dist > maxRadius { maxRadius = dist }
+        }
+
+        // Determine Distance based on FOV and Aspect Ratio
         let fovDegrees: CGFloat = 45
         cameraNode.camera?.fieldOfView = fovDegrees
-        let fov = fovDegrees * .pi / 180
+        let fov = fovDegrees * .pi / 180.0
+        
+        let aspect = viewportSize.width / viewportSize.height
+        
+        // We need to fit the sphere radius within the camera frustum.
+        // If portrait (aspect < 1), the horizontal FOV is narrower, so we must pull back further.
+        // Formula: distance = radius / sin(fov / 2)
+        
+        let distance: CGFloat
+        if aspect < 1.0 {
+            // Portrait: Fit to width.
+            // We calculate the horizontal FOV effectively by dividing the tan of half-fov by aspect
+            // Or simpler: just divide the vertical distance result by the aspect ratio
+            distance = (CGFloat(maxRadius) / sin(fov / 2.0)) / aspect
+        } else {
+            // Landscape: Fit to height (standard vertical FOV)
+            distance = CGFloat(maxRadius) / sin(fov / 2.0)
+        }
 
-        // Guard against zero/invalid size; choose a sane default aspect
-        let aspect: CGFloat = {
-            let w = max(1, viewportSize.width)
-            let h = max(1, viewportSize.height)
-            return w / h
-        }()
+        let finalDistance = distance * padding
 
-        // Distances required to fit height and width
-        let halfH = max(0.001, CGFloat(size.y) / 2)
-        let halfW = max(0.001, CGFloat(size.x) / 2)
-
-        // Height fit: tan(vFOV/2) covers half viewport height
-        let distForHeight = halfH / tan(fov / 2)
-
-        // Width fit: tan(hFOV/2) = aspect * tan(vFOV/2)
-        let distForWidth = halfW / (aspect * tan(fov / 2))
-
-        // Pick the larger distance, add a little padding
-        let distance = max(distForHeight, distForWidth) * padding
-
+        // Position Camera
         #if os(iOS) || os(tvOS) || os(watchOS)
-        cameraNode.position = SCNVector3(center.x, center.y, center.z + Float(distance))
+        cameraNode.position = SCNVector3(center.x, center.y, center.z + Float(finalDistance))
         #elseif os(macOS)
-        cameraNode.position = SCNVector3(center.x, center.y, center.z + CGFloat(distance))
+        cameraNode.position = SCNVector3(center.x, center.y, center.z + CGFloat(finalDistance))
         #endif
-        cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
 
-        cameraNode.camera?.zNear = 0.001
-        #if os(iOS) || os(tvOS) || os(watchOS)
-        cameraNode.camera?.zFar = Double(distance) * 100.0
-        #elseif os(macOS)
-        cameraNode.camera?.zFar = CGFloat(distance) * 100.0
-        #endif
-        cameraNode.camera?.automaticallyAdjustsZRange = true
-
+        // Ensure Z-Range is valid
+        // zNear must be close enough to not clip the front face (center - radius)
+        // zFar must be far enough to see the back face (center + radius)
+        let frontFaceDistance = finalDistance - CGFloat(maxRadius)
+        cameraNode.camera?.zNear = max(0.01, Double(frontFaceDistance) * 0.1)
+        cameraNode.camera?.zFar = Double(finalDistance + CGFloat(maxRadius)) * 2.0
+        
         scene.rootNode.addChildNode(cameraNode)
+        
         return cameraNode
     }
 
