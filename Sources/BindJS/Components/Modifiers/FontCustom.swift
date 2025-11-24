@@ -1,6 +1,7 @@
 import Foundation
 import CoreText
 import SwiftUI
+import Combine
 import os.log
 
 // MARK: - Logger
@@ -14,11 +15,7 @@ extension Logger {
 
 public struct FontCustomComponent: Component {
     public static var directiveName: String = "FontCustom"
-    
-    // MARK: — Modifier State
-    @State private var postScriptName: String?
-    @State private var isLoading = false
-    
+
     public var family: String
     public var size: CGFloat
     public var url: URL?
@@ -38,33 +35,70 @@ extension FontCustomComponent {
 
 extension FontCustomComponent: ViewModifier {
     public func body(content: Content) -> some View {
+        FontLoaderView(url: url, family: family, size: size) {
+            content
+        }
+    }
+}
+
+// MARK: - FontLoaderView
+
+/// A helper view that owns the @State for font loading.
+/// Using a View (instead of storing @State in the ViewModifier) ensures
+/// stable identity across parent re-renders.
+private struct FontLoaderView<Content: View>: View {
+    let url: URL?
+    let family: String
+    let size: CGFloat
+    let content: Content
+
+    @State private var postScriptName: String?
+    @State private var isLoading = false
+
+    init(url: URL?, family: String, size: CGFloat, @ViewBuilder content: () -> Content) {
+        self.url = url
+        self.family = family
+        self.size = size
+        self.content = content()
+    }
+
+    var body: some View {
         content
-            // 1)  Use the custom font if loaded, else fallback:
             .font(makeFont())
-            // 2)  Kick off download when this view appears / url changes:
+            .id(postScriptName)
             .task(id: url) {
                 await loadFontIfNeeded()
             }
+            .onReceive(FontLoadedPublisher.shared.publisher) { loadedURL in
+                // When any font finishes loading, check if it's ours
+                if loadedURL == url, postScriptName == nil {
+                    Task {
+                        if let name = await FontCache.shared.cachedPostScriptName(for: loadedURL) {
+                            postScriptName = name
+                        }
+                    }
+                }
+            }
     }
-    
+
     // MARK: — Helper: choose the Font to apply
     private func makeFont() -> Font {
         let textStyle = nearestTextStyle(for: size)
         if let psName = postScriptName {
             // We have a downloaded font → use it, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Using custom font: \(psName, privacy: .public) at size \(self.size, privacy: .public)")
+            Logger.fontLoading.debug("Using custom font: \(psName, privacy: .public) at size \(size, privacy: .public)")
             return .custom(psName, size: size, relativeTo: textStyle)
         } else if url != nil {
             // We're still loading → use system, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Font loading in progress, using system font at size \(self.size, privacy: .public)")
+            Logger.fontLoading.debug("Font loading in progress, using system font at size \(size, privacy: .public)")
             return .system(size: size, weight: .regular, design: .default)
         } else {
             // No URL was provided → try using the family name locally, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Attempting to use local font family: \(self.family, privacy: .public)")
+            Logger.fontLoading.debug("Attempting to use local font family: \(family, privacy: .public)")
             return .custom(family, size: size, relativeTo: textStyle)
         }
     }
-    
+
     /// Find the closest dynamic TextStyle for a given base size
     private func nearestTextStyle(for size: CGFloat) -> Font.TextStyle {
         // Mapping of base point sizes to SwiftUI TextStyles (iOS default Dynamic Type sizes)
@@ -86,7 +120,7 @@ extension FontCustomComponent: ViewModifier {
         Logger.fontLoading.debug("Mapped size \(size, privacy: .public) to text style: \(String(describing: nearest.0), privacy: .public)")
         return nearest.0
     }
-    
+
     // MARK: — Async loader
     private func loadFontIfNeeded() async {
         guard
@@ -101,24 +135,29 @@ extension FontCustomComponent: ViewModifier {
             }
             return
         }
-        
+
         isLoading = true
         defer { isLoading = false }
-        
+
         Logger.fontLoading.info("Loading font from URL: \(fontURL, privacy: .private(mask: .hash))")
-        
+
         do {
             // Ask our FontCache actor
             let name = try await FontCache.shared.postScriptName(for: fontURL)
-            // Bounce back to the main thread to update @State
-            await MainActor.run {
-                self.postScriptName = name
-                Logger.fontLoading.info("Successfully loaded font: \(name, privacy: .public)")
-            }
+            postScriptName = name
+            Logger.fontLoading.info("Successfully loaded font: \(name, privacy: .public)")
         } catch {
             Logger.fontLoading.error("Failed to load font from \(fontURL, privacy: .private(mask: .hash)): \(error, privacy: .public)")
         }
     }
+}
+
+// MARK: - FontLoadedPublisher
+
+/// Publishes when a font finishes loading so all views using that font can update
+final class FontLoadedPublisher {
+    static let shared = FontLoadedPublisher()
+    let publisher = PassthroughSubject<URL, Never>()
 }
 
 // MARK: - FontCacheError
@@ -225,6 +264,17 @@ public actor FontCache {
         
         loadedFonts[url] = psName
         Logger.fontLoading.info("Font registered successfully: \(psName, privacy: .public)")
+
+        // Notify all listeners that this font is now available
+        Task { @MainActor in
+            FontLoadedPublisher.shared.publisher.send(url)
+        }
+
         return psName
+    }
+
+    /// Synchronous lookup for already-loaded fonts
+    public func cachedPostScriptName(for url: URL) -> String? {
+        loadedFonts[url]
     }
 }
