@@ -34,6 +34,7 @@ public protocol ComponentVisitor {
     mutating func visitTextField(_ textField: TextFieldComponent) -> Result
     mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result
     mutating func visitToggle(_ toggle: ToggleComponent) -> Result
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
@@ -132,6 +133,7 @@ public protocol ComponentVisitor {
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
     mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result
     mutating func visitTint(_ tint: TintComponent) -> Result
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
@@ -264,6 +266,10 @@ public extension ComponentVisitor {
 
     mutating func visitToggle(_ toggle: ToggleComponent) -> Result {
         return defaultVisit(toggle)
+    }
+    
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result {
+        return defaultVisit(toolbarItem)
     }
 
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {
@@ -636,7 +642,11 @@ public extension ComponentVisitor {
     mutating func visitTint(_ tint: TintComponent) -> Result {
         return defaultVisit(tint)
     }
-    
+
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result {
+        return defaultVisit(toolbar)
+    }
+
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result {
         return defaultVisit(tracking)
     }

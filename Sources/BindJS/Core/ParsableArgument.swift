@@ -358,4 +358,117 @@ extension PinnedScrollableViews: ParsableArgument {
         default: return nil
         }
     }
+}   
+
+extension ToolbarItemPlacement: ParsableArgument {
+    init?(rawValue: String) {
+        switch rawValue {
+        // Always available
+        case "automatic": self = .automatic
+        case "primaryAction": self = .primaryAction
+        case "confirmationAction": self = .confirmationAction
+        case "cancellationAction": self = .cancellationAction
+        case "destructiveAction": self = .destructiveAction
+
+        // watchOS unavailable
+        #if !os(watchOS)
+        case "principal": self = .principal
+        case "navigation": self = .navigation
+        #endif
+
+        // tvOS 18.0+, watchOS unavailable
+        #if os(tvOS)
+        case "status": if #available(tvOS 18.0, *) {
+            self = .status
+        } else {
+            return nil
+        }
+        #elseif !os(watchOS)
+        case "status": self = .status
+        #endif
+
+        // iOS 16.0+, macOS 13.0+, tvOS/watchOS unavailable
+        #if os(iOS)
+        case "secondaryAction": if #available(iOS 16.0, *) {
+            self = .secondaryAction
+        } else {
+            return nil
+        }
+        #elseif os(macOS)
+        case "secondaryAction": if #available(macOS 13.0, *) {
+            self = .secondaryAction
+        } else {
+            return nil
+        }
+        #endif
+
+        // iOS 15.0+, macOS 12.0+, tvOS/watchOS/visionOS unavailable
+        #if os(iOS)
+        case "keyboard": if #available(iOS 15.0, *) {
+            self = .keyboard
+        } else {
+            return nil
+        }
+        #elseif os(macOS)
+        case "keyboard": if #available(macOS 12.0, *) {
+            self = .keyboard
+        } else {
+            return nil
+        }
+        #endif
+
+        // iOS 14.0+, tvOS 14.0+, watchOS 10.0+, macOS unavailable
+        #if os(iOS)
+        case "topBarLeading": if #available(iOS 14.0, *) {
+            self = .topBarLeading
+        } else {
+            return nil
+        }
+        case "topBarTrailing": if #available(iOS 14.0, *) {
+            self = .topBarTrailing
+        } else {
+            return nil
+        }
+        #elseif os(tvOS)
+        case "topBarLeading": if #available(tvOS 14.0, *) {
+            self = .topBarLeading
+        } else {
+            return nil
+        }
+        case "topBarTrailing": if #available(tvOS 14.0, *) {
+            self = .topBarTrailing
+        } else {
+            return nil
+        }
+        #elseif os(watchOS)
+        case "topBarLeading": if #available(watchOS 10.0, *) {
+            self = .topBarLeading
+        } else {
+            return nil
+        }
+        case "topBarTrailing": if #available(watchOS 10.0, *) {
+            self = .topBarTrailing
+        } else {
+            return nil
+        }
+        #endif
+
+        // tvOS 18.0+, watchOS 10.0+, macOS unavailable
+        #if os(tvOS)
+        case "bottomBar": if #available(tvOS 18.0, *) {
+            self = .bottomBar
+        } else {
+            return nil
+        }
+        #elseif os(watchOS)
+        case "bottomBar": if #available(watchOS 10.0, *) {
+            self = .bottomBar
+        } else {
+            return nil
+        }
+        #endif
+
+        default: return nil
+        }
+    }
 }
