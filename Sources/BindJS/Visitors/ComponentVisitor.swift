@@ -122,6 +122,7 @@ public protocol ComponentVisitor {
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result
     mutating func visitPadding(_ padding: PaddingComponent) -> Result
     mutating func visitPresentationDetents(_ presentationDetents: PresentationDetentsComponent) -> Result
+    mutating func visitQuickLookPreview(_ quickLookPreview: QuickLookComponent) -> Result
     mutating func visitRotationEffect(_ rotationEffect: RotationEffectComponent) -> Result
     mutating func visitSaturation(_ saturation: SaturationComponent) -> Result
     mutating func visitScaleEffect(_ scaleEffect: ScaleEffectComponent) -> Result
@@ -599,6 +600,10 @@ public extension ComponentVisitor {
     
     mutating func visitPresentationDetents(_ presentationDetents: PresentationDetentsComponent) -> Result {
         return defaultVisit(presentationDetents)
+    }
+    
+    mutating func visitQuickLookPreview(_ quickLookPreview: QuickLookComponent) -> Result {
+        return defaultVisit(quickLookPreview)
     }
     
     mutating func visitRotationEffect(_ rotationEffect: RotationEffectComponent) -> Result {
