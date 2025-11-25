@@ -6,8 +6,8 @@ public struct TextFieldComponent: Component {
     @EnvironmentObject private var context: BindJSContext
 
     public var placeholder: String
-    public var currentValueId: String?
-    public var setterId: String?
+    public var text: String?
+    public var setTextId: String?
     public var environmentId: String
 }
 
@@ -16,8 +16,8 @@ extension TextFieldComponent {
         guard directive.type == Self.directiveName else { return nil }
 
         placeholder = directive["placeholder"] ?? ""
-        currentValueId = directive["currentValueId"]
-        setterId = directive["setterId"]
+        text = directive["text"]
+        setTextId = directive["setTextId"]
         environmentId = directive["environmentId"] ?? ""
     }
 
@@ -30,13 +30,12 @@ extension TextFieldComponent: View {
     public var body: some View {
         TextField(placeholder, text: Binding(
             get: {
-                context.restoreEnvironment(id: environmentId)
-                return context.restoreTextFieldValue(id: currentValueId ?? "") ?? ""
+                return text ?? ""
             },
             set: { newValue in
-                context.restoreEnvironment(id: environmentId)
-                if let setterId = setterId {
-                    context.callTextFieldSetter(id: setterId, value: newValue)
+                if let setTextId {
+                    context.restoreEnvironment(id: environmentId)
+                    context.callEventHandler(id: setTextId, arguments: newValue)
                 }
             }
         ))
