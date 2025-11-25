@@ -558,9 +558,9 @@ private struct Model3DView: View {
         // We find the distance from the center to the furthest corner.
         var maxRadius: Float = 0
         for c in worldCorners {
-            let dx = c.x - center.x
-            let dy = c.y - center.y
-            let dz = c.z - center.z
+            let dx = Float(c.x - center.x)
+            let dy = Float(c.y - center.y)
+            let dz = Float(c.z - center.z)
             let dist = sqrt(dx*dx + dy*dy + dz*dz)
             if dist > maxRadius { maxRadius = dist }
         }

@@ -26,12 +26,20 @@ extension NavigationStackComponent: View {
                 }
             }
         } else {
+            #if os(iOS) || os(tvOS)
             NavigationView {
                 ForEach(Array(children.enumerated()), id: \.offset) { _, child in
                     ComponentView(child)
                 }
             }
             .navigationViewStyle(.stack)
+            #else
+            NavigationView {
+                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                    ComponentView(child)
+                }
+            }
+            #endif
         }
     }
 }

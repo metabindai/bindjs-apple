@@ -19,6 +19,7 @@ extension KeyboardTypeComponent {
 
 extension KeyboardTypeComponent: ViewModifier {
     public func body(content: Content) -> some View {
+        #if os(iOS) || os(tvOS)
         let keyboardType: UIKeyboardType = {
             switch rawValue {
             case "asciiCapable": return .asciiCapable
@@ -35,8 +36,9 @@ extension KeyboardTypeComponent: ViewModifier {
             default: return .default
             }
         }()
-        
-        content
-            .keyboardType(keyboardType)
+        content.keyboardType(keyboardType)
+        #else
+        content  // macOS has no keyboard type
+        #endif
     }
 }
