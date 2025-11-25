@@ -13,13 +13,20 @@ func makeComponent(_ directive: Directive) -> Component? {
     case EllipticalGradientComponent.directiveName: EllipticalGradientComponent(from: directive)
     case EmptyComponent.directiveName: EmptyComponent(from: directive)
     case ForEachComponent.directiveName: ForEachComponent(from: directive)
+    case GeometryReaderComponent.directiveName: GeometryReaderComponent(from: directive)
     case GroupComponent.directiveName: GroupComponent(from: directive)
     case HStackComponent.directiveName: HStackComponent(from: directive)
+    case LazyHStackComponent.directiveName: LazyHStackComponent(from: directive)
+    case LazyVStackComponent.directiveName: LazyVStackComponent(from: directive)
+    case LabelComponent.directiveName: LabelComponent(from: directive)
     case ImageComponent.directiveName: ImageComponent(from: directive)
+    case MenuComponent.directiveName: MenuComponent(from: directive)
     case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
+    case ListComponent.directiveName: ListComponent(from: directive)
     case MaterialComponent.directiveName: MaterialComponent(from: directive)
     case Model3DComponent.directiveName: Model3DComponent(from: directive)
     case ModifiedComponent.directiveName: ModifiedComponent(from: directive)
+    case NavigationStackComponent.directiveName: NavigationStackComponent(from: directive)
     case PickerComponent.directiveName: PickerComponent(from: directive)
     case PlaceholderComponent.directiveName: PlaceholderComponent(from: directive)
     case ProgressViewComponent.directiveName: ProgressViewComponent(from: directive)
@@ -28,9 +35,14 @@ func makeComponent(_ directive: Directive) -> Component? {
     case RoundedRectangleComponent.directiveName: RoundedRectangleComponent(from: directive)
     case ScrollViewComponent.directiveName: ScrollViewComponent(from: directive)
     case SectionComponent.directiveName: SectionComponent(from: directive)
+    case SecureFieldComponent.directiveName: SecureFieldComponent(from: directive)
     case SpacerComponent.directiveName: SpacerComponent(from: directive)
     case TextComponent.directiveName: TextComponent(from: directive)
     case TextEditorComponent.directiveName: TextEditorComponent(from: directive)
+    case TextFieldComponent.directiveName: TextFieldComponent(from: directive)
+    case ToggleComponent.directiveName: ToggleComponent(from: directive)
+    case ToolbarItemComponent.directiveName: ToolbarItemComponent(from: directive)
+    case ToolbarItemGroupComponent.directiveName: ToolbarItemGroupComponent(from: directive)
     case VideoComponent.directiveName: VideoComponent(from: directive)
     case VStackComponent.directiveName: VStackComponent(from: directive)
     case ZStackComponent.directiveName: ZStackComponent(from: directive)
@@ -59,6 +71,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case ColorInvertComponent.directiveName: ColorInvertComponent(from: directive)
     case ColorSchemeComponent.directiveName: ColorSchemeComponent(from: directive)
     case ContentShapeComponent.directiveName: ContentShapeComponent(from: directive)
+    case ContextMenuComponent.directiveName: ContextMenuComponent(from: directive)
     case ContrastComponent.directiveName: ContrastComponent(from: directive)
     case ControlSizeComponent.directiveName: ControlSizeComponent(from: directive)
     case CornerRadiusComponent.directiveName: CornerRadiusComponent(from: directive)
@@ -66,6 +79,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case DisabledComponent.directiveName: DisabledComponent(from: directive)
     case DynamicTypeSizeComponent.directiveName: DynamicTypeSizeComponent(from: directive)
     case FixedSizeComponent.directiveName: FixedSizeComponent(from: directive)
+    case FocusedComponent.directiveName: FocusedComponent(from: directive)
     case FontComponent.directiveName: FontComponent(from: directive)
     case FontDesignComponent.directiveName: FontDesignComponent(from: directive)
     case FontWeightComponent.directiveName: FontWeightComponent(from: directive)
@@ -82,6 +96,7 @@ func makeComponent(_ directive: Directive) -> Component? {
     case IDComponent.directiveName: IDComponent(from: directive)
     case IgnoresSafeAreaComponent.directiveName: IgnoresSafeAreaComponent(from: directive)
     case ItalicComponent.directiveName: ItalicComponent(from: directive)
+    case KeyboardTypeComponent.directiveName: KeyboardTypeComponent(from: directive)
     case LayoutPriorityComponent.directiveName: LayoutPriorityComponent(from: directive)
     case LineLimitComponent.directiveName: LineLimitComponent(from: directive)
     case LineSpacingComponent.directiveName: LineSpacingComponent(from: directive)
@@ -92,10 +107,12 @@ func makeComponent(_ directive: Directive) -> Component? {
     case NavigationTitleComponent.directiveName: NavigationTitleComponent(from: directive)
     case OffsetComponent.directiveName: OffsetComponent(from: directive)
     case OnAppearComponent.directiveName: OnAppearComponent(from: directive)
+    case OnChangeComponent.directiveName: OnChangeComponent(from: directive)
     case OnDisappearComponent.directiveName: OnDisappearComponent(from: directive)
     case OnDragGestureComponent.directiveName: OnDragGestureComponent(from: directive)
     case OnLongPressGestureComponent.directiveName: OnLongPressGestureComponent(from: directive)
     case OnTapGestureComponent.directiveName: OnTapGestureComponent(from: directive)
+    case OnSubmitComponent.directiveName: OnSubmitComponent(from: directive)
     case OpacityComponent.directiveName: OpacityComponent(from: directive)
     case OverlayComponent.directiveName: OverlayComponent(from: directive)
     case PaddingComponent.directiveName: PaddingComponent(from: directive)
@@ -106,13 +123,17 @@ func makeComponent(_ directive: Directive) -> Component? {
     case ScaledToFillComponent.directiveName: ScaledToFillComponent(from: directive)
     case ScaledToFitComponent.directiveName: ScaledToFitComponent(from: directive)
     case ScaleEffectComponent.directiveName: ScaleEffectComponent(from: directive)
+    case ScrollContentBackgroundComponent.directiveName: ScrollContentBackgroundComponent(from: directive)
+    case SubmitLabelComponent.directiveName: SubmitLabelComponent(from: directive)
     case ShadowComponent.directiveName: ShadowComponent(from: directive)
     case SheetComponent.directiveName: SheetComponent(from: directive)
     case StrikethroughComponent.directiveName: StrikethroughComponent(from: directive)
     case TagComponent.directiveName: TagComponent(from: directive)
     case TextCaseComponent.directiveName: TextCaseComponent(from: directive)
     case TextSelectionComponent.directiveName: TextSelectionComponent(from: directive)
+    case TextFieldStyleComponent.directiveName: TextFieldStyleComponent(from: directive)
     case TintComponent.directiveName: TintComponent(from: directive)
+    case ToolbarComponent.directiveName: ToolbarComponent(from: directive)
     case TrackingComponent.directiveName: TrackingComponent(from: directive)
     case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
     case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
@@ -147,13 +168,20 @@ public struct ComponentView: View {
         case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
         case let empty as EmptyComponent: empty
         case let forEach as ForEachComponent: forEach
+        case let geometryReader as GeometryReaderComponent: geometryReader
         case let group as GroupComponent: group
         case let hStack as HStackComponent: hStack
+        case let lazyHStack as LazyHStackComponent: lazyHStack
+        case let lazyVStack as LazyVStackComponent: lazyVStack
+        case let label as LabelComponent: label
         case let image as ImageComponent: image
+        case let menu as MenuComponent: menu
         case let linearGradient as LinearGradientComponent: linearGradient
+        case let list as ListComponent: list
         case let material as MaterialComponent: material
         case let model3D as Model3DComponent: model3D
         case let modified as ModifiedComponent: modified
+        case let navigationStack as NavigationStackComponent: navigationStack
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
         case let progressView as ProgressViewComponent: progressView
@@ -162,9 +190,12 @@ public struct ComponentView: View {
         case let roundedRectangle as RoundedRectangleComponent: roundedRectangle
         case let scrollView as ScrollViewComponent: scrollView
         case let section as SectionComponent: section
+        case let secureField as SecureFieldComponent: secureField
         case let spacer as SpacerComponent: spacer
         case let text as TextComponent: text
         case let textEditor as TextEditorComponent: textEditor
+        case let textField as TextFieldComponent: textField
+        case let toggle as ToggleComponent: toggle
         case let unresolved as UnresolvedComponent: unresolved
         case let video as VideoComponent: video
         case let vStack as VStackComponent: vStack
@@ -205,6 +236,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ColorInvertComponent: content.modifier(m)
         case let m as ColorSchemeComponent: content.modifier(m)
         case let m as ContentShapeComponent: content.modifier(m)
+        case let m as ContextMenuComponent: content.modifier(m)
         case let m as ContrastComponent: content.modifier(m)
         case let m as ControlSizeComponent: content.modifier(m)
         case let m as CornerRadiusComponent: content.modifier(m)
@@ -213,6 +245,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as DynamicTypeSizeComponent: content.modifier(m)
         case let m as FixedSizeComponent: content.modifier(m)
         case let m as FlexibleFrameComponent: content.modifier(m)
+        case let m as FocusedComponent: content.modifier(m)
         case let m as FontComponent: content.modifier(m)
         case let m as FontDesignComponent: content.modifier(m)
         case let m as FontWeightComponent: content.modifier(m)
@@ -225,6 +258,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as IDComponent: content.modifier(m)
         case let m as IgnoresSafeAreaComponent: content.modifier(m)
         case let m as ItalicComponent: content.modifier(m)
+        case let m as KeyboardTypeComponent: content.modifier(m)
         case let m as LayoutPriorityComponent: content.modifier(m)
         case let m as LineLimitComponent: content.modifier(m)
         case let m as LineSpacingComponent: content.modifier(m)
@@ -235,10 +269,12 @@ struct ComponentViewModifier: ViewModifier {
         case let m as NavigationTitleComponent: content.modifier(m)
         case let m as OffsetComponent: content.modifier(m)
         case let m as OnAppearComponent: content.modifier(m)
+        case let m as OnChangeComponent: content.modifier(m)
         case let m as OnDisappearComponent: content.modifier(m)
         case let m as OnDragGestureComponent: content.modifier(m)
         case let m as OnLongPressGestureComponent: content.modifier(m)
         case let m as OnTapGestureComponent: content.modifier(m)
+        case let m as OnSubmitComponent: content.modifier(m)
         case let m as OpacityComponent: content.modifier(m)
         case let m as OverlayComponent: content.modifier(m)
         case let m as PaddingComponent: content.modifier(m)
@@ -249,13 +285,17 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ScaledToFillComponent: content.modifier(m)
         case let m as ScaledToFitComponent: content.modifier(m)
         case let m as ScaleEffectComponent: content.modifier(m)
+        case let m as ScrollContentBackgroundComponent: content.modifier(m)
+        case let m as SubmitLabelComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
         case let m as StrikethroughComponent: content.modifier(m)
         case let m as TagComponent: content.modifier(m)
         case let m as TextCaseComponent: content.modifier(m)
         case let m as TextSelectionComponent: content.modifier(m)
+        case let m as TextFieldStyleComponent: content.modifier(m)
         case let m as TintComponent: content.modifier(m)
+        case let m as ToolbarComponent: content.modifier(m)
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)

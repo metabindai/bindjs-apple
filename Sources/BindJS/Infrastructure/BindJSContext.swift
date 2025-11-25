@@ -263,12 +263,44 @@ public class BindJSContext: ObservableObject {
     public func restoreForEachData(id: String) -> JSValue? {
         runtime.invokeMethod("restoreForEachData", withArguments: [id])
     }
-    
+
+    public func restoreOnChangeTrigger(id: String) -> Int {
+        Int(runtime.invokeMethod("restoreOnChangeTrigger", withArguments: [id])?.toInt32() ?? 0)
+    }
+
+    public func triggerOnChangeHandler(id: String) {
+        _ = runtime.invokeMethod("triggerOnChangeHandler", withArguments: [id])
+    }
+
     public func restorePickerValue(id: String) -> String? {
         runtime.invokeMethod("restorePickerValue", withArguments: [id])?.toString()
     }
 
     public func callPickerSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
+    public func restoreTextFieldValue(id: String) -> String? {
+        runtime.invokeMethod("restoreTextFieldValue", withArguments: [id])?.toString()
+    }
+
+    public func callTextFieldSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
+    public func restoreSecureFieldValue(id: String) -> String? {
+        runtime.invokeMethod("restoreSecureFieldValue", withArguments: [id])?.toString()
+    }
+
+    public func callSecureFieldSetter(id: String, value: String) {
+        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
+    }
+
+    public func restoreToggleValue(id: String) -> Bool? {
+        runtime.invokeMethod("restoreToggleValue", withArguments: [id])?.toBool()
+    }
+
+    public func callToggleSetter(id: String, value: Bool) {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 

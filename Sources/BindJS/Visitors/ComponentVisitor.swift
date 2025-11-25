@@ -10,12 +10,19 @@ public protocol ComponentVisitor {
     mutating func visitColor(_ color: ColorComponent) -> Result
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
+    mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
     mutating func visitGroup(_ group: GroupComponent) -> Result
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result
+    mutating func visitLabel(_ label: LabelComponent) -> Result
     mutating func visitImage(_ image: ImageComponent) -> Result
+    mutating func visitList(_ list: ListComponent) -> Result
+    mutating func visitMenu(_ menu: MenuComponent) -> Result
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
     mutating func visitPicker(_ picker: PickerComponent) -> Result
     mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result
@@ -25,6 +32,11 @@ public protocol ComponentVisitor {
     mutating func visitSpacer(_ spacer: SpacerComponent) -> Result
     mutating func visitText(_ text: TextComponent) -> Result
     mutating func visitTextEditor(_ textEditor: TextEditorComponent) -> Result
+    mutating func visitTextField(_ textField: TextFieldComponent) -> Result
+    mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result
+    mutating func visitToggle(_ toggle: ToggleComponent) -> Result
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
@@ -65,6 +77,7 @@ public protocol ComponentVisitor {
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result
     mutating func visitColorScheme(_ colorScheme: ColorSchemeComponent) -> Result
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result
+    mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result
     mutating func visitContrast(_ contrast: ContrastComponent) -> Result
     mutating func visitControlSize(_ controlSize: ControlSizeComponent) -> Result
     mutating func visitCornerRadius(_ cornerRadius: CornerRadiusComponent) -> Result
@@ -74,6 +87,7 @@ public protocol ComponentVisitor {
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result
     mutating func visitFixedSize(_ fixedSize: FixedSizeComponent) -> Result
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result
+    mutating func visitFocused(_ focused: FocusedComponent) -> Result
     mutating func visitFont(_ font: FontComponent) -> Result
     mutating func visitFontCustom(_ fontCustom: FontCustomComponent) -> Result
     mutating func visitFontDesign(_ fontDesign: FontDesignComponent) -> Result
@@ -98,10 +112,12 @@ public protocol ComponentVisitor {
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
     mutating func visitOffset(_ offset: OffsetComponent) -> Result
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result
+    mutating func visitOnChange(_ onChange: OnChangeComponent) -> Result
     mutating func visitOnDisappear(_ onDisappear: OnDisappearComponent) -> Result
     mutating func visitOnDragGesture(_ onDragGesture: OnDragGestureComponent) -> Result
     mutating func visitOnLongPressGesture(_ onLongPressGesture: OnLongPressGestureComponent) -> Result
     mutating func visitOnTapGesture(_ onTapGesture: OnTapGestureComponent) -> Result
+    mutating func visitOnSubmit(_ onSubmit: OnSubmitComponent) -> Result
     mutating func visitOpacity(_ opacity: OpacityComponent) -> Result
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result
     mutating func visitPadding(_ padding: PaddingComponent) -> Result
@@ -117,11 +133,16 @@ public protocol ComponentVisitor {
     mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
+    mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result
     mutating func visitTint(_ tint: TintComponent) -> Result
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
+    mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
+    mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
+    mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
 
@@ -152,7 +173,11 @@ public extension ComponentVisitor {
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result {
         return defaultVisit(forEach)
     }
-    
+
+    mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result {
+        return defaultVisit(geometryReader)
+    }
+
     mutating func visitGroup(_ group: GroupComponent) -> Result {
         return defaultVisit(group)
     }
@@ -160,11 +185,31 @@ public extension ComponentVisitor {
     mutating func visitHStack(_ hStack: HStackComponent) -> Result {
         return defaultVisit(hStack)
     }
+
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result {
+        return defaultVisit(lazyHStack)
+    }
+
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result {
+        return defaultVisit(lazyVStack)
+    }
     
+    mutating func visitLabel(_ label: LabelComponent) -> Result {
+        return defaultVisit(label)
+    }
+
     mutating func visitImage(_ image: ImageComponent) -> Result {
         return defaultVisit(image)
     }
+
+    mutating func visitList(_ list: ListComponent) -> Result {
+        return defaultVisit(list)
+    }
     
+    mutating func visitMenu(_ menu: MenuComponent) -> Result {
+        return defaultVisit(menu)
+    }
+
     mutating func visitMaterial(_ material: MaterialComponent) -> Result {
         return defaultVisit(material)
     }
@@ -175,6 +220,10 @@ public extension ComponentVisitor {
     
     mutating func visitModified(_ modified: ModifiedComponent) -> Result {
         return defaultVisit(modified)
+    }
+    
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
+        return defaultVisit(navigationStack)
     }
     
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result {
@@ -212,7 +261,27 @@ public extension ComponentVisitor {
     mutating func visitTextEditor(_ textEditor: TextEditorComponent) -> Result {
         return defaultVisit(textEditor)
     }
+
+    mutating func visitTextField(_ textField: TextFieldComponent) -> Result {
+        return defaultVisit(textField)
+    }
+
+    mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result {
+        return defaultVisit(secureField)
+    }
+
+    mutating func visitToggle(_ toggle: ToggleComponent) -> Result {
+        return defaultVisit(toggle)
+    }
     
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result {
+        return defaultVisit(toolbarItem)
+    }
+    
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result {
+        return defaultVisit(toolbarItemGroup)
+    }
+
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {
         return defaultVisit(unresolved)
     }
@@ -351,7 +420,11 @@ public extension ComponentVisitor {
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result {
         return defaultVisit(contentShape)
     }
-    
+
+    mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result {
+        return defaultVisit(contextMenu)
+    }
+
     mutating func visitContrast(_ contrast: ContrastComponent) -> Result {
         return defaultVisit(contrast)
     }
@@ -386,6 +459,10 @@ public extension ComponentVisitor {
     
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result {
         return defaultVisit(flexibleFrame)
+    }
+    
+    mutating func visitFocused(_ focused: FocusedComponent) -> Result {
+        return defaultVisit(focused)
     }
     
     mutating func visitFont(_ font: FontComponent) -> Result {
@@ -483,7 +560,11 @@ public extension ComponentVisitor {
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result {
         return defaultVisit(onAppear)
     }
-    
+
+    mutating func visitOnChange(_ onChange: OnChangeComponent) -> Result {
+        return defaultVisit(onChange)
+    }
+
     mutating func visitOnDisappear(_ onDisappear: OnDisappearComponent) -> Result {
         return defaultVisit(onDisappear)
     }
@@ -498,6 +579,10 @@ public extension ComponentVisitor {
     
     mutating func visitOnTapGesture(_ onTapGesture: OnTapGestureComponent) -> Result {
         return defaultVisit(onTapGesture)
+    }
+    
+    mutating func visitOnSubmit(_ onSubmit: OnSubmitComponent) -> Result {
+        return defaultVisit(onSubmit)
     }
     
     mutating func visitOpacity(_ opacity: OpacityComponent) -> Result {
@@ -560,10 +645,18 @@ public extension ComponentVisitor {
         return defaultVisit(textSelection)
     }
     
+    mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result {
+        return defaultVisit(textFieldStyle)
+    }
+    
     mutating func visitTint(_ tint: TintComponent) -> Result {
         return defaultVisit(tint)
     }
-    
+
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result {
+        return defaultVisit(toolbar)
+    }
+
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result {
         return defaultVisit(tracking)
     }
@@ -578,6 +671,18 @@ public extension ComponentVisitor {
     
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result {
         return defaultVisit(visualEffect)
+    }
+    
+    mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result {
+        return defaultVisit(keyboardType)
+    }
+    
+    mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
+        return defaultVisit(scrollContentBackground)
+    }
+    
+    mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result {
+        return defaultVisit(submitLabel)
     }
     
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {

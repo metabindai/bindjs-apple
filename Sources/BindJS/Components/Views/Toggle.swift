@@ -1,39 +1,41 @@
 import SwiftUI
 
-public struct TextEditorComponent: Component {
-    public static var directiveName: String = "TextEditor"
+public struct ToggleComponent: Component {
+    public static var directiveName: String = "Toggle"
 
     @EnvironmentObject private var context: BindJSContext
 
-    public var text: String?
-    public var setTextId: String?
+    public var label: String
+    public var isOn: Bool?
+    public var setIsOnId: String?
     public var environmentId: String
 }
 
-extension TextEditorComponent {
+extension ToggleComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
 
-        text = directive["text"]
-        setTextId = directive["setTextId"]
+        label = directive["label"] ?? ""
+        isOn = directive["isOn"]
+        setIsOnId = directive["setIsOnId"]
         environmentId = directive["environmentId"] ?? ""
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
-        visitor.visitTextEditor(self)
+        visitor.visitToggle(self)
     }
 }
 
-extension TextEditorComponent: View {
+extension ToggleComponent: View {
     public var body: some View {
-        TextEditor(text: Binding(
+        Toggle(label, isOn: Binding(
             get: {
-                return text ?? ""
+                return isOn ?? false
             },
             set: { newValue in
-                if let setTextId {
+                if let setIsOnId {
                     context.restoreEnvironment(id: environmentId)
-                    context.callEventHandler(id: setTextId, arguments: newValue)
+                    context.callEventHandler(id: setIsOnId, arguments: newValue)
                 }
             }
         ))

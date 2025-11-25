@@ -1,9 +1,9 @@
 const AST = {};
 
 AST.Directive = (name, args = {}, children) => {
-    var props = {...args};
-    props['children'] =  children ?? [];
-    
+    var props = { ...args };
+    props['children'] = children ?? [];
+
     return {
         'type': name,
         'props': props
@@ -17,15 +17,15 @@ AST.ModifiedContent = (modifier, component) => {
     return {
         'type': 'ModifiedComponent',
         'props': {
-            'modifier': {...modifier},
+            'modifier': { ...modifier },
             'content': content
         }
     }
 };
 
-AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
+AST.ForEach = (dataId, functionId, count, environmentId, children) => {
     return {
-        'type' : 'ForEach',
+        'type': 'ForEach',
         'props': {
             'dataId': dataId,
             'functionId': functionId,
@@ -38,7 +38,7 @@ AST.ForEach = (dataId, functionId, count, environmentId, children)  => {
 
 AST.Representable = (functionId, environmentId) => {
     return {
-        'type' : 'Representable',
+        'type': 'Representable',
         'props': {
             'functionId': functionId,
             'environmentId': environmentId
@@ -58,7 +58,7 @@ function Color({ args }) {
         // Normalize the color input
         colorProps = normalizeColor(props);
     }
-    
+
 
     return { props: colorProps, children: [] }
 }
@@ -75,20 +75,20 @@ function isNamedColor(value) {
 function hexToRgba(hex) {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
     } else if (hex.length === 4) {
-        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
     }
     let r = 0, g = 0, b = 0, a = 1;
     if (hex.length === 6) {
-        r = parseInt(hex.substring(0,2), 16);
-        g = parseInt(hex.substring(2,4), 16);
-        b = parseInt(hex.substring(4,6), 16);
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
     } else if (hex.length === 8) {
-        r = parseInt(hex.substring(0,2), 16);
-        g = parseInt(hex.substring(2,4), 16);
-        b = parseInt(hex.substring(4,6), 16);
-        a = parseInt(hex.substring(6,8), 16) / 255;
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+        a = parseInt(hex.substring(6, 8), 16) / 255;
     }
     return { r, g, b, a };
 }
@@ -100,12 +100,12 @@ function hsvToRgb(h, s, v) {
     let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     let m = v - c;
     let r1 = 0, g1 = 0, b1 = 0;
-    if (h < 60)      { r1 = c; g1 = x; b1 = 0; }
-    else if (h < 120){ r1 = x; g1 = c; b1 = 0; }
-    else if (h < 180){ r1 = 0; g1 = c; b1 = x; }
-    else if (h < 240){ r1 = 0; g1 = x; b1 = c; }
-    else if (h < 300){ r1 = x; g1 = 0; b1 = c; }
-    else             { r1 = c; g1 = 0; b1 = x; }
+    if (h < 60) { r1 = c; g1 = x; b1 = 0; }
+    else if (h < 120) { r1 = x; g1 = c; b1 = 0; }
+    else if (h < 180) { r1 = 0; g1 = c; b1 = x; }
+    else if (h < 240) { r1 = 0; g1 = x; b1 = c; }
+    else if (h < 300) { r1 = x; g1 = 0; b1 = c; }
+    else { r1 = c; g1 = 0; b1 = x; }
     const rgb = {
         r: Math.round((r1 + m) * 255),
         g: Math.round((g1 + m) * 255),
@@ -209,16 +209,16 @@ function Button({ args }) {
     // If a single arg is passed and it's an object, use it as { action, label }
     // If two args are passed, use the first as label and the second as action
     const { action, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
-                                        ? arg1
-                                        : { label: arg1, action: arg2  };
+        ? arg1
+        : { label: arg1, action: arg2 };
 
 
-                                        
+
     // Store the action, get the handlerId to be provided in the AST props.
     const path = this.currentPathId();
     const handlerId = this.storeFunction(action, path);
     const environmentId = this.storeEnvironment(path);
-       
+
     // Process label
     const { label: finalLabel } = this.processProps({ label });
 
@@ -226,7 +226,7 @@ function Button({ args }) {
         props: { handlerId, label: finalLabel, environmentId },
         children: []
     }
-    
+
 }
 
 function GenericComponent({ args }) {
@@ -308,7 +308,7 @@ function Picker({ args }) {
         props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId },
         children: childrenAST
     }
-    
+
 }
 
 // SwiftUI default padding value in points
@@ -438,7 +438,7 @@ function Resizable({ args, content }) {
 
         // If the content is a Image component, we need to modify its prop directly
         const imageProps = content.props;
-        imageProps.resizable = resizable == false ? false : true ;
+        imageProps.resizable = resizable == false ? false : true;
 
         // Return the Image directly
         return { ast: content }
@@ -481,7 +481,7 @@ function Opacity({ args, content }) {
     }
 }
 
-function OnHandler({ args , name }) {
+function OnHandler({ args, name }) {
 
     // If arg is a function, store it and return handler id
     // If arg is props, process them and return props
@@ -493,15 +493,15 @@ function OnHandler({ args , name }) {
         // Arg is a handler function
         if (typeof arg === 'function') {
 
-            return { handlerId:  this.storeFunction(arg, this.currentPathId(name)) }
+            return { handlerId: this.storeFunction(arg, this.currentPathId(name)) }
 
-        // Arg is a dictionary of props
+            // Arg is a dictionary of props
         } else if (typeof arg === 'object' && !Array.isArray(arg)) {
 
             return arg
 
         } else {
-            return {}
+            return { value: arg }
         }
 
     };
@@ -538,7 +538,7 @@ var modifiersToAddToEnvironment = [
     'imageScale',
     'colorScheme',
     'environment',
-    
+
     // EnvironmentValues from Environment.tsx
     'displayScale',
     'dynamicTypeSize',
@@ -572,14 +572,14 @@ GenericModifier.environmentValue = (name, args) => {
 
 function AnimationComponent({ args, name }) {
     const typeMap = {
-        'Spring' : 'spring',
-        'EaseIn' : 'easeIn',
-        'EaseOut' : 'easeOut',
-        'EaseInOut' : 'easeInOut',
-        'Linear' : 'linear',
-        'Bouncy' : 'bouncy',
-        'Snappy' : 'snappy',
-        'InterpolatingSpring' : 'interpolatingSpring',
+        'Spring': 'spring',
+        'EaseIn': 'easeIn',
+        'EaseOut': 'easeOut',
+        'EaseInOut': 'easeInOut',
+        'Linear': 'linear',
+        'Bouncy': 'bouncy',
+        'Snappy': 'snappy',
+        'InterpolatingSpring': 'interpolatingSpring',
     };
 
     console.log('AnimationComponent', name, args);
@@ -592,31 +592,31 @@ function AnimationComponent({ args, name }) {
     return { props }
 }
 
-function AnimationModifier({ args,  name, content }) {
+function AnimationModifier({ args, name, content }) {
 
     const value = args[0];
-    
+
     // Add the value directly to the props of the content
     const props = content.props;
     props[name] = value;
-    
+
     // Return the AnimationComponent directly to squash the modifier.
     return { ast: content }
 }
 
 const propertyNameMap = {
-    'PropertyString'  : 'string',
-    'PropertyNumber'  : 'number',
-    'PropertyBoolean' : 'boolean',
-    'PropertyEnum'    : 'enum',
-    'PropertyDate'    : 'date',
-    'PropertyArray'   : 'array',
-    'PropertyAsset'   : 'asset',
-    'PropertyGroup'   : 'group',
-    'PropertyContent' : 'content',
+    'PropertyString': 'string',
+    'PropertyNumber': 'number',
+    'PropertyBoolean': 'boolean',
+    'PropertyEnum': 'enum',
+    'PropertyDate': 'date',
+    'PropertyArray': 'array',
+    'PropertyAsset': 'asset',
+    'PropertyGroup': 'group',
+    'PropertyContent': 'content',
     'PropertyComponent': 'component',
     'PropertyComponentList': 'componentList',
-    'PropertyChildren' : 'children',
+    'PropertyChildren': 'children',
 };
 
 function PropertyComponent({ args, name }) {
@@ -626,7 +626,7 @@ function PropertyComponent({ args, name }) {
         type: propertyNameMap[name] || 'unknown',
         ...props,
     };
-    
+
     return result;
 }
 
@@ -636,12 +636,12 @@ function LayoutGroup({ args, name }) {
     const result = {
         ...props,
     };
-    
+
     return result;
 }
 
 function ComposerGroup({ args, name }) {
-    const props = { };
+    const props = {};
 
     const env = this.environment;
     var children = null;
@@ -689,12 +689,12 @@ function ComposerGroup({ args, name }) {
         // return (childGroupName === groupName)
     });
 
-    
+
     const result = {
         props: this.processProps(props),
         children: childrenAST
     };
-    
+
     return result;
 }
 
@@ -728,7 +728,7 @@ function FontModifier({ args, content }) {
     const [arg] = args;
 
     const customProps = extractPropsByType(arg, 'FontCustom');
-    
+
     let options = {};
     if (customProps) {
         options = { custom: customProps, rawValue: arg() };
@@ -764,7 +764,7 @@ function Fill({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.fill = this.processProps({ ...style });
 
-    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.fill = this.processProps({ style: style });
     }
@@ -786,18 +786,18 @@ function Stroke({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.stroke = this.processProps({ ...style });
 
-    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.stroke = this.processProps({ style: style });
     } else if (typeof style === 'number') {
         shapeProps.stroke = { lineWidth: style };
     }
-    
+
     // Return the Color directly
     return { ast: content }
 }
 
-function ButtonStyle({ args , name }) {
+function ButtonStyle({ args, name }) {
 
     // If arg is a function, store it and return handler id
     // If arg is props, process them and return props
@@ -812,10 +812,10 @@ function ButtonStyle({ args , name }) {
             let ast = arg();
             let name = ast.props.name;
             let props = ast.props.props || {};
-            
+
             return { name, props }
 
-        // Arg is a string
+            // Arg is a string
         } else if (typeof arg === 'string') {
 
             return { name: arg, props: {} }
@@ -848,7 +848,7 @@ function ContentModifier({ args, content }) {
 
     var modifierContent = null;
     var props = {};
-    
+
     if (args.length == 2) {
         modifierContent = args[1];
         props = args[0];
@@ -914,7 +914,7 @@ class VisualEffectBuilder {
         const hasTransform =
             m11 !== undefined || m12 !== undefined ||
             m21 !== undefined || m22 !== undefined ||
-            tx  !== undefined || ty  !== undefined;
+            tx !== undefined || ty !== undefined;
 
         if (hasTransform) {
             this.result.transform = {
@@ -922,8 +922,8 @@ class VisualEffectBuilder {
                 m12: m12 ?? 0,
                 m21: m21 ?? 0,
                 m22: m22 ?? 1,
-                tx:  tx  ?? 0,
-                ty:  ty  ?? 0,
+                tx: tx ?? 0,
+                ty: ty ?? 0,
             };
         }
 
@@ -1012,7 +1012,7 @@ function Content({ args }) {
 const getComponentData = (child) => {
     let ast = child();
     let data = findComponentDataInAST(ast);
-    return data ?? { name: null, props: {}  }
+    return data ?? { name: null, props: {} }
 };
 
 const findComponentDataInAST = (node) => {
@@ -1062,10 +1062,10 @@ const findComponentDataInAST = (node) => {
 };
 
 function useState(initialValue) {
-    
+
     // Sanity check
     if (this.hookState.currentComponent == null) {
-        return [initialValue, () => {}]
+        return [initialValue, () => { }]
     }
 
     // Get current state
@@ -1073,7 +1073,7 @@ function useState(initialValue) {
     const hookIndex = this.hookState.currentComponent.hookIndex;
 
     //console.log(`useState index ${currentHook} value ${hooks[currentHook]} initialValue ${initialValue}`);
-    
+
     // Initialise hook with initialValue if needed
     hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex];
 
@@ -1122,7 +1122,7 @@ function useNavigate() {
     return this.navigateCallback
 }
 
-function makeComponent (component) {
+function makeComponent(component) {
 
     // Pass body directly or in dictionary
     let body = component.body ? component.body : component;
@@ -1135,7 +1135,7 @@ function makeComponent (component) {
     // Create body function
     let f = (props, children) =>
         this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
-    
+
     f._component = true;
 
     return f
@@ -1148,7 +1148,7 @@ async function getContent(content) {
     if (this.getContent == null || contentId == null) {
         return null
 
-    // Call the getContent property assigned to the runtime with the contentId.
+        // Call the getContent property assigned to the runtime with the contentId.
     } else {
         return await this.getContent(contentId)
     }
@@ -1208,7 +1208,7 @@ function convertComponentProps(props) {
                 const result = makeComponent(() => {
                     return callFn(item._component, 'body', item);
                 });
-                
+
                 return [result, true];
             }
 
@@ -1308,49 +1308,81 @@ funcs.titleCase = (input) => {
  * Built in component names
  */
 const componentNames = [
+    "Actions",
+    "AlertScene",
     "AngularGradient",
     "AnyView",
+    "AssistiveAccess",
     "AsyncImage",
     "Body",
+    "Button",
     "Canvas",
+    "Capsule",
     "Circle",
     "ColorPicker",
-    "Content",
-    "ContentUnavailableView",
-    "ControlGroup",
-    "ComposerGroup",
+    "CommandGroup",
+    "CommandMenu",
     "ComposerAdd",
     "ComposerChildren",
-    "FilterChildren",
-    "DrawingCanvas",
+    "ComposerGroup",
+    "Content",
+    "ContentUnavailableView",
+    "ContentView",
+    "ContextMenu",
+    "ControlGroup",
+    "CurrentValueLabel",
     "DatePicker",
+    "DebugReplaceableView",
+    "DefaultButtonLabel",
+    "DefaultDateProgressLabel",
+    "DefaultDocumentGroupLaunchActions",
+    "DefaultSettingsLinkLabel",
+    "DefaultShareLinkLabel",
+    "DefaultTabLabel",
+    "DefaultWindowVisibilityToggleLabel",
+    "Description",
     "DisclosureGroup",
     "Divider",
+    "DocumentGroup",
+    "DocumentGroupLaunchScene",
+    "DocumentLaunchView",
+    "DOMIdentifable",
+    "DrawingCanvas",
     "EditButton",
-    "EllipticalGradient",
+    "Element",
     "Ellipse",
-    "Capsule",
+    "EllipticalGradient",
+    "Empty",
     "EmptyModifier",
     "EmptyView",
-    "Empty",
-    "EquatableView",
     "EnvironmentValue",
-    "ForEach",
-    "Form",
+    "EquatableView",
+    "FillShapeView",
+    "FilterChildren",
     "FontCustom",
+    "ForEach",
+    "ForEachSectionCollection",
+    "ForEachSubviewCollection",
+    "Form",
     "Gauge",
     "GeometryReader",
     "GeometryReader3D",
+    "GlassEffectContainer",
     "Grid",
     "GridRow",
     "Group",
     "GroupBox",
+    "GroupElementsOfContent",
+    "GroupSectionsOfContent",
     "HelpLink",
     "HSplitView",
     "HStack",
     "Image",
+    "ImmersiveSpaceViewContent",
     "KeyframeAnimator",
     "Label",
+    "LabeledControlGroupContent",
+    "LabeledToolbarItemGroupContent",
     "LazyHGrid",
     "LazyHStack",
     "LazyVGrid",
@@ -1358,25 +1390,32 @@ const componentNames = [
     "LinearGradient",
     "Link",
     "List",
+    "Main",
+    "MarkedValueLabel",
     "Material",
+    "MaximumValueLabel",
     "Menu",
+    "MenuBarExtra",
     "MenuButton",
-    "MultiDatePicker",
+    "MinimumValueLabel",
     "Model3D",
+    "MultiDatePicker",
     "NavigationLink",
     "NavigationSplitView",
     "NavigationStack",
     "NavigationView",
     "NewDocumentButton",
+    "OutlineSubgroupChildren",
     "PasteButton",
     "Path",
     "PhaseAnimator",
     "Picker",
     "Placeholder",
+    "PlaceholderContentView",
+    "PresentedWindowContent",
     "ProgressView",
-    "ReactRepresentable",
-    "DOMIdentifable",
     "RadialGradient",
+    "ReactRepresentable",
     "Rectangle",
     "RenameButton",
     "RoundedRectangle",
@@ -1384,15 +1423,22 @@ const componentNames = [
     "ScrollViewReader",
     "Section",
     "SecureField",
+    "Settings",
     "SettingsLink",
     "Shader",
-    "ShareLink",
     "Shape",
+    "ShareLink",
     "SignInWithAppleButton",
     "Slider",
     "Spacer",
     "Stepper",
+    "StrokeBorderShapeView",
+    "StrokeShapeView",
+    "SubscriptionView",
+    "Subview",
     "Table",
+    "TableColumn",
+    "TableHeaderRowContent",
     "TabView",
     "Text",
     "TextEditor",
@@ -1402,13 +1448,18 @@ const componentNames = [
     "ToolbarItem",
     "ToolbarItemGroup",
     "ToolbarTitleMenu",
+    "TouchBar",
+    "TupleView",
     "UnevenRoundedRectangle",
+    "UtilityWindow",
+    "Video",
     "ViewThatFits",
     "VSplitView",
     "VStack",
-    "Video",
+    "Window",
+    "WindowGroup",
     "WindowVisibilityToggle",
-    "ZStack"
+    "ZStack",
 ];
 
 function SheetModifier({ args, name }) {
@@ -1424,7 +1475,7 @@ function SheetModifier({ args, name }) {
     const onDismiss = props.onDismiss;
 
     const content = props.content;
-    
+
     // Return AST representation when content handler is called.
     const contentHandler = content ? () => {
         // Execute handler, then AST function.
@@ -1455,6 +1506,23 @@ const Detent = {
     height: (value) => ({ detentType: 'height', value }),
 };
 
+function CallbackComponent({ args, name }) {
+    const callback = args[0];
+
+    if (!callback || typeof callback !== 'function') {
+        return { props: { handlerId: null } };
+    }
+
+    // Wrap the callback to unwrap component functions
+    const handler = (geometry) => this.unwrapComponentAST(callback(geometry));
+
+    const id = this.currentPathId('CallbackComponent_' + name);
+    const handlerId = this.storeFunction(handler, id);
+    const environmentId = this.storeEnvironment(id);
+
+    return { props: { handlerId, environmentId } };
+}
+
 class BindJSRuntime {
     constructor(options) {
         this.options = options ?? { expandForEach: false };
@@ -1477,7 +1545,7 @@ class BindJSRuntime {
         this.componentRegistry = { GenericComponent };
 
         // Default app state that can be managed by the renderer. Can be overridden by the renderer.
-        this.appState = { };
+        this.appState = {};
 
         this.resetState();
         this.registerBuiltInCallbacks();
@@ -1540,10 +1608,10 @@ class BindJSRuntime {
             path: [],
 
             // Current index in an array of children. Used to create the path if no id
-            childIndex : 0,
+            childIndex: 0,
 
             // Current id set by a modifier. Used to create the path if set.
-            modifierId : null,
+            modifierId: null,
 
             // Current id in a ForEach loop. Used to create the path if set.
             forEachElementId: null,
@@ -1568,7 +1636,7 @@ class BindJSRuntime {
         this.storedData = {};
         this.storedHookStates = {};
     }
-    
+
     resetCache(componentName) {
         this.functionCache[componentName] = {};
     }
@@ -1602,21 +1670,26 @@ class BindJSRuntime {
 
         this.#registerBuiltInModifier('background', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
+        this.#registerBuiltInModifier('contextMenu', ContentModifier);
+        this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
-        
+
         // Register event handlers
-        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
+        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 
         // Register animation components
         ['Spring', 'Linear', 'EaseIn', 'EaseOut', 'EaseInOut', 'Bouncy', 'Snappy', 'InterpolatingSpring'].map(name => this.#registerBuiltInComponent(name, AnimationComponent));
 
         // Register animation modifiers
         ['delay', 'speed', 'repeatCount', 'repeatForever'].map(name => this.#registerBuiltInModifier(name, AnimationModifier));
-        
+
         ['PropertyString', 'PropertyNumber', 'PropertyEnum', 'PropertyBoolean', 'PropertyArray', 'PropertyAsset', 'PropertyContent', 'PropertyComponent', 'PropertyDate', 'PropertyGroup', 'PropertyChildren', 'PropertyComponentList'].map(name => {
             this.#registerHelperComponent(name, PropertyComponent);
         });
+
+        // Register components that use callbacks
+        ['GeometryReader'].map(name => this.#registerBuiltInComponent(name, CallbackComponent));
 
         this.#registerBuiltInComponent('ComposerGroup', ComposerGroup);
         this.#registerBuiltInComponent('ComposerChildren', ComposerGroup);
@@ -1644,7 +1717,7 @@ class BindJSRuntime {
             this.registerCallback(key, funcs[key]);
         }
 
-        
+
         // useState
         this.registerCallback('useState', useState.bind(this));
 
@@ -1669,7 +1742,7 @@ class BindJSRuntime {
         // With animation callback
         this.registerCallback('withAnimation', withAnimation.bind(this));
     }
-    
+
     /**
      * Creates a built in component.
      * A callback can be passed to generate the component, or left empty to use the generic handler.
@@ -1705,7 +1778,7 @@ class BindJSRuntime {
         }
     }
 
-    registerComponent(componentName, content, entryPoint = 'body')  {
+    registerComponent(componentName, content, entryPoint = 'body') {
         const name = componentName.replace(/\s/g, '');
         this.callStack = [];
         this.functionCache[name] = {};
@@ -1716,33 +1789,33 @@ class BindJSRuntime {
 
             return this.#makeComponent((props, children) => {
 
-               // Call the body of our registered component
-               let componentFunction = this.call(name, entryPoint, this.convertComponentProps(props), children, ...otherArgs);
+                // Call the body of our registered component
+                let componentFunction = this.call(name, entryPoint, this.convertComponentProps(props), children, ...otherArgs);
 
-               // It's assumed a component returns an inbuilt component.
-               // Run the returned function to generate the ast
-               let ast = componentFunction ? componentFunction() : null;
+                // It's assumed a component returns an inbuilt component.
+                // Run the returned function to generate the ast
+                let ast = componentFunction ? componentFunction() : null;
 
-               if (ast && ast._component) {
+                if (ast && ast._component) {
                     ast = ast();
-               }
+                }
 
-               // Wrap the component in a directive so the renderer knows what component generated that part of the AST
-               let componentAst = AST.Directive('ComponentCall', { name: name, props: props }, [ ast ]);
+                // Wrap the component in a directive so the renderer knows what component generated that part of the AST
+                let componentAst = AST.Directive('ComponentCall', { name: name, props: props }, [ast]);
 
-               // Return
-               return componentAst
+                // Return
+                return componentAst
 
             }, props, children, name)
 
         };
     }
 
-     /**
-     * Register callback to be made available to the runtime
-     * @param {*} callbackName
-     * @param {*} callback
-     */
+    /**
+    * Register callback to be made available to the runtime
+    * @param {*} callbackName
+    * @param {*} callback
+    */
     registerCallback(callbackName, callback) {
         this.context[callbackName] = callback;
     }
@@ -1839,6 +1912,18 @@ class BindJSRuntime {
         return null
     }
 
+    /**
+     * Unwraps a component function and returns the AST by calling it.
+     */
+    unwrapComponentAST(callback) {
+        // Unwrap component functions (_component marker)
+        while (callback && callback._component) {
+            callback = callback();
+        }
+        return callback
+    }
+
+
     convertComponentProps(props) {
         return convertComponentProps.bind(this)(props)
     }
@@ -1852,7 +1937,7 @@ class BindJSRuntime {
     call(componentName, componentEntryPoint = 'body', params, children, ...args) {
         const componentKeys = Object.keys(this.context);
         const functionList = componentKeys.join(', ');
-    
+
         let func = null;
         if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {
             //console.log(`[cache hit ${componentName}.${componentEntryPoint}]`)
@@ -1875,24 +1960,31 @@ class BindJSRuntime {
         if (props == null || typeof props != 'object') {
             return props
         }
-        
-        var newProps = {...props};
+
+        var newProps = { ...props };
         Object.keys(newProps).forEach(key => {
             let value = newProps[key];
-            
+
             // Expand functions in arrays
             if (Array.isArray(value)) {
                 newProps[key] = value.map(v =>
                     (typeof v === 'function' && v._component) ? v() : v
                 );
 
-            // If the value is an object, process its properties recursively
+                // If the value is an object, process its properties recursively
             } else if (typeof value === 'object' && value !== null) {
                 newProps[key] = this.processProps(value);
 
-            // Expand functions if value of key
+                // Expand functions if value of key
             } else if (typeof value === 'function' && value._component) {
                 newProps[key] = newProps[key]();
+
+                // Store any other setter functions
+            } else if (typeof value === 'function' && key.startsWith('set')) {
+                // Update from setWhateverKey to setWhateverKeyId;
+                let setKey = key + 'Id';
+                newProps[setKey] = this.storeFunction(value, this.currentPathId(key));
+                delete newProps[key];
             }
         });
         return newProps
@@ -1920,11 +2012,11 @@ class BindJSRuntime {
         return (...args) => {
 
             const modifierContent = () => {
-    
+
                 const executeModifiedContent = (args) => {
-                    
+
                     // Capture the hook state so it can be maintained once the content is executed
-                    const capturedHookState = {...this.hookState};
+                    const capturedHookState = { ...this.hookState };
 
                     // If this modifier is an id, store the name into the hook state so it can be used
                     // for the hook path
@@ -1942,7 +2034,7 @@ class BindJSRuntime {
                     this.hookState.modifierId = null;
 
                     // Restore state
-                    this.hookState = {...capturedHookState};
+                    this.hookState = { ...capturedHookState };
 
                     return content
                 };
@@ -1973,7 +2065,7 @@ class BindJSRuntime {
 
                     // If the modifier function returns a value, store it in the environment.
                     if (result) {
-                        capturedEnvironment = {...this.environment};
+                        capturedEnvironment = { ...this.environment };
                         const { key, value } = result;
                         this.environment[key] = value;
                     }
@@ -1981,7 +2073,7 @@ class BindJSRuntime {
 
                 // Execute content
                 const content = executeModifiedContent(processedArgs);
-                
+
                 // Restore environment if needed
                 if (capturedEnvironment) {
                     this.environment = capturedEnvironment;
@@ -1999,15 +2091,15 @@ class BindJSRuntime {
 
                     return modifierAst
 
-                // Otherwise, use the props to create a new modifier
+                    // Otherwise, use the props to create a new modifier
                 } else {
                     return AST.ModifiedContent(AST.Directive(name, modifierProps, []), content)
                 }
-                 
+
             };
-            
+
             return new Proxy(modifierContent, {
-                get: function(target, prop, receiver) {
+                get: function (target, prop, receiver) {
                     if (prop == 'toJSON' || prop == 'type' || prop == 'children' || prop == 'props') {
                         return target[prop]
                     } else {
@@ -2023,12 +2115,12 @@ class BindJSRuntime {
     makeComponent(body, props, children) {
         return this.#makeComponent(body, props, children)
     }
-    
+
     /**
      * Creates a component
      */
     #makeComponent(body, props, children, componentName) {
-        
+
         const f = () => {
 
             let { path, modifierId, childIndex, componentHookStore, currentComponent, forEachElementId } = this.hookState;
@@ -2064,13 +2156,13 @@ class BindJSRuntime {
 
             return r
         };
-        
+
         f._component = true;
 
         const makeModifier = this.#makeModifier.bind(this);
 
         return new Proxy(f, {
-            get: function(target, prop, receiver) {
+            get: function (target, prop, receiver) {
                 if (prop == 'toJSON' || prop == 'type' || prop == 'children' || prop == 'props') {
                     return target[prop]
                 }
@@ -2086,7 +2178,7 @@ class BindJSRuntime {
     storeEnvironment(environmentId) {
         const id = environmentId ?? this.#generateUniqueID();
         if (this.environment) {
-            this.storedEnvironments[id] = {...this.environment};
+            this.storedEnvironments[id] = { ...this.environment };
         }
         if (this.hookState) {
             this.storedHookStates[id] = { path: [...this.hookState.path] };
@@ -2108,7 +2200,7 @@ class BindJSRuntime {
         return this.storedData[dataId]
     }
 
-    storeData(data, dataId ) {
+    storeData(data, dataId) {
         const id = dataId ?? this.#generateUniqueID();
         this.storedData[id] = data;
         return id
@@ -2122,7 +2214,7 @@ class BindJSRuntime {
     * Creates a built in component
     */
     #makeInBuiltComponent(type, args) {
-        
+
         return this.#makeComponent((...componentArgs) => {
 
             const handler = this.componentRegistry[type] ?? this.componentRegistry['GenericComponent'];
@@ -2134,7 +2226,7 @@ class BindJSRuntime {
             if (ast) {
                 return ast
             } else {
-                return AST.Directive(type, {...props}, children ?? [])
+                return AST.Directive(type, { ...props }, children ?? [])
             }
 
         }, args[0], args[1], type)
@@ -2153,14 +2245,13 @@ class BindJSRuntime {
     callForEachFunction(functionId, element, index) {
         let f = this.restoreFunction(functionId);
         let result = f(element, index);
-        while(result && result._component) {
+        while (result && result._component) {
             result = result();
         }
         return result
     }
 
 }
-
 
 // MARK: - After the runtime...
 
@@ -2189,6 +2280,8 @@ Object.assign(this, {
     callForEachFunction: (functionId, element, index) => runtime.callForEachFunction(functionId, element, index),
     restoreForEachData: (dataId) => runtime.restoreData(dataId),
     restorePickerValue: (dataId) => runtime.restoreData(dataId),
+    restoreOnChangeTrigger: (watcherId) => runtime.restoreOnChangeTrigger(watcherId),
+    triggerOnChangeHandler: (watcherId) => runtime.triggerOnChangeHandler(watcherId),
     restoreEventHandler: (handlerId) => runtime.restoreEventHandler(handlerId),
     callEventHandler: (handlerId, ...args) => {
         const handler = runtime.storedFunctions[handlerId]
