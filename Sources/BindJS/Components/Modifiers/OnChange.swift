@@ -5,14 +5,16 @@ public struct OnChangeComponent: Component {
 
     @EnvironmentObject private var context: BindJSContext
 
-    public let watcherId: String
+    public let value: String?
+    public let handlerId: String
 }
 
 extension OnChangeComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
 
-        watcherId = directive["watcherId"] ?? ""
+        value = directive["value"] ?? ""
+        handlerId = directive["handlerId"] ?? ""
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -22,17 +24,15 @@ extension OnChangeComponent {
 
 extension OnChangeComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        let triggerValue = context.restoreOnChangeTrigger(id: watcherId)
-
         if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
             content
-                .onChange(of: triggerValue) { _, _ in
-                    context.triggerOnChangeHandler(id: watcherId)
+                .onChange(of: value) { oldValue, newValue in
+                    context.callEventHandler(id: handlerId, arguments: [oldValue, newValue])
                 }
         } else {
             content
-                .onChange(of: triggerValue) { _ in
-                    context.triggerOnChangeHandler(id: watcherId)
+                .onChange(of: value) { newValue in
+                    context.callEventHandler(id: handlerId, arguments: [newValue, newValue])
                 }
         }
     }
