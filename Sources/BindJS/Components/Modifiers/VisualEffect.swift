@@ -134,38 +134,39 @@ func geometryCallbackData(for geometry: GeometryProxy) -> [String: Any] {
         }
 
         let rect: CGRect
-        if name.isEmpty {
+        switch name {
+        case "", "local":
             rect = geometry.frame(in: .local)
-        } else {
-            switch name {
-            case "scrollView":
-                rect = geometry.frame(in: .scrollView)
-            case "global":
-                rect = geometry.frame(in: .global)
-            case "local":
-                rect = geometry.frame(in: .local)
-            default:
-                rect = geometry.frame(in: .named(name))
-            }
+        case "global":
+            rect = geometry.frame(in: .global)
+        case "scrollView":
+            rect = geometry.frame(in: .scrollView)
+        case "scrollView.horizontal":
+            rect = geometry.frame(in: .scrollView(axis: .horizontal))
+        case "scrollView.vertical":
+            rect = geometry.frame(in: .scrollView(axis: .vertical))
+        default:
+            rect = geometry.frame(in: .named(name))
         }
 
         return frameDictionary(from: rect)
     }
-            
+
     let boundsFrame: @convention(block) (JSValue) -> [String: Double] = { coordinateSpaceValue in
-        // Safely extract and normalize name
         let name = coordinateSpaceValue.toString() ?? ""
 
         let rect: CGRect?
-
         switch name {
         case "scrollView":
             rect = geometry.bounds(of: .scrollView)
+        case "scrollView.horizontal":
+            rect = geometry.bounds(of: .scrollView(axis: .horizontal))
+        case "scrollView.vertical":
+            rect = geometry.bounds(of: .scrollView(axis: .vertical))
         default:
             rect = geometry.bounds(of: .named(name))
         }
 
-        // Return the dictionary only if we got a valid rect
         if let rect = rect {
             return frameDictionary(from: rect)
         } else {
@@ -173,12 +174,30 @@ func geometryCallbackData(for geometry: GeometryProxy) -> [String: Any] {
         }
     }
     
-    return [
+    var result: [String: Any] = [
         "size": [
-            "width" : geometry.size.width,
-            "height" : geometry.size.height
+            "width": geometry.size.width,
+            "height": geometry.size.height
+        ],
+        "safeAreaInsets": [
+            "top": geometry.safeAreaInsets.top,
+            "bottom": geometry.safeAreaInsets.bottom,
+            "leading": geometry.safeAreaInsets.leading,
+            "trailing": geometry.safeAreaInsets.trailing
         ],
         "frame": geometryFrame,
-        "bounds" : boundsFrame
+        "bounds": boundsFrame
     ]
+
+    if #available(iOS 26.0, macOS 26.0, tvOS 26.0, watchOS 26.0, *) {
+        let insets = geometry.containerCornerInsets
+        result["containerCornerInsets"] = [
+            "topLeading": ["width": insets.topLeading.width, "height": insets.topLeading.height],
+            "topTrailing": ["width": insets.topTrailing.width, "height": insets.topTrailing.height],
+            "bottomLeading": ["width": insets.bottomLeading.width, "height": insets.bottomLeading.height],
+            "bottomTrailing": ["width": insets.bottomTrailing.width, "height": insets.bottomTrailing.height]
+        ]
+    }
+
+    return result
 }

@@ -84,18 +84,16 @@ private struct ContextHostView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                RenderEffect {
-                    setupNavigation()
-                    setupAppState()
-                    setupHooks()
-                    setupEnvironment(geometry: geometry)
-                }
-                context.viewForName("_body")
+        VStack {
+            RenderEffect {
+                setupNavigation()
+                setupAppState()
+                setupHooks()
+                setupEnvironment()
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
+            context.viewForName("_body")
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: content) { _, newContent in
             withAnimation(.snappy) {
                 reregisterIfNeeded(newContent)
@@ -143,9 +141,8 @@ private struct ContextHostView: View {
         }
     }
 
-    private func setupEnvironment(geometry: GeometryProxy) {
+    private func setupEnvironment() {
         let builder = EnvironmentBuilder(
-            geometry: geometry,
             environment: environment,
             componentEnvironment: bindJS.environment
         )
@@ -166,16 +163,11 @@ private struct RenderEffect: View {
 // MARK: - Environment Builder
 
 private struct EnvironmentBuilder {
-    let geometry: GeometryProxy
     let environment: EnvironmentValues
     let componentEnvironment: [String: any Codable]
 
     func build() -> [String: Any] {
         var result: [String: Any] = [:]
-
-        // Geometry & Screen
-        result["geometry"] = buildGeometry()
-        result["screen"] = buildScreen()
 
         // Locale & Time
         result["locale"] = environment.locale.identifier
@@ -238,34 +230,6 @@ private struct EnvironmentBuilder {
 
         // Fallback: return as-is (works for primitives that are already JSON-compatible)
         return value
-    }
-
-    private func buildGeometry() -> [String: Any] {
-        [
-            "size": [
-                "width": geometry.size.width,
-                "height": geometry.size.height,
-            ],
-            "safeAreaInsets": [
-                "top": geometry.safeAreaInsets.top,
-                "bottom": geometry.safeAreaInsets.bottom,
-                "leading": geometry.safeAreaInsets.leading,
-                "trailing": geometry.safeAreaInsets.trailing
-            ]
-        ]
-    }
-
-    private func buildScreen() -> [String: Any] {
-        [
-            "width": geometry.size.width,
-            "height": geometry.size.height,
-            "safeAreaInsets": [
-                "top": geometry.safeAreaInsets.top,
-                "bottom": geometry.safeAreaInsets.bottom,
-                "leading": geometry.safeAreaInsets.leading,
-                "trailing": geometry.safeAreaInsets.trailing
-            ]
-        ]
     }
 
     private func buildAccessibility() -> [String: Any] {
