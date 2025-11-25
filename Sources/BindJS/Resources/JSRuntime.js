@@ -1980,7 +1980,7 @@ class BindJSRuntime {
                 newProps[key] = newProps[key]();
 
                 // Store any other setter functions
-            } else if (typeof value === 'function' && key.startsWith('set')) {
+            } else if (typeof value === 'function' && (key.startsWith('set') || key.startsWith('on'))) {
                 // Update from setWhateverKey to setWhateverKeyId;
                 let setKey = key + 'Id';
                 newProps[setKey] = this.storeFunction(value, this.currentPathId(key));
