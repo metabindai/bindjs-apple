@@ -124,6 +124,7 @@ public protocol ComponentVisitor {
     mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
+    mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result
     mutating func visitTint(_ tint: TintComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
@@ -131,6 +132,7 @@ public protocol ComponentVisitor {
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
+    mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
 
@@ -597,6 +599,10 @@ public extension ComponentVisitor {
         return defaultVisit(textSelection)
     }
     
+    mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result {
+        return defaultVisit(textFieldStyle)
+    }
+    
     mutating func visitTint(_ tint: TintComponent) -> Result {
         return defaultVisit(tint)
     }
@@ -623,6 +629,10 @@ public extension ComponentVisitor {
     
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
         return defaultVisit(scrollContentBackground)
+    }
+    
+    mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result {
+        return defaultVisit(submitLabel)
     }
     
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {
