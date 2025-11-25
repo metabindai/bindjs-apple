@@ -127,8 +127,9 @@ public protocol ComponentVisitor {
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
-    mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
+    mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
+    mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
 
 public extension ComponentVisitor {
@@ -606,11 +607,15 @@ public extension ComponentVisitor {
         return defaultVisit(visualEffect)
     }
     
-    mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {
-        return defaultVisit(zIndex)
+    mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result {
+        return defaultVisit(keyboardType)
     }
     
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
         return defaultVisit(scrollContentBackground)
+    }
+    
+    mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {
+        return defaultVisit(zIndex)
     }
 }
