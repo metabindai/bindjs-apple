@@ -1674,7 +1674,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('sheet', SheetModifier);
 
         // Register event handlers
-        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear'].map(name => this.#registerBuiltInModifier(name, OnHandler));
+        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 
         // Register animation components
         ['Spring', 'Linear', 'EaseIn', 'EaseOut', 'EaseInOut', 'Bouncy', 'Snappy', 'InterpolatingSpring'].map(name => this.#registerBuiltInComponent(name, AnimationComponent));

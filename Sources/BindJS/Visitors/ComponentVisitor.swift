@@ -108,6 +108,7 @@ public protocol ComponentVisitor {
     mutating func visitOnDragGesture(_ onDragGesture: OnDragGestureComponent) -> Result
     mutating func visitOnLongPressGesture(_ onLongPressGesture: OnLongPressGestureComponent) -> Result
     mutating func visitOnTapGesture(_ onTapGesture: OnTapGestureComponent) -> Result
+    mutating func visitOnSubmit(_ onSubmit: OnSubmitComponent) -> Result
     mutating func visitOpacity(_ opacity: OpacityComponent) -> Result
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result
     mutating func visitPadding(_ padding: PaddingComponent) -> Result
@@ -530,6 +531,10 @@ public extension ComponentVisitor {
     
     mutating func visitOnTapGesture(_ onTapGesture: OnTapGestureComponent) -> Result {
         return defaultVisit(onTapGesture)
+    }
+    
+    mutating func visitOnSubmit(_ onSubmit: OnSubmitComponent) -> Result {
+        return defaultVisit(onSubmit)
     }
     
     mutating func visitOpacity(_ opacity: OpacityComponent) -> Result {

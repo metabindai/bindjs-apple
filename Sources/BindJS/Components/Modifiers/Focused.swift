@@ -16,8 +16,6 @@ extension FocusedComponent {
         self.isFocused = directive["isFocused"]
         self.setIsFocusedId = directive["setIsFocusedId"]
         self.environmentId = directive["environmentId"] ?? ""
-        debugPrint(directive)
-        debugPrint("is focused ", self.isFocused)
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
