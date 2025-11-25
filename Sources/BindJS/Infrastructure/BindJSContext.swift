@@ -272,14 +272,6 @@ public class BindJSContext: ObservableObject {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 
-    public func restoreListSelection(id: String) -> String? {
-        runtime.invokeMethod("restoreListSelection", withArguments: [id])?.toString()
-    }
-
-    public func callListSelectionSetter(id: String, value: String?) {
-        _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value as Any])
-    }
-
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()

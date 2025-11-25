@@ -5,8 +5,8 @@ public struct ListComponent: Component {
 
     @EnvironmentObject private var context: BindJSContext
 
-    public var currentSelectionId: String?
-    public var selectionSetterId: String?
+    public var selection: String?
+    public var setSelectionId: String?
     public var environmentId: String
     public var children: [Component]
 }
@@ -15,10 +15,10 @@ extension ListComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
 
-        currentSelectionId = directive["currentSelectionId"]
-        selectionSetterId = directive["selectionSetterId"]
-        environmentId = directive["environmentId"] ?? ""
-        children = directive.children.compactMap { makeComponent($0) }
+        selection      = directive["selection"]
+        setSelectionId = directive["setSelectionId"]
+        environmentId  = directive["environmentId"] ?? ""
+        children       = directive.children.compactMap { makeComponent($0) }
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -28,17 +28,16 @@ extension ListComponent {
 
 extension ListComponent: View {
     public var body: some View {
-        if currentSelectionId != nil && selectionSetterId != nil {
+        if setSelectionId != nil {
             // List with selection binding
             List(selection: Binding(
                 get: {
-                    context.restoreEnvironment(id: environmentId)
-                    return context.restoreListSelection(id: currentSelectionId ?? "")
+                    return selection
                 },
                 set: { newValue in
                     context.restoreEnvironment(id: environmentId)
-                    if let selectionSetterId = selectionSetterId {
-                        context.callListSelectionSetter(id: selectionSetterId, value: newValue)
+                    if let selectionSetterId = setSelectionId {
+                        context.callEventHandler(id: selectionSetterId, arguments: newValue)
                     }
                 }
             )) {
