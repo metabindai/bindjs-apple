@@ -452,6 +452,21 @@ extension ToolbarItemPlacement: ParsableArgument {
             return nil
         }
         #endif
+            
+        #if os(iOS)
+        // iOS 14.0+
+        case "bottomBar": if #available(iOS 14.0, *) {
+            self = .bottomBar
+        } else { return nil }
+
+        case "navigationBarLeading": if #available(iOS 14.0, *) {
+            self = .navigationBarLeading
+        } else { return nil }
+
+        case "navigationBarTrailing": if #available(iOS 14.0, *) {
+            self = .navigationBarTrailing
+        } else { return nil }
+        #endif
 
         // tvOS 18.0+, watchOS 10.0+, macOS unavailable
         #if os(tvOS)
