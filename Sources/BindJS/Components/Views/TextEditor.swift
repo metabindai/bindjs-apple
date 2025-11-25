@@ -5,8 +5,8 @@ public struct TextEditorComponent: Component {
 
     @EnvironmentObject private var context: BindJSContext
 
-    public var currentValueId: String?
-    public var setterId: String?
+    public var text: String?
+    public var setTextId: String?
     public var environmentId: String
 }
 
@@ -14,8 +14,8 @@ extension TextEditorComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
 
-        currentValueId = directive["currentValueId"]
-        setterId = directive["setterId"]
+        text = directive["text"]
+        setTextId = directive["setTextId"]
         environmentId = directive["environmentId"] ?? ""
     }
 
@@ -28,13 +28,12 @@ extension TextEditorComponent: View {
     public var body: some View {
         TextEditor(text: Binding(
             get: {
-                context.restoreEnvironment(id: environmentId)
-                return context.restoreTextEditorValue(id: currentValueId ?? "") ?? ""
+                return text ?? ""
             },
             set: { newValue in
-                context.restoreEnvironment(id: environmentId)
-                if let setterId = setterId {
-                    context.callTextEditorSetter(id: setterId, value: newValue)
+                if let setTextId {
+                    context.restoreEnvironment(id: environmentId)
+                    context.callEventHandler(id: setTextId, arguments: newValue)
                 }
             }
         ))
