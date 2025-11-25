@@ -95,6 +95,7 @@ public protocol ComponentVisitor {
     mutating func visitFontWidth(_ fontWidth: FontWidthComponent) -> Result
     mutating func visitForegroundStyle(_ foregroundStyle: ForegroundStyleComponent) -> Result
     mutating func visitFrame(_ frame: FrameComponent) -> Result
+    mutating func visitQuickLookPreviewAR(_ quickLookPreviewAR: QuickLookPreviewARComponent) -> Result
     mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result
@@ -491,6 +492,10 @@ public extension ComponentVisitor {
     
     mutating func visitFrame(_ frame: FrameComponent) -> Result {
         return defaultVisit(frame)
+    }
+    
+    mutating func visitQuickLookPreviewAR(_ quickLookPreviewAR: QuickLookPreviewARComponent) -> Result {
+        return defaultVisit(quickLookPreviewAR)
     }
     
     mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result {
