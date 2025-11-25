@@ -1,151 +1,157 @@
 import SwiftUI
 
-func makeComponent(_ directive: Directive) -> Component? {
-    switch directive.type {
-    case AngularGradientComponent.directiveName: AngularGradientComponent(from: directive)
-    case ButtonComponent.directiveName: ButtonComponent(from: directive)
-    case ComponentCall.directiveName: ComponentCall(from: directive)
-    case CapsuleComponent.directiveName: CapsuleComponent(from: directive)
-    case CircleComponent.directiveName: CircleComponent(from: directive)
-    case ColorComponent.directiveName: ColorComponent(from: directive)
-    case DividerComponent.directiveName: DividerComponent(from: directive)
-    case EllipseComponent.directiveName: EllipseComponent(from: directive)
-    case EllipticalGradientComponent.directiveName: EllipticalGradientComponent(from: directive)
-    case EmptyComponent.directiveName: EmptyComponent(from: directive)
-    case ForEachComponent.directiveName: ForEachComponent(from: directive)
-    case GeometryReaderComponent.directiveName: GeometryReaderComponent(from: directive)
-    case GroupComponent.directiveName: GroupComponent(from: directive)
-    case HStackComponent.directiveName: HStackComponent(from: directive)
-    case LazyHStackComponent.directiveName: LazyHStackComponent(from: directive)
-    case LazyVStackComponent.directiveName: LazyVStackComponent(from: directive)
-    case LabelComponent.directiveName: LabelComponent(from: directive)
-    case ImageComponent.directiveName: ImageComponent(from: directive)
-    case MenuComponent.directiveName: MenuComponent(from: directive)
-    case LinearGradientComponent.directiveName: LinearGradientComponent(from: directive)
-    case ListComponent.directiveName: ListComponent(from: directive)
-    case MaterialComponent.directiveName: MaterialComponent(from: directive)
-    case Model3DComponent.directiveName: Model3DComponent(from: directive)
-    case ModifiedComponent.directiveName: ModifiedComponent(from: directive)
-    case NavigationStackComponent.directiveName: NavigationStackComponent(from: directive)
-    case PickerComponent.directiveName: PickerComponent(from: directive)
-    case PlaceholderComponent.directiveName: PlaceholderComponent(from: directive)
-    case ProgressViewComponent.directiveName: ProgressViewComponent(from: directive)
-    case RadialGradientComponent.directiveName: RadialGradientComponent(from: directive)
-    case RectangleComponent.directiveName: RectangleComponent(from: directive)
-    case RoundedRectangleComponent.directiveName: RoundedRectangleComponent(from: directive)
-    case ScrollViewComponent.directiveName: ScrollViewComponent(from: directive)
-    case SectionComponent.directiveName: SectionComponent(from: directive)
-    case SecureFieldComponent.directiveName: SecureFieldComponent(from: directive)
-    case SpacerComponent.directiveName: SpacerComponent(from: directive)
-    case TextComponent.directiveName: TextComponent(from: directive)
-    case TextEditorComponent.directiveName: TextEditorComponent(from: directive)
-    case TextFieldComponent.directiveName: TextFieldComponent(from: directive)
-    case ToggleComponent.directiveName: ToggleComponent(from: directive)
-    case ToolbarItemComponent.directiveName: ToolbarItemComponent(from: directive)
-    case ToolbarItemGroupComponent.directiveName: ToolbarItemGroupComponent(from: directive)
-    case VideoComponent.directiveName: VideoComponent(from: directive)
-    case VStackComponent.directiveName: VStackComponent(from: directive)
-    case ZStackComponent.directiveName: ZStackComponent(from: directive)
-    
+private let componentFactories: [String: (Directive) -> Component?] = [
+    // Views
+    AngularGradientComponent.directiveName: { AngularGradientComponent(from: $0) },
+    ButtonComponent.directiveName: { ButtonComponent(from: $0) },
+    ComponentCall.directiveName: { ComponentCall(from: $0) },
+    CapsuleComponent.directiveName: { CapsuleComponent(from: $0) },
+    CircleComponent.directiveName: { CircleComponent(from: $0) },
+    ColorComponent.directiveName: { ColorComponent(from: $0) },
+    DividerComponent.directiveName: { DividerComponent(from: $0) },
+    EllipseComponent.directiveName: { EllipseComponent(from: $0) },
+    EllipticalGradientComponent.directiveName: { EllipticalGradientComponent(from: $0) },
+    EmptyComponent.directiveName: { EmptyComponent(from: $0) },
+    ForEachComponent.directiveName: { ForEachComponent(from: $0) },
+    GeometryReaderComponent.directiveName: { GeometryReaderComponent(from: $0) },
+    GroupComponent.directiveName: { GroupComponent(from: $0) },
+    HStackComponent.directiveName: { HStackComponent(from: $0) },
+    LazyHStackComponent.directiveName: { LazyHStackComponent(from: $0) },
+    LazyVStackComponent.directiveName: { LazyVStackComponent(from: $0) },
+    LabelComponent.directiveName: { LabelComponent(from: $0) },
+    ImageComponent.directiveName: { ImageComponent(from: $0) },
+    MenuComponent.directiveName: { MenuComponent(from: $0) },
+    LinearGradientComponent.directiveName: { LinearGradientComponent(from: $0) },
+    ListComponent.directiveName: { ListComponent(from: $0) },
+    MaterialComponent.directiveName: { MaterialComponent(from: $0) },
+    Model3DComponent.directiveName: { Model3DComponent(from: $0) },
+    ModifiedComponent.directiveName: { ModifiedComponent(from: $0) },
+    NavigationStackComponent.directiveName: { NavigationStackComponent(from: $0) },
+    PickerComponent.directiveName: { PickerComponent(from: $0) },
+    PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
+    ProgressViewComponent.directiveName: { ProgressViewComponent(from: $0) },
+    RadialGradientComponent.directiveName: { RadialGradientComponent(from: $0) },
+    RectangleComponent.directiveName: { RectangleComponent(from: $0) },
+    RoundedRectangleComponent.directiveName: { RoundedRectangleComponent(from: $0) },
+    ScrollViewComponent.directiveName: { ScrollViewComponent(from: $0) },
+    SectionComponent.directiveName: { SectionComponent(from: $0) },
+    SecureFieldComponent.directiveName: { SecureFieldComponent(from: $0) },
+    SpacerComponent.directiveName: { SpacerComponent(from: $0) },
+    TextComponent.directiveName: { TextComponent(from: $0) },
+    TextEditorComponent.directiveName: { TextEditorComponent(from: $0) },
+    TextFieldComponent.directiveName: { TextFieldComponent(from: $0) },
+    ToggleComponent.directiveName: { ToggleComponent(from: $0) },
+    ToolbarItemComponent.directiveName: { ToolbarItemComponent(from: $0) },
+    ToolbarItemGroupComponent.directiveName: { ToolbarItemGroupComponent(from: $0) },
+    VideoComponent.directiveName: { VideoComponent(from: $0) },
+    VStackComponent.directiveName: { VStackComponent(from: $0) },
+    ZStackComponent.directiveName: { ZStackComponent(from: $0) },
+
     // Modifiers
-        
-    case AccessibilityHiddenComponent.directiveName: AccessibilityHiddenComponent(from: directive)
-    case AccessibilityHintComponent.directiveName: AccessibilityHintComponent(from: directive)
-    case AccessibilityLabelComponent.directiveName: AccessibilityLabelComponent(from: directive)
-    case AccessibilityRepresentationComponent.directiveName: AccessibilityRepresentationComponent(from: directive)
-    case AccessibilityValueComponent.directiveName: AccessibilityValueComponent(from: directive)
-    case AccessibilityAddTraitsComponent.directiveName: AccessibilityAddTraitsComponent(from: directive)
-    case AccessibilityRemoveTraitsComponent.directiveName: AccessibilityRemoveTraitsComponent(from: directive)
-    case AllowsHitTestingComponent.directiveName: AllowsHitTestingComponent(from: directive)
-    case AllowsTighteningComponent.directiveName: AllowsTighteningComponent(from: directive)
-    case AspectRatioComponent.directiveName: AspectRatioComponent(from: directive)
-    case AutocorrectionDisabledComponent.directiveName: AutocorrectionDisabledComponent(from: directive)
-    case BackgroundComponent.directiveName: BackgroundComponent(from: directive)
-    case BlendModeComponent.directiveName: BlendModeComponent(from: directive)
-    case BlurComponent.directiveName: BlurComponent(from: directive)
-    case BoldComponent.directiveName: BoldComponent(from: directive)
-    case BorderComponent.directiveName: BorderComponent(from: directive)
-    case BrightnessComponent.directiveName: BrightnessComponent(from: directive)
-    case ClippedComponent.directiveName: ClippedComponent(from: directive)
-    case ClipShapeComponent.directiveName: ClipShapeComponent(from: directive)
-    case ColorInvertComponent.directiveName: ColorInvertComponent(from: directive)
-    case ColorSchemeComponent.directiveName: ColorSchemeComponent(from: directive)
-    case ContentShapeComponent.directiveName: ContentShapeComponent(from: directive)
-    case ContextMenuComponent.directiveName: ContextMenuComponent(from: directive)
-    case ContrastComponent.directiveName: ContrastComponent(from: directive)
-    case ControlSizeComponent.directiveName: ControlSizeComponent(from: directive)
-    case CornerRadiusComponent.directiveName: CornerRadiusComponent(from: directive)
-    case CoordinateSpaceComponent.directiveName: CoordinateSpaceComponent(from: directive)
-    case DisabledComponent.directiveName: DisabledComponent(from: directive)
-    case DynamicTypeSizeComponent.directiveName: DynamicTypeSizeComponent(from: directive)
-    case FixedSizeComponent.directiveName: FixedSizeComponent(from: directive)
-    case FocusedComponent.directiveName: FocusedComponent(from: directive)
-    case FontComponent.directiveName: FontComponent(from: directive)
-    case FontDesignComponent.directiveName: FontDesignComponent(from: directive)
-    case FontWeightComponent.directiveName: FontWeightComponent(from: directive)
-    case FontWidthComponent.directiveName: FontWidthComponent(from: directive)
-    case ForegroundStyleComponent.directiveName: ForegroundStyleComponent(from: directive)
-    case FrameComponent.directiveName: if Set(directive.props.keys).isDisjoint(with: ["minWidth", "minHeight", "maxWidth", "maxHeight"]) {
-        FrameComponent(from: directive)
-    } else {
-        FlexibleFrameComponent(from: directive)
-    }
-    case GlassEffectComponent.directiveName: GlassEffectComponent(from: directive)
-    case GrayscaleComponent.directiveName: GrayscaleComponent(from: directive)
-    case HiddenComponent.directiveName: HiddenComponent(from: directive)
-    case IDComponent.directiveName: IDComponent(from: directive)
-    case IgnoresSafeAreaComponent.directiveName: IgnoresSafeAreaComponent(from: directive)
-    case ItalicComponent.directiveName: ItalicComponent(from: directive)
-    case KeyboardTypeComponent.directiveName: KeyboardTypeComponent(from: directive)
-    case LayoutPriorityComponent.directiveName: LayoutPriorityComponent(from: directive)
-    case LineLimitComponent.directiveName: LineLimitComponent(from: directive)
-    case LineSpacingComponent.directiveName: LineSpacingComponent(from: directive)
-    case MaskComponent.directiveName: MaskComponent(from: directive)
-    case MinimumScaleFactorComponent.directiveName: MinimumScaleFactorComponent(from: directive)
-    case MonospacedComponent.directiveName: MonospacedComponent(from: directive)
-    case MultilineTextAlignmentComponent.directiveName: MultilineTextAlignmentComponent(from: directive)
-    case NavigationTitleComponent.directiveName: NavigationTitleComponent(from: directive)
-    case OffsetComponent.directiveName: OffsetComponent(from: directive)
-    case OnAppearComponent.directiveName: OnAppearComponent(from: directive)
-    case OnChangeComponent.directiveName: OnChangeComponent(from: directive)
-    case OnDisappearComponent.directiveName: OnDisappearComponent(from: directive)
-    case OnDragGestureComponent.directiveName: OnDragGestureComponent(from: directive)
-    case OnLongPressGestureComponent.directiveName: OnLongPressGestureComponent(from: directive)
-    case OnTapGestureComponent.directiveName: OnTapGestureComponent(from: directive)
-    case OnSubmitComponent.directiveName: OnSubmitComponent(from: directive)
-    case OpacityComponent.directiveName: OpacityComponent(from: directive)
-    case OverlayComponent.directiveName: OverlayComponent(from: directive)
-    case PaddingComponent.directiveName: PaddingComponent(from: directive)
-    case PickerStyleComponent.directiveName: PickerStyleComponent(from: directive)
-    case PresentationDetentsComponent.directiveName: PresentationDetentsComponent(from: directive)
-    case RotationEffectComponent.directiveName: RotationEffectComponent(from: directive)
-    case SaturationComponent.directiveName: SaturationComponent(from: directive)
-    case ScaledToFillComponent.directiveName: ScaledToFillComponent(from: directive)
-    case ScaledToFitComponent.directiveName: ScaledToFitComponent(from: directive)
-    case ScaleEffectComponent.directiveName: ScaleEffectComponent(from: directive)
-    case ScrollContentBackgroundComponent.directiveName: ScrollContentBackgroundComponent(from: directive)
-    case SubmitLabelComponent.directiveName: SubmitLabelComponent(from: directive)
-    case ShadowComponent.directiveName: ShadowComponent(from: directive)
-    case SheetComponent.directiveName: SheetComponent(from: directive)
-    case StrikethroughComponent.directiveName: StrikethroughComponent(from: directive)
-    case TagComponent.directiveName: TagComponent(from: directive)
-    case TextCaseComponent.directiveName: TextCaseComponent(from: directive)
-    case TextSelectionComponent.directiveName: TextSelectionComponent(from: directive)
-    case TextFieldStyleComponent.directiveName: TextFieldStyleComponent(from: directive)
-    case TintComponent.directiveName: TintComponent(from: directive)
-    case ToolbarComponent.directiveName: ToolbarComponent(from: directive)
-    case TrackingComponent.directiveName: TrackingComponent(from: directive)
-    case TransformEffectComponent.directiveName: TransformEffectComponent(from: directive)
-    case UnderlineComponent.directiveName: UnderlineComponent(from: directive)
-    case VisualEffectComponent.directiveName: VisualEffectComponent(from: directive)
-    case ZIndexComponent.directiveName: ZIndexComponent(from: directive)
-        
+    AccessibilityHiddenComponent.directiveName: { AccessibilityHiddenComponent(from: $0) },
+    AccessibilityHintComponent.directiveName: { AccessibilityHintComponent(from: $0) },
+    AccessibilityLabelComponent.directiveName: { AccessibilityLabelComponent(from: $0) },
+    AccessibilityRepresentationComponent.directiveName: { AccessibilityRepresentationComponent(from: $0) },
+    AccessibilityValueComponent.directiveName: { AccessibilityValueComponent(from: $0) },
+    AccessibilityAddTraitsComponent.directiveName: { AccessibilityAddTraitsComponent(from: $0) },
+    AccessibilityRemoveTraitsComponent.directiveName: { AccessibilityRemoveTraitsComponent(from: $0) },
+    AllowsHitTestingComponent.directiveName: { AllowsHitTestingComponent(from: $0) },
+    AllowsTighteningComponent.directiveName: { AllowsTighteningComponent(from: $0) },
+    AspectRatioComponent.directiveName: { AspectRatioComponent(from: $0) },
+    AutocorrectionDisabledComponent.directiveName: { AutocorrectionDisabledComponent(from: $0) },
+    BackgroundComponent.directiveName: { BackgroundComponent(from: $0) },
+    BlendModeComponent.directiveName: { BlendModeComponent(from: $0) },
+    BlurComponent.directiveName: { BlurComponent(from: $0) },
+    BoldComponent.directiveName: { BoldComponent(from: $0) },
+    BorderComponent.directiveName: { BorderComponent(from: $0) },
+    BrightnessComponent.directiveName: { BrightnessComponent(from: $0) },
+    ClippedComponent.directiveName: { ClippedComponent(from: $0) },
+    ClipShapeComponent.directiveName: { ClipShapeComponent(from: $0) },
+    ColorInvertComponent.directiveName: { ColorInvertComponent(from: $0) },
+    ColorSchemeComponent.directiveName: { ColorSchemeComponent(from: $0) },
+    ContentShapeComponent.directiveName: { ContentShapeComponent(from: $0) },
+    ContextMenuComponent.directiveName: { ContextMenuComponent(from: $0) },
+    ContrastComponent.directiveName: { ContrastComponent(from: $0) },
+    ControlSizeComponent.directiveName: { ControlSizeComponent(from: $0) },
+    CornerRadiusComponent.directiveName: { CornerRadiusComponent(from: $0) },
+    CoordinateSpaceComponent.directiveName: { CoordinateSpaceComponent(from: $0) },
+    DisabledComponent.directiveName: { DisabledComponent(from: $0) },
+    DynamicTypeSizeComponent.directiveName: { DynamicTypeSizeComponent(from: $0) },
+    FixedSizeComponent.directiveName: { FixedSizeComponent(from: $0) },
+    FocusedComponent.directiveName: { FocusedComponent(from: $0) },
+    FontComponent.directiveName: { FontComponent(from: $0) },
+    FontDesignComponent.directiveName: { FontDesignComponent(from: $0) },
+    FontWeightComponent.directiveName: { FontWeightComponent(from: $0) },
+    FontWidthComponent.directiveName: { FontWidthComponent(from: $0) },
+    ForegroundStyleComponent.directiveName: { ForegroundStyleComponent(from: $0) },
+    FrameComponent.directiveName: { makeFrameComponent($0) },
+    GlassEffectComponent.directiveName: { GlassEffectComponent(from: $0) },
+    GrayscaleComponent.directiveName: { GrayscaleComponent(from: $0) },
+    HiddenComponent.directiveName: { HiddenComponent(from: $0) },
+    IDComponent.directiveName: { IDComponent(from: $0) },
+    IgnoresSafeAreaComponent.directiveName: { IgnoresSafeAreaComponent(from: $0) },
+    ItalicComponent.directiveName: { ItalicComponent(from: $0) },
+    KeyboardTypeComponent.directiveName: { KeyboardTypeComponent(from: $0) },
+    LayoutPriorityComponent.directiveName: { LayoutPriorityComponent(from: $0) },
+    LineLimitComponent.directiveName: { LineLimitComponent(from: $0) },
+    LineSpacingComponent.directiveName: { LineSpacingComponent(from: $0) },
+    MaskComponent.directiveName: { MaskComponent(from: $0) },
+    MinimumScaleFactorComponent.directiveName: { MinimumScaleFactorComponent(from: $0) },
+    MonospacedComponent.directiveName: { MonospacedComponent(from: $0) },
+    MultilineTextAlignmentComponent.directiveName: { MultilineTextAlignmentComponent(from: $0) },
+    NavigationTitleComponent.directiveName: { NavigationTitleComponent(from: $0) },
+    OffsetComponent.directiveName: { OffsetComponent(from: $0) },
+    OnAppearComponent.directiveName: { OnAppearComponent(from: $0) },
+    OnChangeComponent.directiveName: { OnChangeComponent(from: $0) },
+    OnDisappearComponent.directiveName: { OnDisappearComponent(from: $0) },
+    OnDragGestureComponent.directiveName: { OnDragGestureComponent(from: $0) },
+    OnLongPressGestureComponent.directiveName: { OnLongPressGestureComponent(from: $0) },
+    OnTapGestureComponent.directiveName: { OnTapGestureComponent(from: $0) },
+    OnSubmitComponent.directiveName: { OnSubmitComponent(from: $0) },
+    OpacityComponent.directiveName: { OpacityComponent(from: $0) },
+    OverlayComponent.directiveName: { OverlayComponent(from: $0) },
+    PaddingComponent.directiveName: { PaddingComponent(from: $0) },
+    PickerStyleComponent.directiveName: { PickerStyleComponent(from: $0) },
+    PresentationDetentsComponent.directiveName: { PresentationDetentsComponent(from: $0) },
+    RotationEffectComponent.directiveName: { RotationEffectComponent(from: $0) },
+    SaturationComponent.directiveName: { SaturationComponent(from: $0) },
+    ScaledToFillComponent.directiveName: { ScaledToFillComponent(from: $0) },
+    ScaledToFitComponent.directiveName: { ScaledToFitComponent(from: $0) },
+    ScaleEffectComponent.directiveName: { ScaleEffectComponent(from: $0) },
+    ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
+    SubmitLabelComponent.directiveName: { SubmitLabelComponent(from: $0) },
+    ShadowComponent.directiveName: { ShadowComponent(from: $0) },
+    SheetComponent.directiveName: { SheetComponent(from: $0) },
+    StrikethroughComponent.directiveName: { StrikethroughComponent(from: $0) },
+    TagComponent.directiveName: { TagComponent(from: $0) },
+    TextCaseComponent.directiveName: { TextCaseComponent(from: $0) },
+    TextSelectionComponent.directiveName: { TextSelectionComponent(from: $0) },
+    TextFieldStyleComponent.directiveName: { TextFieldStyleComponent(from: $0) },
+    TintComponent.directiveName: { TintComponent(from: $0) },
+    ToolbarComponent.directiveName: { ToolbarComponent(from: $0) },
+    TrackingComponent.directiveName: { TrackingComponent(from: $0) },
+    TransformEffectComponent.directiveName: { TransformEffectComponent(from: $0) },
+    UnderlineComponent.directiveName: { UnderlineComponent(from: $0) },
+    VisualEffectComponent.directiveName: { VisualEffectComponent(from: $0) },
+    ZIndexComponent.directiveName: { ZIndexComponent(from: $0) },
+
     // Values
-        
-    case FontCustomComponent.directiveName: FontCustomComponent(from: directive)
-        
-    default: UnresolvedComponent(from: directive)
+    FontCustomComponent.directiveName: { FontCustomComponent(from: $0) },
+]
+
+private func makeFrameComponent(_ directive: Directive) -> Component? {
+    let keys = directive.props.keys
+    if keys.contains("minWidth") || keys.contains("minHeight") || keys.contains("maxWidth") || keys.contains("maxHeight") {
+        return FlexibleFrameComponent(from: directive)
     }
+    return FrameComponent(from: directive)
+}
+
+func makeComponent(_ directive: Directive) -> Component? {
+    if let factory = componentFactories[directive.type] {
+        return factory(directive)
+    }
+    return UnresolvedComponent(from: directive)
 }
 
 public struct ComponentView: View {
