@@ -22,6 +22,7 @@ public protocol ComponentVisitor {
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
     mutating func visitPicker(_ picker: PickerComponent) -> Result
     mutating func visitPlaceholder(_ placeholder: PlaceholderComponent) -> Result
@@ -35,6 +36,7 @@ public protocol ComponentVisitor {
     mutating func visitSecureField(_ secureField: SecureFieldComponent) -> Result
     mutating func visitToggle(_ toggle: ToggleComponent) -> Result
     mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
@@ -220,6 +222,10 @@ public extension ComponentVisitor {
         return defaultVisit(modified)
     }
     
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
+        return defaultVisit(navigationStack)
+    }
+    
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result {
         return defaultVisit(empty)
     }
@@ -270,6 +276,10 @@ public extension ComponentVisitor {
     
     mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result {
         return defaultVisit(toolbarItem)
+    }
+    
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result {
+        return defaultVisit(toolbarItemGroup)
     }
 
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {

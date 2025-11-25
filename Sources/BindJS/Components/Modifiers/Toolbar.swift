@@ -27,8 +27,8 @@ extension ToolbarComponent {
             items = []
         }
 
-        // Filter to only ToolbarItems (ignore anything else)
-        items = items.filter { $0 is ToolbarItemComponent }
+        // Filter to only ToolbarItems or ToolbarItemGroupComponent (ignore anything else)
+        items = items.filter { $0 is ToolbarItemComponent || $0 is ToolbarItemGroupComponent }
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
@@ -47,6 +47,14 @@ extension ToolbarComponent: ViewModifier {
             // Base case: no more items
             content
         } else if let firstItem = items.first as? ToolbarItemComponent {
+            // Recursive case: apply first item, then recurse with remaining
+            let remaining = Array(items.dropFirst())
+            content
+                .toolbar {
+                    firstItem
+                }
+                .modifier(ToolbarRecursiveModifier(items: remaining))
+        } else if let firstItem = items.first as? ToolbarItemGroupComponent {
             // Recursive case: apply first item, then recurse with remaining
             let remaining = Array(items.dropFirst())
             content
@@ -74,6 +82,13 @@ private struct ToolbarRecursiveModifier: ViewModifier {
         if items.isEmpty {
             content
         } else if let firstItem = items.first as? ToolbarItemComponent {
+            let remaining = Array(items.dropFirst())
+            content
+                .toolbar {
+                    firstItem
+                }
+                .modifier(ToolbarRecursiveModifier(items: remaining))
+        } else if let firstItem = items.first as? ToolbarItemGroupComponent {
             let remaining = Array(items.dropFirst())
             content
                 .toolbar {
