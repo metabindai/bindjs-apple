@@ -6,8 +6,8 @@ public struct ToggleComponent: Component {
     @EnvironmentObject private var context: BindJSContext
 
     public var label: String
-    public var currentValueId: String?
-    public var setterId: String?
+    public var isOn: Bool?
+    public var setIsOnId: String?
     public var environmentId: String
 }
 
@@ -16,8 +16,8 @@ extension ToggleComponent {
         guard directive.type == Self.directiveName else { return nil }
 
         label = directive["label"] ?? ""
-        currentValueId = directive["currentValueId"]
-        setterId = directive["setterId"]
+        isOn = directive["isOn"]
+        setIsOnId = directive["setIsOnId"]
         environmentId = directive["environmentId"] ?? ""
     }
 
@@ -30,13 +30,12 @@ extension ToggleComponent: View {
     public var body: some View {
         Toggle(label, isOn: Binding(
             get: {
-                context.restoreEnvironment(id: environmentId)
-                return context.restoreToggleValue(id: currentValueId ?? "") ?? false
+                return isOn ?? false
             },
             set: { newValue in
-                context.restoreEnvironment(id: environmentId)
-                if let setterId = setterId {
-                    context.callToggleSetter(id: setterId, value: newValue)
+                if let setIsOnId {
+                    context.restoreEnvironment(id: environmentId)
+                    context.callEventHandler(id: setIsOnId, arguments: newValue)
                 }
             }
         ))
