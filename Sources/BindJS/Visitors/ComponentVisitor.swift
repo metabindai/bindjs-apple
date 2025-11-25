@@ -125,6 +125,7 @@ public protocol ComponentVisitor {
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
+    mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
 }
 
 public extension ComponentVisitor {
@@ -592,5 +593,9 @@ public extension ComponentVisitor {
     
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result {
         return defaultVisit(zIndex)
+    }
+    
+    mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
+        return defaultVisit(scrollContentBackground)
     }
 }
