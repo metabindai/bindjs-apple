@@ -79,6 +79,7 @@ public protocol ComponentVisitor {
     mutating func visitDynamicTypeSize(_ dynamicTypeSize: DynamicTypeSizeComponent) -> Result
     mutating func visitFixedSize(_ fixedSize: FixedSizeComponent) -> Result
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result
+    mutating func visitFocused(_ focused: FocusedComponent) -> Result
     mutating func visitFont(_ font: FontComponent) -> Result
     mutating func visitFontCustom(_ fontCustom: FontCustomComponent) -> Result
     mutating func visitFontDesign(_ fontDesign: FontDesignComponent) -> Result
@@ -413,6 +414,10 @@ public extension ComponentVisitor {
     
     mutating func visitFlexibleFrame(_ flexibleFrame: FlexibleFrameComponent) -> Result {
         return defaultVisit(flexibleFrame)
+    }
+    
+    mutating func visitFocused(_ focused: FocusedComponent) -> Result {
+        return defaultVisit(focused)
     }
     
     mutating func visitFont(_ font: FontComponent) -> Result {
