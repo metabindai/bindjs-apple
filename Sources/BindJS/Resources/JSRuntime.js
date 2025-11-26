@@ -734,8 +734,10 @@ function FontModifier({ args, content }) {
 
     // FontCustom currently for backward compatiblity.
     const customFont = getComponentAST(arg, 'CustomFont') || getComponentAST(arg, 'FontCustom');
-    customFont.type = 'CustomFont';
-    
+    if (customFont) {
+        customFont.type = 'CustomFont';
+    }
+
     let options = {};
     if (customFont) {
         options = { custom: customFont.props, rawValue: customFont };
