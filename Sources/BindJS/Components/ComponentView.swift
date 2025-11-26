@@ -137,7 +137,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ZIndexComponent.directiveName: { ZIndexComponent(from: $0) },
 
     // Values
-    FontCustomComponent.directiveName: { FontCustomComponent(from: $0) },
+    CustomFontComponent.directiveName: { CustomFontComponent(from: $0) },
 ]
 
 private func makeFrameComponent(_ directive: Directive) -> Component? {
