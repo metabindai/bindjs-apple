@@ -113,6 +113,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     PaddingComponent.directiveName: { PaddingComponent(from: $0) },
     PickerStyleComponent.directiveName: { PickerStyleComponent(from: $0) },
     PresentationDetentsComponent.directiveName: { PresentationDetentsComponent(from: $0) },
+    QuickLookComponent.directiveName: { QuickLookComponent(from: $0) },
     RotationEffectComponent.directiveName: { RotationEffectComponent(from: $0) },
     SaturationComponent.directiveName: { SaturationComponent(from: $0) },
     ScaledToFillComponent.directiveName: { ScaledToFillComponent(from: $0) },
@@ -286,6 +287,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as PaddingComponent: content.modifier(m)
         case let m as PickerStyleComponent: content.modifier(m)
         case let m as PresentationDetentsComponent: content.modifier(m)
+        case let m as QuickLookComponent: content.modifier(m)
         case let m as RotationEffectComponent: content.modifier(m)
         case let m as SaturationComponent: content.modifier(m)
         case let m as ScaledToFillComponent: content.modifier(m)
