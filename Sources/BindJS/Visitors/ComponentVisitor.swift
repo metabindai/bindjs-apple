@@ -141,6 +141,7 @@ public protocol ComponentVisitor {
     mutating func visitTextFieldStyle(_ textFieldStyle: TextFieldStyleComponent) -> Result
     mutating func visitTint(_ tint: TintComponent) -> Result
     mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result
+    mutating func visitToolbarVisibility(_ toolbarVisibility: ToolbarVisibilityComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
@@ -682,6 +683,10 @@ public extension ComponentVisitor {
 
     mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result {
         return defaultVisit(toolbar)
+    }
+
+    mutating func visitToolbarVisibility(_ toolbarVisibility: ToolbarVisibilityComponent) -> Result {
+        return defaultVisit(toolbarVisibility)
     }
 
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result {
