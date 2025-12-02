@@ -703,16 +703,17 @@ function ComposerGroup({ args, name }) {
 }
 
 // Helper: Recursively checks if a node or its children matches the given type
-function extractPropsByType(node, typeName) {
+function getComponentAST(node, typeName) {
     var ast = node;
-    if (typeof node === 'function') {
-        ast = node();
+
+    // Unwrap component function if it is a component
+    while (typeof ast === 'function' && ast._component) {
+        ast = ast();
     }
 
-    if (typeof ast === 'object' && ast !== null) {
+    if (typeof ast === 'object' && ast !== null && typeName != null) {
         if (ast?.type === typeName && typeof ast.props === 'object') {
-            const { children, ...restProps } = ast.props;
-            return { ...restProps };
+            return ast
         }
 
         // Recurse into children if they exist
@@ -720,7 +721,7 @@ function extractPropsByType(node, typeName) {
         if (astChildren) {
             const children = Array.isArray(astChildren) ? astChildren : [astChildren];
             for (const child of children) {
-                const result = extractPropsByType(child, typeName);
+                const result = getComponentAST(child, typeName);
                 if (result) return result;
             }
         }
@@ -731,11 +732,15 @@ function extractPropsByType(node, typeName) {
 function FontModifier({ args, content }) {
     const [arg] = args;
 
-    const customProps = extractPropsByType(arg, 'FontCustom');
+    // FontCustom currently for backward compatiblity.
+    const customFont = getComponentAST(arg, 'CustomFont') || getComponentAST(arg, 'FontCustom');
+    if (customFont) {
+        customFont.type = 'CustomFont';
+    }
 
     let options = {};
-    if (customProps) {
-        options = { custom: customProps, rawValue: arg() };
+    if (customFont) {
+        options = { custom: customFont.props, rawValue: customFont };
     } else {
         options = { rawValue: arg };
     }
@@ -1375,6 +1380,7 @@ const componentNames = [
     "EquatableView",
     "FillShapeView",
     "FilterChildren",
+    "CustomFont",
     "FontCustom",
     "ForEach",
     "ForEachSectionCollection",

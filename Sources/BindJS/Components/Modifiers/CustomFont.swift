@@ -8,20 +8,20 @@ import os.log
 
 extension Logger {
     /// Logger for font loading operations
-    static let fontLoading = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FontCustom", category: "FontLoading")
+    static let fontLoading = Logger(subsystem: Bundle.main.bundleIdentifier ?? "CustomFont", category: "FontLoading")
 }
 
-// MARK: - FontCustomComponent
+// MARK: - CustomFontComponent
 
-public struct FontCustomComponent: Component {
-    public static var directiveName: String = "FontCustom"
+public struct CustomFontComponent: Component {
+    public static var directiveName: String = "CustomFont"
 
     public var family: String
     public var size: CGFloat
     public var url: URL?
 }
 
-extension FontCustomComponent {
+extension CustomFontComponent {
     public init?(from directive: Directive) {
         self.family = directive["family"] ?? "Not Specified"
         self.size = directive["size"] ?? 17.0
@@ -29,11 +29,11 @@ extension FontCustomComponent {
     }
     
     public func accept<V>(visitor: inout V) -> V.Result where V : ComponentVisitor {
-        visitor.visitFontCustom(self)
+        visitor.visitCustomFont(self)
     }
 }
 
-extension FontCustomComponent: ViewModifier {
+extension CustomFontComponent: ViewModifier {
     public func body(content: Content) -> some View {
         FontLoaderView(url: url, family: family, size: size) {
             content
