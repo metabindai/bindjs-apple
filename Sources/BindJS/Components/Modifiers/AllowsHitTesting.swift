@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct AllowsHitTestingComponent: Component {
-    public static var directiveName: String = "allowsHitTestingComponent"
+    public static var directiveName: String = "allowsHitTesting"
     
     public var isActive: Bool
 }
