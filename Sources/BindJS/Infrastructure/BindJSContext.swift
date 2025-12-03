@@ -111,8 +111,8 @@ public class BindJSContext: ObservableObject {
             
             // Decode ContentLink
             do {
-                let contentLink = try JSONDecoder().decode(ContentLinkDTO.self, from: data)
-                self.navigateCallback?(contentLink.to)
+                let contentLink = try JSONDecoder().decode(ContentLink.self, from: data)
+                self.navigateCallback?(contentLink)
             } catch {
                 print("Error decoding ContentLink: \(error)")
             }
