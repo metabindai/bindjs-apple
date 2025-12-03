@@ -5,7 +5,10 @@ public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
     private var actions: [String: (Any?) -> Any?] = [:]
+    
+    private var actionCallback: ((ContentAction) -> Void)?
     private var navigateCallback: ((ContentLink) -> Void)?
+    
     private var openURL: OpenURLAction?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
@@ -25,6 +28,7 @@ public class BindJSContext: ObservableObject {
         setupNeedsRerender()
         setupWithAnimation()
         setupNavigate()
+        setupAction()
         setupOnOpenURL()
         setupPerformAction()
         setupAppStateListener()
@@ -119,6 +123,28 @@ public class BindJSContext: ObservableObject {
         }
         jsContext.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
         _ = jsContext.evaluateScript("runtime.navigateCallback = navigateCallback")
+    }
+
+    private func setupAction() {
+        let actionFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
+            guard let self = self else { return }
+            
+            guard let jsonString = jsonStringify(options),
+                  let data = jsonString.data(using: .utf8) else {
+                print("Invalid options for action")
+                return
+            }
+            
+            // Decode ContentLink
+            do {
+                let contentAction = try JSONDecoder().decode(ContentAction.self, from: data)
+                self.actionCallback?(contentAction)
+            } catch {
+                print("Error decoding ContentAction: \(error)")
+            }
+        }
+        jsContext.setObject(actionFunction, forKeyedSubscript: "actionCallback" as NSString)
+        _ = jsContext.evaluateScript("runtime.actionCallback = actionCallback")
     }
     
     private func setupOnOpenURL() {
@@ -360,6 +386,12 @@ public class BindJSContext: ObservableObject {
     
     public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
         self.navigateCallback = callback
+    }
+
+    // MARK: - Action Callback
+    
+    public func onAction(_ callback: @escaping (ContentAction) -> Void) {
+        self.actionCallback = callback
     }
     
     // MARK: - OpenURL
