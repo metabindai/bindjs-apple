@@ -10,15 +10,6 @@ public struct NavigationLinkComponent: Component {
     public var label: Component
     public var destinationHandlerId: String?
 
-    func reloadDestination() {
-        guard let destinationHandlerId else { return }
-
-        if let jsValue = context.callEventHandler(id: destinationHandlerId, arguments: []),
-           let directive = jsValue.toDirective(),
-           let component = makeComponent(directive) {
-            self.destination = component
-        }
-    }
 }
 
 extension NavigationLinkComponent {
@@ -39,20 +30,38 @@ extension NavigationLinkComponent: View {
     public var body: some View {
         if #available(iOS 16.0, macOS 13.0, *) {
             NavigationLink {
-                ComponentView(destination)
+                NavigationLinkContentView(destinationHandlerId: destinationHandlerId)
+                    .environmentObject(context)
             } label: {
                 ComponentView(label)
             }
-            .onAppear {
-                reloadDestination()
-            }
         } else {
-            NavigationLink(destination: ComponentView(destination)) {
+            NavigationLink(destination: NavigationLinkContentView(destinationHandlerId: destinationHandlerId)) {
                 ComponentView(label)
             }
+        }
+    }
+}
+
+struct NavigationLinkContentView : View {
+    var destinationHandlerId: String?
+    @State var destination: Component = ColorComponent(storage: .name("clear"), opacity: 0)
+    @EnvironmentObject private var context: BindJSContext
+
+    func reloadDestination() {
+        guard let destinationHandlerId else { return }
+        
+        if let jsValue = context.callEventHandler(id: destinationHandlerId, arguments: []),
+           let directive = jsValue.toDirective(),
+           let component = makeComponent(directive) {
+            self.destination = component
+        }
+    }
+    
+    var body : some View {
+        ComponentView(destination)
             .onAppear {
                 reloadDestination()
             }
-        }
     }
 }
