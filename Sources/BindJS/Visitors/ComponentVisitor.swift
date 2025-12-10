@@ -22,6 +22,7 @@ public protocol ComponentVisitor {
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> Result
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
     mutating func visitPicker(_ picker: PickerComponent) -> Result
@@ -224,6 +225,10 @@ public extension ComponentVisitor {
         return defaultVisit(modified)
     }
     
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> Result {
+        return defaultVisit(navigationLink)
+    }
+
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
         return defaultVisit(navigationStack)
     }

@@ -1548,6 +1548,39 @@ function NavigationDestinationModifier({ args, name }) {
     }
 }
 
+function NavigationLink({ args }) {
+    const [arg1] = args;
+
+    // Expect { destination, label }
+    const props = typeof arg1 === 'object' ? arg1 : {};
+
+    let { destination, label } = props;
+
+    // Support label as a raw string, convert to Text component
+    if (typeof label === 'string') {
+        label = AST.Directive('Text', { rawValue: label });
+    }
+
+    // Store the destination handler
+    const path = this.currentPathId();
+    const environmentId = this.storeEnvironment(path);
+
+    // Create destination handler that returns AST when called
+    const destinationHandler = destination ? () => {
+        return destination()();
+    } : () => null;
+
+    const destinationHandlerId = this.storeFunction(destinationHandler, this.currentPathId('NavigationLink_destination'));
+
+    // Process label
+    const { label: finalLabel } = this.processProps({ label });
+
+    return {
+        props: { destinationHandlerId, label: finalLabel, environmentId },
+        children: []
+    };
+}
+
 const Detent = {
     medium: { detentType: 'medium' },
     large: { detentType: 'large' },
@@ -1704,6 +1737,7 @@ class BindJSRuntime {
         // Register specific handlers for inbuilt components
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
+        this.#registerBuiltInComponent('NavigationLink', NavigationLink);
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
         this.#registerBuiltInComponent('Picker', Picker);

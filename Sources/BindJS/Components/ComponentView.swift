@@ -26,6 +26,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     MaterialComponent.directiveName: { MaterialComponent(from: $0) },
     Model3DComponent.directiveName: { Model3DComponent(from: $0) },
     ModifiedComponent.directiveName: { ModifiedComponent(from: $0) },
+    NavigationLinkComponent.directiveName: { NavigationLinkComponent(from: $0) },
     NavigationStackComponent.directiveName: { NavigationStackComponent(from: $0) },
     PickerComponent.directiveName: { PickerComponent(from: $0) },
     PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
@@ -189,6 +190,7 @@ public struct ComponentView: View {
         case let material as MaterialComponent: material
         case let model3D as Model3DComponent: model3D
         case let modified as ModifiedComponent: modified
+        case let navigationLink as NavigationLinkComponent: navigationLink
         case let navigationStack as NavigationStackComponent: navigationStack
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
