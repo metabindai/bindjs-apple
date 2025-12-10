@@ -7,6 +7,8 @@ public struct NavigationDestinationComponent: Component {
 
     @State var destination: Component
 
+    @State var internalIsPresentedState: Bool = false
+    
     public var isPresented: Bool
     public var destinationHandlerId: String?
     public var setIsPresentedHandlerId: String?
@@ -49,23 +51,43 @@ extension NavigationDestinationComponent: ViewModifier {
     @ViewBuilder
     public func body(content: Content) -> some View {
         if #available(iOS 16.0, macOS 13.0, *) {
-            let isPresentedBinding = Binding(
-                get: { self.isPresented },
-                set: { handleChange(isPresented: $0) }
-            )
-
             content
-                .navigationDestination(isPresented: isPresentedBinding) {
-                    ComponentView(self.destination)
+                .navigationDestination(isPresented: $internalIsPresentedState) {
+                    NavigationDestinationContentView(destinationHandlerId: destinationHandlerId)
+                        .environmentObject(context)
                 }
-                .onChange(of: self.isPresented) { old, new in
-                    reloadDestination(isPresented: new)
+                .onChange(of: isPresented) { old, new in
+                    internalIsPresentedState = new
                 }
-                .onAppear {
-                    reloadDestination(isPresented: self.isPresented)
+                .onChange(of: internalIsPresentedState) { old, new in
+                    handleChange(isPresented: new)
                 }
         } else {
             content
         }
+    }
+}
+
+
+struct NavigationDestinationContentView : View {
+    var destinationHandlerId: String?
+    @State var destination: Component = ColorComponent(storage: .name("clear"), opacity: 0)
+    @EnvironmentObject private var context: BindJSContext
+
+    func reloadDestination() {
+        guard let destinationHandlerId else { return }
+        
+        if let jsValue = context.callEventHandler(id: destinationHandlerId, arguments: []),
+           let directive = jsValue.toDirective(),
+           let component = makeComponent(directive) {
+            self.destination = component
+        }
+    }
+    
+    var body : some View {
+        ComponentView(destination)
+            .onAppear {
+                reloadDestination()
+            }
     }
 }
