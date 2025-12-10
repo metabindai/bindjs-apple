@@ -4,7 +4,7 @@ public struct SheetComponent: Component {
     public static var directiveName: String = "sheet"
     
     @EnvironmentObject private var context: BindJSContext
-    
+
     @State var content: Component
 
     public var isPresented: Bool
@@ -14,13 +14,13 @@ public struct SheetComponent: Component {
 
     func handleChange(isPresented: Bool) {
         if let setIsPresentedHandlerId {
-            context.callEventHandler(id: setIsPresentedHandlerId, arguments: [isPresented])
+            context.callEventHandler(id: setIsPresentedHandlerId, arguments: isPresented)
         }
     }
     
     func handleDismiss() {
         if let dismissHandlerId {
-            context.callEventHandler(id: dismissHandlerId, arguments: [isPresented])
+            context.callEventHandler(id: dismissHandlerId, arguments: [])
         }
     }
     
@@ -55,21 +55,21 @@ extension SheetComponent {
 
 extension SheetComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        
-        let isPresented = Binding(get: {
-            self.isPresented
-        }, set: {
-            handleChange(isPresented: $0)
-        })
-        
+        let isPresentedBinding = Binding(
+            get: { self.isPresented },
+            set: { handleChange(isPresented: $0) }
+        )
+
         content
-            .sheet(isPresented: isPresented, onDismiss: {
+            .sheet(isPresented: isPresentedBinding, onDismiss: {
                 handleDismiss()
             }) {
                 ComponentView(self.content)
-            }.onChange(of: self.isPresented) { old, new in
+            }
+            .onChange(of: self.isPresented) { old, new in
                 reloadContent(isPresented: new)
-            }.onAppear {
+            }
+            .onAppear {
                 reloadContent(isPresented: self.isPresented)
             }
     }

@@ -1489,12 +1489,14 @@ function SheetModifier({ args, name }) {
     // Assume args[0] contains the props
     const props = args[0] ?? { isPresented: false };
 
-    // Extract isPresented binding. First arg is the getter, second is the setter
+    // Extract isPresented value
     const isPresented = props.isPresented;
-    const setIsPresented = props.setIsPresented ?? (() => { });
 
-    // Extract onDismiss handler if provided
-    const onDismiss = props.onDismiss;
+    // setIsPresented is already processed by processProps into setIsPresentedId
+    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
+
+    // onDismiss is already processed by processProps into onDismissId
+    const dismissHandlerId = props.onDismissId ?? null;
 
     const content = props.content;
 
@@ -1508,15 +1510,40 @@ function SheetModifier({ args, name }) {
 
     return {
         props: {
-            // Store isPresented binding handlers
             isPresented: isPresented,
-            setIsPresentedHandlerId: setIsPresented ? this.storeFunction(setIsPresented, this.currentPathId(name + '_setPresented')) : null,
-
-            // Store content handler
+            setIsPresentedHandlerId: setIsPresentedHandlerId,
             contentHandlerId: this.storeFunction(contentHandler, this.currentPathId(name + '_content')),
+            dismissHandlerId: dismissHandlerId,
+        }
+    }
+}
 
-            // Store onDismiss handler if provided
-            dismissHandlerId: onDismiss ? this.storeFunction(onDismiss, this.currentPathId(name + '_dismiss')) : null,
+function NavigationDestinationModifier({ args, name }) {
+
+    // Assume args[0] contains the props
+    const props = args[0] ?? { isPresented: false };
+
+    // Extract isPresented value
+    const isPresented = props.isPresented;
+
+    // setIsPresented is already processed by processProps into setIsPresentedId
+    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
+
+    const destination = props.destination;
+
+    // Return AST representation when destination handler is called.
+    const destinationHandler = destination ? () => {
+        // Execute handler, then AST function.
+        return destination()();
+    } : () => {
+        return null;
+    };
+
+    return {
+        props: {
+            isPresented: isPresented,
+            setIsPresentedHandlerId: setIsPresentedHandlerId,
+            destinationHandlerId: this.storeFunction(destinationHandler, this.currentPathId(name + '_destination')),
         }
     }
 }
@@ -1696,6 +1723,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
+        this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));

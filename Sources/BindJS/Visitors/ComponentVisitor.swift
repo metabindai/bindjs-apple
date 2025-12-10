@@ -109,6 +109,7 @@ public protocol ComponentVisitor {
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result
+    mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
     mutating func visitOffset(_ offset: OffsetComponent) -> Result
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result
@@ -549,7 +550,11 @@ public extension ComponentVisitor {
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result {
         return defaultVisit(multilineTextAlignment)
     }
-    
+
+    mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result {
+        return defaultVisit(navigationDestination)
+    }
+
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result {
         return defaultVisit(navigationTitle)
     }

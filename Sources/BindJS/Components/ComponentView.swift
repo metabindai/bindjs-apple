@@ -99,6 +99,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     MinimumScaleFactorComponent.directiveName: { MinimumScaleFactorComponent(from: $0) },
     MonospacedComponent.directiveName: { MonospacedComponent(from: $0) },
     MultilineTextAlignmentComponent.directiveName: { MultilineTextAlignmentComponent(from: $0) },
+    NavigationDestinationComponent.directiveName: { NavigationDestinationComponent(from: $0) },
     NavigationTitleComponent.directiveName: { NavigationTitleComponent(from: $0) },
     OffsetComponent.directiveName: { OffsetComponent(from: $0) },
     OnAppearComponent.directiveName: { OnAppearComponent(from: $0) },
@@ -273,6 +274,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as MinimumScaleFactorComponent: content.modifier(m)
         case let m as MonospacedComponent: content.modifier(m)
         case let m as MultilineTextAlignmentComponent: content.modifier(m)
+        case let m as NavigationDestinationComponent: content.modifier(m)
         case let m as NavigationTitleComponent: content.modifier(m)
         case let m as OffsetComponent: content.modifier(m)
         case let m as OnAppearComponent: content.modifier(m)
