@@ -110,6 +110,8 @@ public protocol ComponentVisitor {
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result
+    mutating func visitNavigationBarBackButtonHidden(_ navigationBarBackButtonHidden: NavigationBarBackButtonHiddenComponent) -> Result
+    mutating func visitNavigationBarTitleDisplayMode(_ navigationBarTitleDisplayMode: NavigationBarTitleDisplayModeComponent) -> Result
     mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
     mutating func visitOffset(_ offset: OffsetComponent) -> Result
@@ -554,6 +556,14 @@ public extension ComponentVisitor {
     
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result {
         return defaultVisit(multilineTextAlignment)
+    }
+
+    mutating func visitNavigationBarBackButtonHidden(_ navigationBarBackButtonHidden: NavigationBarBackButtonHiddenComponent) -> Result {
+        return defaultVisit(navigationBarBackButtonHidden)
+    }
+
+    mutating func visitNavigationBarTitleDisplayMode(_ navigationBarTitleDisplayMode: NavigationBarTitleDisplayModeComponent) -> Result {
+        return defaultVisit(navigationBarTitleDisplayMode)
     }
 
     mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result {
