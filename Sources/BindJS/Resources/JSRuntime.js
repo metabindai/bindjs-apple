@@ -1549,12 +1549,14 @@ function NavigationDestinationModifier({ args, name }) {
 }
 
 function NavigationLink({ args }) {
-    const [arg1] = args;
+    const [arg1, arg2] = args;
 
-    // Expect { destination, label }
-    const props = typeof arg1 === 'object' ? arg1 : {};
-
-    let { destination, label } = props;
+    // Normalize into { destination, label }
+    // If a single arg is passed and it's an object, use it as { destination, label }
+    // If two args are passed, use the first as label and the second as destination
+    var { destination, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
+        ? arg1
+        : { label: arg1, destination: arg2 };
 
     // Support label as a raw string, convert to Text component
     if (typeof label === 'string') {
