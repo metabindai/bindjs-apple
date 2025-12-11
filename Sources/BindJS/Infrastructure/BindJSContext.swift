@@ -7,7 +7,6 @@ public class BindJSContext: ObservableObject {
     private var actions: [String: (Any?) -> Any?] = [:]
     
     private var actionCallback: ((ContentAction) -> Void)?
-    private var navigateCallback: ((ContentLink) -> Void)?
     
     private var openURL: OpenURLAction?
     private var appState: [String: Any] = [:]
@@ -27,7 +26,6 @@ public class BindJSContext: ObservableObject {
         setupConsoleLog()
         setupNeedsRerender()
         setupWithAnimation()
-        setupNavigate()
         setupAction()
         setupOnOpenURL()
         setupPerformAction()
@@ -102,29 +100,6 @@ public class BindJSContext: ObservableObject {
         _ = jsContext.evaluateScript("runtime.withAnimation = withAnimation")
     }
     
-    private func setupNavigate() {
-        let navigateFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
-            guard let self = self else { return }
-            
-            
-            guard let jsonString = jsonStringify(options),
-                  let data = jsonString.data(using: .utf8) else {
-                print("Invalid options for navigate")
-                return
-            }
-            
-            // Decode ContentLink
-            do {
-                let contentLink = try JSONDecoder().decode(ContentLinkDTO.self, from: data)
-                self.navigateCallback?(contentLink.to)
-            } catch {
-                print("Error decoding ContentLink: \(error)")
-            }
-        }
-        jsContext.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
-        _ = jsContext.evaluateScript("runtime.navigateCallback = navigateCallback")
-    }
-
     private func setupAction() {
         let actionFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
             guard let self = self else { return }
@@ -334,7 +309,7 @@ public class BindJSContext: ObservableObject {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()
         setupWithAnimation()
-        setupNavigate()
+        setupAction()
         setupOnOpenURL()
         setupPerformAction()
         setupAppStateListener()
@@ -380,12 +355,6 @@ public class BindJSContext: ObservableObject {
             action(argumentDict)
             return nil
         }
-    }
-    
-    // MARK: - Navigation Callback
-    
-    public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
-        self.navigateCallback = callback
     }
 
     // MARK: - Action Callback
