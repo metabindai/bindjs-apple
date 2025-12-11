@@ -26,6 +26,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     MaterialComponent.directiveName: { MaterialComponent(from: $0) },
     Model3DComponent.directiveName: { Model3DComponent(from: $0) },
     ModifiedComponent.directiveName: { ModifiedComponent(from: $0) },
+    NavigationLinkComponent.directiveName: { NavigationLinkComponent(from: $0) },
     NavigationStackComponent.directiveName: { NavigationStackComponent(from: $0) },
     PickerComponent.directiveName: { PickerComponent(from: $0) },
     PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
@@ -99,6 +100,9 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     MinimumScaleFactorComponent.directiveName: { MinimumScaleFactorComponent(from: $0) },
     MonospacedComponent.directiveName: { MonospacedComponent(from: $0) },
     MultilineTextAlignmentComponent.directiveName: { MultilineTextAlignmentComponent(from: $0) },
+    NavigationBarBackButtonHiddenComponent.directiveName: { NavigationBarBackButtonHiddenComponent(from: $0) },
+    NavigationBarTitleDisplayModeComponent.directiveName: { NavigationBarTitleDisplayModeComponent(from: $0) },
+    NavigationDestinationComponent.directiveName: { NavigationDestinationComponent(from: $0) },
     NavigationTitleComponent.directiveName: { NavigationTitleComponent(from: $0) },
     OffsetComponent.directiveName: { OffsetComponent(from: $0) },
     OnAppearComponent.directiveName: { OnAppearComponent(from: $0) },
@@ -188,6 +192,7 @@ public struct ComponentView: View {
         case let material as MaterialComponent: material
         case let model3D as Model3DComponent: model3D
         case let modified as ModifiedComponent: modified
+        case let navigationLink as NavigationLinkComponent: navigationLink
         case let navigationStack as NavigationStackComponent: navigationStack
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
@@ -273,6 +278,9 @@ struct ComponentViewModifier: ViewModifier {
         case let m as MinimumScaleFactorComponent: content.modifier(m)
         case let m as MonospacedComponent: content.modifier(m)
         case let m as MultilineTextAlignmentComponent: content.modifier(m)
+        case let m as NavigationBarBackButtonHiddenComponent: content.modifier(m)
+        case let m as NavigationBarTitleDisplayModeComponent: content.modifier(m)
+        case let m as NavigationDestinationComponent: content.modifier(m)
         case let m as NavigationTitleComponent: content.modifier(m)
         case let m as OffsetComponent: content.modifier(m)
         case let m as OnAppearComponent: content.modifier(m)

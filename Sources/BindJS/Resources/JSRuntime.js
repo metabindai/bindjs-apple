@@ -1489,12 +1489,14 @@ function SheetModifier({ args, name }) {
     // Assume args[0] contains the props
     const props = args[0] ?? { isPresented: false };
 
-    // Extract isPresented binding. First arg is the getter, second is the setter
+    // Extract isPresented value
     const isPresented = props.isPresented;
-    const setIsPresented = props.setIsPresented ?? (() => { });
 
-    // Extract onDismiss handler if provided
-    const onDismiss = props.onDismiss;
+    // setIsPresented is already processed by processProps into setIsPresentedId
+    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
+
+    // onDismiss is already processed by processProps into onDismissId
+    const dismissHandlerId = props.onDismissId ?? null;
 
     const content = props.content;
 
@@ -1508,17 +1510,77 @@ function SheetModifier({ args, name }) {
 
     return {
         props: {
-            // Store isPresented binding handlers
             isPresented: isPresented,
-            setIsPresentedHandlerId: setIsPresented ? this.storeFunction(setIsPresented, this.currentPathId(name + '_setPresented')) : null,
-
-            // Store content handler
+            setIsPresentedHandlerId: setIsPresentedHandlerId,
             contentHandlerId: this.storeFunction(contentHandler, this.currentPathId(name + '_content')),
-
-            // Store onDismiss handler if provided
-            dismissHandlerId: onDismiss ? this.storeFunction(onDismiss, this.currentPathId(name + '_dismiss')) : null,
+            dismissHandlerId: dismissHandlerId,
         }
     }
+}
+
+function NavigationDestinationModifier({ args, name }) {
+
+    // Assume args[0] contains the props
+    const props = args[0] ?? { isPresented: false };
+
+    // Extract isPresented value
+    const isPresented = props.isPresented;
+
+    // setIsPresented is already processed by processProps into setIsPresentedId
+    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
+
+    const destination = props.destination;
+
+    // Return AST representation when destination handler is called.
+    const destinationHandler = destination ? () => {
+        // Execute handler, then AST function.
+        return destination()();
+    } : () => {
+        return null;
+    };
+
+    return {
+        props: {
+            isPresented: isPresented,
+            setIsPresentedHandlerId: setIsPresentedHandlerId,
+            destinationHandlerId: this.storeFunction(destinationHandler, this.currentPathId(name + '_destination')),
+        }
+    }
+}
+
+function NavigationLink({ args }) {
+    const [arg1, arg2] = args;
+
+    // Normalize into { destination, label }
+    // If a single arg is passed and it's an object, use it as { destination, label }
+    // If two args are passed, use the first as label and the second as destination
+    var { destination, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
+        ? arg1
+        : { label: arg1, destination: arg2 };
+
+    // Support label as a raw string, convert to Text component
+    if (typeof label === 'string') {
+        label = AST.Directive('Text', { rawValue: label });
+    }
+
+    // Store the destination handler
+    const path = this.currentPathId();
+    const environmentId = this.storeEnvironment(path);
+
+    // Create destination handler that returns AST when called
+    const destinationHandler = destination ? () => {
+        return destination()();
+    } : () => null;
+
+    const destinationHandlerId = this.storeFunction(destinationHandler, this.currentPathId('NavigationLink_destination'));
+
+    // Process label
+    const { label: finalLabel } = this.processProps({ label });
+
+    return {
+        props: { destinationHandlerId, label: finalLabel, environmentId },
+        children: []
+    };
 }
 
 const Detent = {
@@ -1677,6 +1739,7 @@ class BindJSRuntime {
         // Register specific handlers for inbuilt components
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
+        this.#registerBuiltInComponent('NavigationLink', NavigationLink);
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
         this.#registerBuiltInComponent('Picker', Picker);
@@ -1696,6 +1759,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
+        this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));

@@ -21,21 +21,21 @@ extension NavigationStackComponent: View {
     public var body: some View {
         if #available(iOS 16.0, macOS 13.0, *) {
             NavigationStack {
-                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                ForEach(children.enumerated(), id: \.offset) { _, child in
                     ComponentView(child)
                 }
             }
         } else {
             #if os(iOS) || os(tvOS)
             NavigationView {
-                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                ForEach(children.enumerated(), id: \.offset) { _, child in
                     ComponentView(child)
                 }
             }
             .navigationViewStyle(.stack)
             #else
             NavigationView {
-                ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+                ForEach(children.enumerated(), id: \.offset) { _, child in
                     ComponentView(child)
                 }
             }

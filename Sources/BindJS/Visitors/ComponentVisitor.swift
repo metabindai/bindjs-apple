@@ -22,6 +22,7 @@ public protocol ComponentVisitor {
     mutating func visitMaterial(_ material: MaterialComponent) -> Result
     mutating func visitModel3D(_ model3D: Model3DComponent) -> Result
     mutating func visitModified(_ modified: ModifiedComponent) -> Result
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> Result
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result
     mutating func visitEmpty(_ empty: EmptyComponent) -> Result
     mutating func visitPicker(_ picker: PickerComponent) -> Result
@@ -109,6 +110,9 @@ public protocol ComponentVisitor {
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result
+    mutating func visitNavigationBarBackButtonHidden(_ navigationBarBackButtonHidden: NavigationBarBackButtonHiddenComponent) -> Result
+    mutating func visitNavigationBarTitleDisplayMode(_ navigationBarTitleDisplayMode: NavigationBarTitleDisplayModeComponent) -> Result
+    mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result
     mutating func visitOffset(_ offset: OffsetComponent) -> Result
     mutating func visitOnAppear(_ onAppear: OnAppearComponent) -> Result
@@ -223,6 +227,10 @@ public extension ComponentVisitor {
         return defaultVisit(modified)
     }
     
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> Result {
+        return defaultVisit(navigationLink)
+    }
+
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
         return defaultVisit(navigationStack)
     }
@@ -549,7 +557,19 @@ public extension ComponentVisitor {
     mutating func visitMultilineTextAlignment(_ multilineTextAlignment: MultilineTextAlignmentComponent) -> Result {
         return defaultVisit(multilineTextAlignment)
     }
-    
+
+    mutating func visitNavigationBarBackButtonHidden(_ navigationBarBackButtonHidden: NavigationBarBackButtonHiddenComponent) -> Result {
+        return defaultVisit(navigationBarBackButtonHidden)
+    }
+
+    mutating func visitNavigationBarTitleDisplayMode(_ navigationBarTitleDisplayMode: NavigationBarTitleDisplayModeComponent) -> Result {
+        return defaultVisit(navigationBarTitleDisplayMode)
+    }
+
+    mutating func visitNavigationDestination(_ navigationDestination: NavigationDestinationComponent) -> Result {
+        return defaultVisit(navigationDestination)
+    }
+
     mutating func visitNavigationTitle(_ navigationTitle: NavigationTitleComponent) -> Result {
         return defaultVisit(navigationTitle)
     }
