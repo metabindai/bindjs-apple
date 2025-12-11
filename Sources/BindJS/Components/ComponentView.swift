@@ -124,6 +124,8 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScaledToFitComponent.directiveName: { ScaledToFitComponent(from: $0) },
     ScaleEffectComponent.directiveName: { ScaleEffectComponent(from: $0) },
     ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
+    ScrollEdgeEffectHiddenComponent.directiveName: { ScrollEdgeEffectHiddenComponent(from: $0) },
+    ScrollEdgeEffectStyleComponent.directiveName: { ScrollEdgeEffectStyleComponent(from: $0) },
     SubmitLabelComponent.directiveName: { SubmitLabelComponent(from: $0) },
     ShadowComponent.directiveName: { ShadowComponent(from: $0) },
     SheetComponent.directiveName: { SheetComponent(from: $0) },
@@ -134,6 +136,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     TextFieldStyleComponent.directiveName: { TextFieldStyleComponent(from: $0) },
     TintComponent.directiveName: { TintComponent(from: $0) },
     ToolbarComponent.directiveName: { ToolbarComponent(from: $0) },
+    ToolbarVisibilityComponent.directiveName: { ToolbarVisibilityComponent(from: $0) },
     TrackingComponent.directiveName: { TrackingComponent(from: $0) },
     TransformEffectComponent.directiveName: { TransformEffectComponent(from: $0) },
     UnderlineComponent.directiveName: { UnderlineComponent(from: $0) },
@@ -302,6 +305,8 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ScaledToFitComponent: content.modifier(m)
         case let m as ScaleEffectComponent: content.modifier(m)
         case let m as ScrollContentBackgroundComponent: content.modifier(m)
+        case let m as ScrollEdgeEffectHiddenComponent: content.modifier(m)
+        case let m as ScrollEdgeEffectStyleComponent: content.modifier(m)
         case let m as SubmitLabelComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
@@ -312,6 +317,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as TextFieldStyleComponent: content.modifier(m)
         case let m as TintComponent: content.modifier(m)
         case let m as ToolbarComponent: content.modifier(m)
+        case let m as ToolbarVisibilityComponent: content.modifier(m)
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)
