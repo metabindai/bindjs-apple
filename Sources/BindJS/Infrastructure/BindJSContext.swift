@@ -4,8 +4,6 @@ import JavaScriptCore
 public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
-    private var actions: [String: (Any?) -> Any?] = [:]
-    
     private var actionCallback: ((ContentAction) -> Void)?
     
     private var openURL: OpenURLAction?
@@ -28,7 +26,6 @@ public class BindJSContext: ObservableObject {
         setupWithAnimation()
         setupAction()
         setupOnOpenURL()
-        setupPerformAction()
         setupAppStateListener()
     }
 
@@ -147,44 +144,6 @@ public class BindJSContext: ObservableObject {
         }
 
         runtime.invokeMethod("setOnOpenURL", withArguments: [onOpenURLFunction])
-    }
-    
-    private func setupPerformAction() {
-        let performActionFunction: @convention(block) (String, JSValue?) -> JSValue? = { [weak self] actionName, args in
-            guard let self = self else { return nil }
-            
-            guard let action = self.actions[actionName] else {
-                print("Action '\(actionName)' not found")
-                return nil
-            }
-            
-            // Convert JSValue args to Swift object if provided
-            let swiftArgs: Any?
-            if let args = args, !args.isNull && !args.isUndefined {
-                swiftArgs = args.toObject()
-            } else {
-                swiftArgs = nil
-            }
-            
-            // Execute the action
-            let result = action(swiftArgs)
-            
-            // Convert result back to JSValue if it exists
-            if let result = result {
-                do {
-                    let data = try JSONSerialization.data(withJSONObject: result)
-                    let jsonString = String(data: data, encoding: .utf8) ?? "null"
-                    return self.jsContext.evaluateScript("(\(jsonString))")
-                } catch {
-                    print("Error serializing action result: \(error)")
-                    return nil
-                }
-            }
-            
-            return nil
-        }
-        
-        jsContext.setObject(performActionFunction, forKeyedSubscript: "performAction" as NSString)
     }
 
     public func register(name: String, source: String) {
@@ -311,7 +270,6 @@ public class BindJSContext: ObservableObject {
         setupWithAnimation()
         setupAction()
         setupOnOpenURL()
-        setupPerformAction()
         setupAppStateListener()
     }
 
@@ -338,25 +296,6 @@ public class BindJSContext: ObservableObject {
         return json.invokeMethod("stringify", withArguments: [value])?.toString()
     }
     
-    // MARK: - Action Registry
-    
-    /// Register an action that takes arguments and returns a codable value
-    public func registerAction<R: Codable>(name: String, action: @escaping ([String: Any]) -> R) {
-        actions[name] = { args in
-            let argumentDict = args as? [String: Any] ?? [:]
-            return action(argumentDict)
-        }
-    }
-    
-    /// Register an action that takes arguments and returns void
-    public func registerAction(name: String, action: @escaping ([String: Any]) -> Void) {
-        actions[name] = { args in
-            let argumentDict = args as? [String: Any] ?? [:]
-            action(argumentDict)
-            return nil
-        }
-    }
-
     // MARK: - Action Callback
     
     public func onAction(_ callback: @escaping (ContentAction) -> Void) {
