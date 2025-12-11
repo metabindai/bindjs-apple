@@ -4,8 +4,8 @@ import JavaScriptCore
 public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
-    private var actions: [String: (Any?) -> Any?] = [:]
-    private var navigateCallback: ((ContentLink) -> Void)?
+    private var actionCallback: ((ContentAction) -> Void)?
+    
     private var openURL: OpenURLAction?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
@@ -24,9 +24,8 @@ public class BindJSContext: ObservableObject {
         setupConsoleLog()
         setupNeedsRerender()
         setupWithAnimation()
-        setupNavigate()
+        setupAction()
         setupOnOpenURL()
-        setupPerformAction()
         setupAppStateListener()
     }
 
@@ -98,27 +97,26 @@ public class BindJSContext: ObservableObject {
         _ = jsContext.evaluateScript("runtime.withAnimation = withAnimation")
     }
     
-    private func setupNavigate() {
-        let navigateFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
+    private func setupAction() {
+        let actionFunction: @convention(block) (JSValue) -> Void = { [weak self] options in
             guard let self = self else { return }
-            
             
             guard let jsonString = jsonStringify(options),
                   let data = jsonString.data(using: .utf8) else {
-                print("Invalid options for navigate")
+                print("Invalid options for action")
                 return
             }
             
             // Decode ContentLink
             do {
-                let contentLink = try JSONDecoder().decode(ContentLinkDTO.self, from: data)
-                self.navigateCallback?(contentLink.to)
+                let contentAction = try JSONDecoder().decode(ContentAction.self, from: data)
+                self.actionCallback?(contentAction)
             } catch {
-                print("Error decoding ContentLink: \(error)")
+                print("Error decoding ContentAction: \(error)")
             }
         }
-        jsContext.setObject(navigateFunction, forKeyedSubscript: "navigateCallback" as NSString)
-        _ = jsContext.evaluateScript("runtime.navigateCallback = navigateCallback")
+        jsContext.setObject(actionFunction, forKeyedSubscript: "actionCallback" as NSString)
+        _ = jsContext.evaluateScript("runtime.actionCallback = actionCallback")
     }
     
     private func setupOnOpenURL() {
@@ -146,44 +144,6 @@ public class BindJSContext: ObservableObject {
         }
 
         runtime.invokeMethod("setOnOpenURL", withArguments: [onOpenURLFunction])
-    }
-    
-    private func setupPerformAction() {
-        let performActionFunction: @convention(block) (String, JSValue?) -> JSValue? = { [weak self] actionName, args in
-            guard let self = self else { return nil }
-            
-            guard let action = self.actions[actionName] else {
-                print("Action '\(actionName)' not found")
-                return nil
-            }
-            
-            // Convert JSValue args to Swift object if provided
-            let swiftArgs: Any?
-            if let args = args, !args.isNull && !args.isUndefined {
-                swiftArgs = args.toObject()
-            } else {
-                swiftArgs = nil
-            }
-            
-            // Execute the action
-            let result = action(swiftArgs)
-            
-            // Convert result back to JSValue if it exists
-            if let result = result {
-                do {
-                    let data = try JSONSerialization.data(withJSONObject: result)
-                    let jsonString = String(data: data, encoding: .utf8) ?? "null"
-                    return self.jsContext.evaluateScript("(\(jsonString))")
-                } catch {
-                    print("Error serializing action result: \(error)")
-                    return nil
-                }
-            }
-            
-            return nil
-        }
-        
-        jsContext.setObject(performActionFunction, forKeyedSubscript: "performAction" as NSString)
     }
 
     public func register(name: String, source: String) {
@@ -308,9 +268,8 @@ public class BindJSContext: ObservableObject {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()
         setupWithAnimation()
-        setupNavigate()
+        setupAction()
         setupOnOpenURL()
-        setupPerformAction()
         setupAppStateListener()
     }
 
@@ -337,29 +296,10 @@ public class BindJSContext: ObservableObject {
         return json.invokeMethod("stringify", withArguments: [value])?.toString()
     }
     
-    // MARK: - Action Registry
+    // MARK: - Action Callback
     
-    /// Register an action that takes arguments and returns a codable value
-    public func registerAction<R: Codable>(name: String, action: @escaping ([String: Any]) -> R) {
-        actions[name] = { args in
-            let argumentDict = args as? [String: Any] ?? [:]
-            return action(argumentDict)
-        }
-    }
-    
-    /// Register an action that takes arguments and returns void
-    public func registerAction(name: String, action: @escaping ([String: Any]) -> Void) {
-        actions[name] = { args in
-            let argumentDict = args as? [String: Any] ?? [:]
-            action(argumentDict)
-            return nil
-        }
-    }
-    
-    // MARK: - Navigation Callback
-    
-    public func onNavigate(_ callback: @escaping (ContentLink) -> Void) {
-        self.navigateCallback = callback
+    public func onAction(_ callback: @escaping (ContentAction) -> Void) {
+        self.actionCallback = callback
     }
     
     // MARK: - OpenURL

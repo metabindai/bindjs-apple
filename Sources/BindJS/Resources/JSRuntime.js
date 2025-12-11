@@ -733,7 +733,7 @@ function FontModifier({ args, content }) {
     const [arg] = args;
 
     // FontCustom currently for backward compatiblity.
-    const customFont = getComponentAST(arg, 'CustomFont') || getComponentAST(arg, 'FontCustom');
+    let customFont = getComponentAST(arg, 'CustomFont') || getComponentAST(arg, 'FontCustom');
     if (customFont) {
         customFont.type = 'CustomFont';
     }
@@ -1141,6 +1141,10 @@ function useAppState(key, defaultValue) {
 
 function useNavigate() {
     return this.navigateCallback
+}
+
+function useAction() {
+    return this.actionCallback
 }
 
 function makeComponent(component) {
@@ -1660,6 +1664,10 @@ class BindJSRuntime {
             console.log('Navigate not implemented', path, options);
         };
 
+        this.actionCallback = (action, options) => {
+            console.log('Action not implemented', path, options);
+        };
+
         this.withAnimation = (handlerId) => {
             console.log('With animation not implemented', handlerId);
             // Provide default implementation.
@@ -1812,6 +1820,7 @@ class BindJSRuntime {
 
         // useNavigate
         this.registerCallback('useNavigate', useNavigate.bind(this));
+        this.registerCallback('useAction', useAction.bind(this));
 
         // makeComponent
         this.registerCallback('makeComponent', makeComponent.bind(this));

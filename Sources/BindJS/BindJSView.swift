@@ -32,16 +32,16 @@ extension EnvironmentValues {
 public struct BindJSConfiguration {
     public var environment: [String: any Codable] = [:]
     public var appState: Binding<[String: Any]>?
-    public var onNavigation: ((ContentLink) -> Void)?
+    public var onAction: ((ContentAction) -> Void)?
 
     public init(
         environment: [String: any Codable] = [:],
         appState: Binding<[String: Any]>? = nil,
-        onNavigation: ((ContentLink) -> Void)? = nil
+        onAction: ((ContentAction) -> Void)? = nil
     ) {
         self.environment = environment
         self.appState = appState
-        self.onNavigation = onNavigation
+        self.onAction = onAction
     }
 }
 
@@ -86,7 +86,7 @@ private struct ContextHostView: View {
     var body: some View {
         VStack {
             RenderEffect {
-                setupNavigation()
+                setupAction()
                 setupAppState()
                 setupHooks()
                 setupEnvironment()
@@ -117,9 +117,9 @@ private struct ContextHostView: View {
         context.register(name: "_body", source: newContent.compiled)
     }
 
-    private func setupNavigation() {
-        context.onNavigate { link in
-            bindJS.onNavigation?(link)
+    private func setupAction() {
+        context.onAction { action in
+            bindJS.onAction?(action)
         }
     }
 
