@@ -29,8 +29,29 @@ extension ToolbarVisibilityComponent {
 }
 
 extension ToolbarVisibilityComponent: ViewModifier {
+    private func toolbarPlacement(for bar: String) -> ToolbarPlacement? {
+        switch bar {
+        #if os(iOS) || os(visionOS)
+        case "navigationBar":
+            return .navigationBar
+        case "tabBar":
+            return .tabBar
+        case "bottomBar":
+            return .bottomBar
+        #endif
+        #if os(macOS)
+        case "windowToolbar":
+            return .windowToolbar
+        #endif
+        case "automatic":
+            return .automatic
+        default:
+            return nil
+        }
+    }
+
     public func body(content: Content) -> some View {
-        if #available(iOS 18.0, macOS 26.0, *) {
+        if #available(iOS 16.0, macOS 15.0, *) {
             let toolbarVisibility: Visibility = {
                 switch visibility {
                 case "visible":
@@ -43,22 +64,11 @@ extension ToolbarVisibilityComponent: ViewModifier {
                     return .automatic
                 }
             }()
-            
+
             if let bars = bars, !bars.isEmpty {
                 // Convert string array to ToolbarPlacement values
-                let toolbarPlacements: [ToolbarPlacement] = bars.compactMap { bar in
-                    switch bar {
-                    case "navigationBar":
-                        return .navigationBar
-                    case "tabBar":
-                        return .tabBar
-                    case "bottomBar":
-                        return .bottomBar
-                    default:
-                        return nil
-                    }
-                }
-                
+                let toolbarPlacements: [ToolbarPlacement] = bars.compactMap { toolbarPlacement(for: $0) }
+
                 // Use variadic arguments by expanding the array
                 switch toolbarPlacements.count {
                 case 1:
