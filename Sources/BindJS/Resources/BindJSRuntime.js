@@ -46,6 +46,228 @@ AST.Representable = (functionId, environmentId) => {
     }
 };
 
+/**
+ * Built in component names
+ */
+const componentNames = [
+    "Actions",
+    "AlertScene",
+    "AngularGradient",
+    "AnyView",
+    "AssistiveAccess",
+    "AsyncImage",
+    "Body",
+    "Button",
+    "Canvas",
+    "Capsule",
+    "Circle",
+    "ColorPicker",
+    "CommandGroup",
+    "CommandMenu",
+    "ComposerAdd",
+    "ComposerChildren",
+    "ComposerGroup",
+    "Content",
+    "ContentUnavailableView",
+    "ContentView",
+    "ContextMenu",
+    "ControlGroup",
+    "CurrentValueLabel",
+    "DatePicker",
+    "DebugReplaceableView",
+    "DefaultButtonLabel",
+    "DefaultDateProgressLabel",
+    "DefaultDocumentGroupLaunchActions",
+    "DefaultSettingsLinkLabel",
+    "DefaultShareLinkLabel",
+    "DefaultTabLabel",
+    "DefaultWindowVisibilityToggleLabel",
+    "Description",
+    "DisclosureGroup",
+    "Divider",
+    "DocumentGroup",
+    "DocumentGroupLaunchScene",
+    "DocumentLaunchView",
+    "DOMIdentifable",
+    "DrawingCanvas",
+    "EditButton",
+    "Element",
+    "Ellipse",
+    "EllipticalGradient",
+    "Empty",
+    "EmptyModifier",
+    "EmptyView",
+    "EnvironmentValue",
+    "EquatableView",
+    "FillShapeView",
+    "FilterChildren",
+    "CustomFont",
+    "FontCustom",
+    "ForEach",
+    "ForEachSectionCollection",
+    "ForEachSubviewCollection",
+    "Form",
+    "Gauge",
+    "GeometryReader",
+    "GeometryReader3D",
+    "GlassEffectContainer",
+    "Grid",
+    "GridRow",
+    "Group",
+    "GroupBox",
+    "GroupElementsOfContent",
+    "GroupSectionsOfContent",
+    "HelpLink",
+    "HSplitView",
+    "HStack",
+    "Image",
+    "ImmersiveSpaceViewContent",
+    "KeyframeAnimator",
+    "Label",
+    "LabeledControlGroupContent",
+    "LabeledToolbarItemGroupContent",
+    "LazyHGrid",
+    "LazyHStack",
+    "LazyVGrid",
+    "LazyVStack",
+    "LinearGradient",
+    "Link",
+    "List",
+    "Main",
+    "MarkedValueLabel",
+    "Material",
+    "MaximumValueLabel",
+    "Menu",
+    "MenuBarExtra",
+    "MenuButton",
+    "MinimumValueLabel",
+    "Model3D",
+    "MultiDatePicker",
+    "NavigationLink",
+    "NavigationSplitView",
+    "NavigationStack",
+    "NavigationView",
+    "NewDocumentButton",
+    "OutlineSubgroupChildren",
+    "PasteButton",
+    "Path",
+    "PhaseAnimator",
+    "Picker",
+    "Placeholder",
+    "PlaceholderContentView",
+    "PresentedWindowContent",
+    "ProgressView",
+    "RadialGradient",
+    "ReactRepresentable",
+    "Rectangle",
+    "RenameButton",
+    "RoundedRectangle",
+    "ScrollView",
+    "ScrollViewReader",
+    "Section",
+    "SecureField",
+    "Settings",
+    "SettingsLink",
+    "Shader",
+    "Shape",
+    "ShareLink",
+    "SignInWithAppleButton",
+    "Slider",
+    "Spacer",
+    "Stepper",
+    "StrokeBorderShapeView",
+    "StrokeShapeView",
+    "SubscriptionView",
+    "Subview",
+    "Table",
+    "TableColumn",
+    "TableHeaderRowContent",
+    "TabView",
+    "Text",
+    "TextEditor",
+    "TextField",
+    "TextFieldLink",
+    "Toggle",
+    "ToolbarItem",
+    "ToolbarItemGroup",
+    "ToolbarTitleMenu",
+    "TouchBar",
+    "TupleView",
+    "UnevenRoundedRectangle",
+    "UtilityWindow",
+    "Video",
+    "ViewThatFits",
+    "VSplitView",
+    "VStack",
+    "Window",
+    "WindowGroup",
+    "WindowVisibilityToggle",
+    "ZStack",
+];
+
+function GenericComponent({ args }) {
+    var { props, children } = processComponentArgs(args[0], args[1]);
+
+    // If props isnt a dictionary contain within value
+    if (typeof props != 'object' || typeof props == 'function') {
+        props = { rawValue: props };
+    }
+
+    // Expand functions in props
+    props = this.processProps(props);
+
+    /**
+     * Execute children
+     */
+    const childrenAST = processChildren.bind(this)(children);
+
+    return { props, children: childrenAST }
+}
+
+function processChildren(children) {
+    if (!children) {
+        return [];
+    }
+
+    /**
+     * Execute children
+     */
+    const childrenAST = (children ?? []).flatMap((child, index) => {
+        this.hookState.childIndex = index;
+
+        let content = typeof child === 'function' ? child() : child;
+        if (typeof content === 'function') {
+            content = content();
+        }
+        return content
+    });
+
+    // Reset
+    this.hookState.childIndex = 0;
+
+    return childrenAST
+}
+
+function processComponentArgs(arg1, arg2) {
+    // Allow children to be passed as the first argument, including as a single component (function)
+    const childrenFirstArg = arg1 != null && arg2 == null && Array.isArray(arg1);
+    const singleComponentChild = arg1 != null && arg2 == null && typeof arg1 === 'function' && arg1._component;
+    const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg && !singleComponentChild;
+
+    const props =
+        rawValueFirstArg ? { rawValue: arg1 }
+            : childrenFirstArg ? {}
+                : singleComponentChild ? {}
+                    : arg1;
+
+    const children =
+        childrenFirstArg ? arg1
+            : singleComponentChild ? [arg1]
+                : arg2;
+
+    return { props, children };
+}
+
 function Color({ args }) {
 
     const [props] = args ?? [];
@@ -212,6 +434,14 @@ function Button({ args }) {
         ? arg1
         : { label: arg1, action: arg2 };
 
+    if (!label) {
+        throw new Error("Button requires a label")
+    }
+
+    if (!action || typeof action !== 'function') {
+        throw new Error("Button requires an action function")
+    }
+
 
     // Support label to be a raw string, convert to Text component
     if (typeof label == 'string') {
@@ -233,69 +463,6 @@ function Button({ args }) {
 
 }
 
-function GenericComponent({ args }) {
-    var { props, children } = processComponentArgs(args[0], args[1]);
-
-    // If props isnt a dictionary contain within value
-    if (typeof props != 'object' || typeof props == 'function') {
-        props = { rawValue: props };
-    }
-
-    // Expand functions in props
-    props = this.processProps(props);
-
-    /**
-     * Execute children
-     */
-    const childrenAST = processChildren.bind(this)(children);
-
-    return { props, children: childrenAST }
-}
-
-function processChildren(children) {
-    if (!children) {
-        return [];
-    }
-
-    /**
-     * Execute children
-     */
-    const childrenAST = (children ?? []).flatMap((child, index) => {
-        this.hookState.childIndex = index;
-
-        let content = typeof child === 'function' ? child() : child;
-        if (typeof content === 'function') {
-            content = content();
-        }
-        return content
-    });
-
-    // Reset
-    this.hookState.childIndex = 0;
-
-    return childrenAST
-}
-
-function processComponentArgs(arg1, arg2) {
-    // Allow children to be passed as the first argument, including as a single component (function)
-    const childrenFirstArg = arg1 != null && arg2 == null && Array.isArray(arg1);
-    const singleComponentChild = arg1 != null && arg2 == null && typeof arg1 === 'function' && arg1._component;
-    const rawValueFirstArg = typeof arg1 != 'object' && !childrenFirstArg && !singleComponentChild;
-
-    const props =
-        rawValueFirstArg ? { rawValue: arg1 }
-            : childrenFirstArg ? {}
-                : singleComponentChild ? {}
-                    : arg1;
-
-    const children =
-        childrenFirstArg ? arg1
-            : singleComponentChild ? [arg1]
-                : arg2;
-
-    return { props, children };
-}
-
 function Picker({ args }) {
     const [label, selection, children] = args;
 
@@ -314,6 +481,262 @@ function Picker({ args }) {
     }
 
 }
+
+function AnimationComponent({ args, name }) {
+    const typeMap = {
+        'Spring': 'spring',
+        'EaseIn': 'easeIn',
+        'EaseOut': 'easeOut',
+        'EaseInOut': 'easeInOut',
+        'Linear': 'linear',
+        'Bouncy': 'bouncy',
+        'Snappy': 'snappy',
+        'InterpolatingSpring': 'interpolatingSpring',
+    };
+
+    console.log('AnimationComponent', name, args);
+
+    const props = {
+        type: typeMap[name] ?? 'unknown',
+        ...(args[0] ?? {})
+    };
+
+    return { props }
+}
+
+const propertyNameMap = {
+    'PropertyString': 'string',
+    'PropertyNumber': 'number',
+    'PropertyBoolean': 'boolean',
+    'PropertyEnum': 'enum',
+    'PropertyDate': 'date',
+    'PropertyArray': 'array',
+    'PropertyAsset': 'asset',
+    'PropertyGroup': 'group',
+    'PropertyContent': 'content',
+    'PropertyComponent': 'component',
+    'PropertyComponentList': 'componentList',
+    'PropertyChildren': 'children',
+};
+
+function PropertyComponent({ args, name }) {
+    const props = args?.[0] || {};
+
+    const result = {
+        type: propertyNameMap[name] || 'unknown',
+        ...props,
+    };
+
+    return result;
+}
+
+function ComposerGroup({ args, name }) {
+    const props = {};
+
+    const env = this.environment;
+    var children = null;
+
+    if (args) {
+        if (args[0] && args[1] || (typeof args[0] === 'object' && !Array.isArray(args[0])) || typeof args[0] === 'string') {
+            // If the first argument is an object, treat it as props
+            if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
+                Object.assign(props, args[0]);
+
+            } else if (typeof args[0] === 'string') {
+                // Otherwise, treat the first argument as a raw value
+                props.rawValue = args[0];
+            }
+
+            if (args[1]) {
+                children = args[1];
+            }
+
+        } else if (args[0]) {
+            // If the first argument is an array, treat it as children
+            children = args[0] ?? [];
+        }
+    }
+
+    if (!children) {
+        let propName = props.property || props.rawValue || props.group;
+        if (propName == 'children') {
+            children = env?.content?.children || [];
+        } else {
+            children = env?.content?.layoutProps?.[props.rawValue ?? props.property] || [];
+        }
+    }
+
+    const childrenAST = processChildren.bind(this)(children).filter(child => {
+        return true
+        // const groupName = props.group || props.rawValue;
+
+        // const childGroupName = child?.props?.group;
+
+        // if (!groupName && !childGroupName) {
+        //     return true
+        // }
+
+        // return (childGroupName === groupName)
+    });
+
+
+    const result = {
+        props: this.processProps(props),
+        children: childrenAST
+    };
+
+    return result;
+}
+
+function ForEach({ args }) {
+
+    const [data, callback] = args;
+
+    const expand = this.options.expandForEach;
+    const count = Array.isArray(data) ? data.length : 0;
+
+    var ast = null;
+
+    if (expand) {
+        const children = data.map((element, index) => {
+            this.setForEachElementId(index);
+            let result = callback(element, index);
+            while (result && result._component) {
+                result = result();
+            }
+            return result
+        });
+        ast = AST.ForEach(null, null, count, null, children);
+    } else {
+        const id = this.currentPathId('ForEach');
+        const environmentId = this.storeEnvironment(id);
+        const functionId = this.storeFunction(callback, id);
+        const dataId = this.storeData(data, id);
+
+        ast = AST.ForEach(dataId, functionId, count, environmentId);
+    }
+
+    return { ast }
+}
+
+function Content({ args }) {
+
+    const id = this.currentPathId('Content');
+    const environmentId = this.storeEnvironment(id);
+
+    const contentId = typeof args[0] === 'object' ? args[0]?._content : args[0];
+
+    const props = {
+        environmentId,
+        id: contentId
+    };
+    return { props }
+}
+
+function CallbackComponent({ args, name }) {
+    const callback = args[0];
+
+    if (!callback || typeof callback !== 'function') {
+        return { props: { handlerId: null } };
+    }
+
+    // Wrap the callback to unwrap component functions
+    const handler = (geometry) => this.unwrapComponentAST(callback(geometry));
+
+    const id = this.currentPathId('CallbackComponent_' + name);
+    const handlerId = this.storeFunction(handler, id);
+    const environmentId = this.storeEnvironment(id);
+
+    return { props: { handlerId, environmentId } };
+}
+
+function NavigationLink({ args }) {
+    const [arg1, arg2] = args;
+
+    // Normalize into { destination, label }
+    // If a single arg is passed and it's an object, use it as { destination, label }
+    // If two args are passed, use the first as label and the second as destination
+    var { destination, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
+        ? arg1
+        : { label: arg1, destination: arg2 };
+
+    // Support label as a raw string, convert to Text component
+    if (typeof label === 'string') {
+        label = AST.Directive('Text', { rawValue: label });
+    }
+
+    // Store the destination handler
+    const path = this.currentPathId();
+    const environmentId = this.storeEnvironment(path);
+
+    // Create destination handler that returns AST when called
+    const destinationHandler = destination ? () => {
+        return destination()();
+    } : () => null;
+
+    const destinationHandlerId = this.storeFunction(destinationHandler, this.currentPathId('NavigationLink_destination'));
+
+    // Process label
+    const { label: finalLabel } = this.processProps({ label });
+
+    return {
+        props: { destinationHandlerId, label: finalLabel, environmentId },
+        children: []
+    };
+}
+
+var modifierDefaults = {
+    'disabled': true
+};
+
+
+// Add all environment value modifiers that need to be accessible in the environment
+var modifiersToAddToEnvironment = [
+    // Existing modifiers
+    'padding',
+    'textSelection',
+    'font',
+    'foregroundStyle',
+    'accentColor',
+    'controlSize',
+    'multilineTextAlignment',
+    'lineSpacing',
+    'textCase',
+    'lineLimit',
+    'imageScale',
+    'colorScheme',
+    'environment',
+
+    // EnvironmentValues from Environment.tsx
+    'displayScale',
+    'dynamicTypeSize',
+    'locale',
+    'layoutDirection',
+    'screen',
+    'platform'
+];
+
+function GenericModifier({ args, name }) {
+
+    var props = args[0] == null ? modifierDefaults[name] : args[0];
+
+    // Handle passing single value
+    if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) {
+        if (typeof props == 'function') {
+            props = props();
+        }
+        props = { rawValue: props };
+    }
+
+    return { props }
+}
+
+GenericModifier.environmentValue = (name, args) => {
+    if (!modifiersToAddToEnvironment.includes(name)) {
+        return null
+    }
+    return { key: name, value: args[0] }
+};
 
 // SwiftUI default padding value in points
 const DEFAULT_LENGTH = 8;
@@ -474,6 +897,12 @@ function Opacity({ args, content }) {
         // Return the Color directly
         return { ast: content }
 
+    } else if (content && content.type === 'ModifiedComponent' && content.modifier.type === 'opacity') {
+
+        // Collapse opacity modifiers
+        content.modifier.props.rawValue *= opacity;
+        return { ast: content }
+
     } else {
 
         // If the content is not a Color component, we just return it as is
@@ -521,81 +950,6 @@ function OnHandler({ args, name }) {
     }
 }
 
-var modifierDefaults = {
-    'disabled': true
-};
-
-
-// Add all environment value modifiers that need to be accessible in the environment
-var modifiersToAddToEnvironment = [
-    // Existing modifiers
-    'padding',
-    'textSelection',
-    'font',
-    'foregroundStyle',
-    'accentColor',
-    'controlSize',
-    'multilineTextAlignment',
-    'lineSpacing',
-    'textCase',
-    'lineLimit',
-    'imageScale',
-    'colorScheme',
-    'environment',
-
-    // EnvironmentValues from Environment.tsx
-    'displayScale',
-    'dynamicTypeSize',
-    'locale',
-    'layoutDirection',
-    'screen',
-    'platform'
-];
-
-function GenericModifier({ args, name }) {
-
-    var props = args[0] == null ? modifierDefaults[name] : args[0];
-
-    // Handle passing single value
-    if (Array.isArray(props) || typeof props != 'object' || (typeof props == 'object' && props.type != null)) {
-        if (typeof props == 'function') {
-            props = props();
-        }
-        props = { rawValue: props };
-    }
-
-    return { props }
-}
-
-GenericModifier.environmentValue = (name, args) => {
-    if (!modifiersToAddToEnvironment.includes(name)) {
-        return null
-    }
-    return { key: name, value: args[0] }
-};
-
-function AnimationComponent({ args, name }) {
-    const typeMap = {
-        'Spring': 'spring',
-        'EaseIn': 'easeIn',
-        'EaseOut': 'easeOut',
-        'EaseInOut': 'easeInOut',
-        'Linear': 'linear',
-        'Bouncy': 'bouncy',
-        'Snappy': 'snappy',
-        'InterpolatingSpring': 'interpolatingSpring',
-    };
-
-    console.log('AnimationComponent', name, args);
-
-    const props = {
-        type: typeMap[name] ?? 'unknown',
-        ...(args[0] ?? {})
-    };
-
-    return { props }
-}
-
 function AnimationModifier({ args, name, content }) {
 
     const value = args[0];
@@ -606,100 +960,6 @@ function AnimationModifier({ args, name, content }) {
 
     // Return the AnimationComponent directly to squash the modifier.
     return { ast: content }
-}
-
-const propertyNameMap = {
-    'PropertyString': 'string',
-    'PropertyNumber': 'number',
-    'PropertyBoolean': 'boolean',
-    'PropertyEnum': 'enum',
-    'PropertyDate': 'date',
-    'PropertyArray': 'array',
-    'PropertyAsset': 'asset',
-    'PropertyGroup': 'group',
-    'PropertyContent': 'content',
-    'PropertyComponent': 'component',
-    'PropertyComponentList': 'componentList',
-    'PropertyChildren': 'children',
-};
-
-function PropertyComponent({ args, name }) {
-    const props = args?.[0] || {};
-
-    const result = {
-        type: propertyNameMap[name] || 'unknown',
-        ...props,
-    };
-
-    return result;
-}
-
-function LayoutGroup({ args, name }) {
-    const props = args?.[0] || {};
-
-    const result = {
-        ...props,
-    };
-
-    return result;
-}
-
-function ComposerGroup({ args, name }) {
-    const props = {};
-
-    const env = this.environment;
-    var children = null;
-
-    if (args) {
-        if (args[0] && args[1] || (typeof args[0] === 'object' && !Array.isArray(args[0])) || typeof args[0] === 'string') {
-            // If the first argument is an object, treat it as props
-            if (typeof args[0] === 'object' && !Array.isArray(args[0])) {
-                Object.assign(props, args[0]);
-
-            } else if (typeof args[0] === 'string') {
-                // Otherwise, treat the first argument as a raw value
-                props.rawValue = args[0];
-            }
-
-            if (args[1]) {
-                children = args[1];
-            }
-
-        } else if (args[0]) {
-            // If the first argument is an array, treat it as children
-            children = args[0] ?? [];
-        }
-    }
-
-    if (!children) {
-        let propName = props.property || props.rawValue || props.group;
-        if (propName == 'children') {
-            children = env?.content?.children || [];
-        } else {
-            children = env?.content?.layoutProps?.[props.rawValue ?? props.property] || [];
-        }
-    }
-
-    const childrenAST = processChildren.bind(this)(children).filter(child => {
-        return true
-        // const groupName = props.group || props.rawValue;
-
-        // const childGroupName = child?.props?.group;
-
-        // if (!groupName && !childGroupName) {
-        //     return true
-        // }
-
-        // return (childGroupName === groupName)
-    });
-
-
-    const result = {
-        props: this.processProps(props),
-        children: childrenAST
-    };
-
-    return result;
 }
 
 // Helper: Recursively checks if a node or its children matches the given type
@@ -816,19 +1076,9 @@ function ButtonStyle({ args, name }) {
         }
 
         // Arg is a handler function
-        if (typeof arg === 'function' && arg._component) {
-
-            let ast = arg();
-            let name = ast.props.name;
-            let props = ast.props.props || {};
-
-            return { name, props }
-
-            // Arg is a string
-        } else if (typeof arg === 'string') {
-
-            return { name: arg, props: {} }
-
+        if (arg._buttonStyle) {
+            let unwrapped = arg();
+            return { props: unwrapped.props, handlerId: unwrapped.handlerId }
         } else {
             return {}
         }
@@ -985,50 +1235,89 @@ function VisualEffectModifier({ args, name }) {
     }
 }
 
-function ForEach({ args }) {
+function SheetModifier({ args, name }) {
 
-    const [data, callback] = args;
+    // Assume args[0] contains the props
+    const props = args[0] ?? { isPresented: false };
 
-    const expand = this.options.expandForEach;
-    const count = Array.isArray(data) ? data.length : 0;
+    // Extract isPresented binding. First arg is the getter, second is the setter
+    const isPresented = props.isPresented;
+    const setIsPresented = props.setIsPresented ?? (() => { });
 
-    var ast = null;
+    // Extract onDismiss handler if provided
+    const onDismiss = props.onDismiss;
 
-    if (expand) {
-        const children = data.map((element, index) => {
-            this.setForEachElementId(index);
-            let result = callback(element, index);
-            while (result && result._component) {
-                result = result();
-            }
-            return result
-        });
-        ast = AST.ForEach(null, null, count, null, children);
-    } else {
-        const id = this.currentPathId('ForEach');
-        const environmentId = this.storeEnvironment(id);
-        const functionId = this.storeFunction(callback, id);
-        const dataId = this.storeData(data, id);
+    const content = props.content;
 
-        ast = AST.ForEach(dataId, functionId, count, environmentId);
-    }
-
-    return { ast }
-}
-
-function Content({ args }) {
-
-    const id = this.currentPathId('Content');
-    const environmentId = this.storeEnvironment(id);
-
-    const contentId = typeof args[0] === 'object' ? args[0]?._content : args[0];
-
-    const props = {
-        environmentId,
-        id: contentId
+    // Return AST representation when content handler is called.
+    const contentHandler = content ? () => {
+        // Execute handler, then AST function.
+        return content()();
+    } : () => {
+        return null;
     };
-    return { props }
+
+    return {
+        props: {
+            // Store isPresented binding handlers
+            isPresented: isPresented,
+            setIsPresentedHandlerId: setIsPresented ? this.storeFunction(setIsPresented, this.currentPathId(name + '_setPresented')) : null,
+
+            // Store content handler
+            contentHandlerId: this.storeFunction(contentHandler, this.currentPathId(name + '_content')),
+
+            // Store onDismiss handler if provided
+            dismissHandlerId: onDismiss ? this.storeFunction(onDismiss, this.currentPathId(name + '_dismiss')) : null,
+        }
+    }
 }
+
+function NavigationDestinationModifier({ args, name }) {
+
+    // Assume args[0] contains the props
+    const props = args[0] ?? { isPresented: false };
+
+    // Extract isPresented value
+    const isPresented = props.isPresented;
+
+    // setIsPresented is already processed by processProps into setIsPresentedId
+    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
+
+    const destination = props.destination;
+
+    // Return AST representation when destination handler is called.
+    const destinationHandler = destination ? () => {
+        // Execute handler, then AST function.
+        return destination()();
+    } : () => {
+        return null;
+    };
+
+    return {
+        props: {
+            isPresented: isPresented,
+            setIsPresentedHandlerId: setIsPresentedHandlerId,
+            destinationHandlerId: this.storeFunction(destinationHandler, this.currentPathId(name + '_destination')),
+        }
+    }
+}
+
+function LayoutGroup({ args, name }) {
+    const props = args?.[0] || {};
+
+    const result = {
+        ...props,
+    };
+
+    return result;
+}
+
+const Detent = {
+    medium: { detentType: 'medium' },
+    large: { detentType: 'large' },
+    fraction: (value) => ({ detentType: 'fraction', value }),
+    height: (value) => ({ detentType: 'height', value }),
+};
 
 const getComponentData = (child) => {
     let ast = child();
@@ -1115,6 +1404,75 @@ function useState(initialValue) {
     };
 
     return [hooks[this.hookState.currentComponent.hookIndex++], callback]
+}
+
+function useStore(key, defaultValue, scope) {
+    if (defaultValue === null || typeof defaultValue !== "object") {
+        throw new Error(
+            `useStore("${key}") defaultValue must be an object (Zustand-style).`
+        );
+    }
+
+    const fullKey = scope ? `${scope}:${key}` : key;
+
+    const rerenderCallback = this.needsRerender;
+    const rendererId = this.rendererId;
+
+    // Read or fallback to default
+    const stateObj = this.appState[fullKey] ?? defaultValue;
+
+    // Zustand-style setter
+    const set = (value) => {
+        const next =
+            typeof value === "function"
+                ? value(stateObj)
+                : value;
+
+        if (!next || typeof next !== "object") {
+            throw new Error(
+                `useStore("${key}") set() must return an object`
+            );
+        }
+
+        this.updatedAppState(
+            fullKey,
+            next,
+            (prevState) => {
+                const prev = prevState[fullKey] ?? defaultValue;
+                if (prev !== next) {
+                    return { ...prevState, [fullKey]: next };
+                }
+                return prevState; // unchanged
+            },
+            () => rerenderCallback(rendererId)
+        );
+    };
+
+    // Flattened store object
+    const store = {
+        set
+    };
+
+    // Add state fields directly onto the store object
+    for (const field of Object.keys(stateObj)) {
+        store[field] = stateObj[field];
+
+        const cap =
+            field.charAt(0).toUpperCase() + field.slice(1);
+        const setterName = `set${cap}`;
+
+        store[setterName] = (val) => {
+            set((prev) => ({
+                ...prev,
+                [field]:
+                    typeof val === "function"
+                        ? val(prev[field])
+                        : val
+            }));
+        };
+    }
+
+    return store;
 }
 
 function useAppState(key, defaultValue) {
@@ -1205,8 +1563,8 @@ async function getContent(content) {
 function convertComponentProps(props) {
     if (props == null || typeof props !== 'object') return props;
 
-    const callFn = this.call?.bind(this);
     const makeComponent = this.makeComponent?.bind(this);
+    const getExport = this.getComponentExport?.bind(this);
 
     function process(item) {
         // Fast-path array
@@ -1226,20 +1584,23 @@ function convertComponentProps(props) {
         if (item && typeof item === 'object') {
 
             // Check for component-like structure with _type == 'ComponentInstance' and _component
-            if (item._component != null && item._type == 'ComponentInstance' && callFn) {
+            if (item._component != null && item._type == 'ComponentInstance' && getExport) {
 
                 // Wrap in makeComponent, so the function is called at runtime (rather than parsing of props time)
                 // So environment works correctly.
                 const result = makeComponent(() => {
-                    return callFn(item._component, 'body', item);
+                    let body = getExport(item._component, 'body');
+                    return body(item)
                 });
 
                 return [result, true];
             }
 
             // Check for component-like structure
-            if (item.id != null && item.type && item.props && callFn) {
-                const result = callFn(item.type, 'body', item.props);
+            if (item.id != null && item.type && item.props && getExport) {
+                let bodyFunc = getExport(item.type, 'body');
+                const result = bodyFunc(item.type, item.props);
+                //const result = callFn(item.type, item.props);
                 return [result, true];
             }
 
@@ -1293,6 +1654,58 @@ function withAnimation(arg1, arg2) {
     }
 }
 
+/**
+ * Creates an action that intercepts and handles URL opening requests.
+ *
+ * This function mimics SwiftUI's OpenURLAction, allowing you to intercept links
+ * and choose how they are handled: by your custom logic, by the system, or discarded.
+ *
+ * @param {Function} urlCallback - A callback function that receives the URL to be opened.
+ * @returns {Function} A handler function bound to the runtime context.
+ *
+ * @example
+ * ```javascript
+ * // Handle the URL yourself
+ * OpenURLAction((url) => {
+ *   console.log(" intercepted:", url);
+ *   return { handled: true };
+ * })
+ *
+ * // Let the system handle it (default behavior)
+ * OpenURLAction((url) => {
+ *   return { systemAction: true };
+ * })
+ *
+ * // Modify the URL before letting the system handle it
+ * OpenURLAction((url) => {
+ *   return { systemAction: { url: url + "?ref=app" } };
+ * })
+ *
+ * // Open in the same window
+ * OpenURLAction((url) => {
+ *   return { systemAction: { url: url, preferInApp: true } };
+ * })
+ * ```
+ */
+function OpenURLAction(urlCallback) {
+    return (url, resultCallback) => {
+        const result = urlCallback(url);
+
+        if (result?.systemAction) {
+            if (this?.openURL) {
+                // Handle both boolean true and object forms of systemAction
+                const systemAction = result.systemAction === true ? {} : result.systemAction;
+                const targetUrl = systemAction.url ?? url;
+                const preferInApp = systemAction.preferInApp ?? false;
+
+                this.openURL(targetUrl, resultCallback, { preferInApp });
+            }
+        } else if (resultCallback) {
+            resultCallback(result);
+        }
+    }
+}
+
 let funcs = {};
 funcs.capitalize = (s) => {
     return s.charAt(0).toUpperCase() + s.slice(1)
@@ -1329,287 +1742,72 @@ funcs.titleCase = (input) => {
         .join(' ')
 };
 
-/**
- * Built in component names
- */
-const componentNames = [
-    "Actions",
-    "AlertScene",
-    "AngularGradient",
-    "AnyView",
-    "AssistiveAccess",
-    "AsyncImage",
-    "Body",
-    "Button",
-    "Canvas",
-    "Capsule",
-    "Circle",
-    "ColorPicker",
-    "CommandGroup",
-    "CommandMenu",
-    "ComposerAdd",
-    "ComposerChildren",
-    "ComposerGroup",
-    "Content",
-    "ContentUnavailableView",
-    "ContentView",
-    "ContextMenu",
-    "ControlGroup",
-    "CurrentValueLabel",
-    "DatePicker",
-    "DebugReplaceableView",
-    "DefaultButtonLabel",
-    "DefaultDateProgressLabel",
-    "DefaultDocumentGroupLaunchActions",
-    "DefaultSettingsLinkLabel",
-    "DefaultShareLinkLabel",
-    "DefaultTabLabel",
-    "DefaultWindowVisibilityToggleLabel",
-    "Description",
-    "DisclosureGroup",
-    "Divider",
-    "DocumentGroup",
-    "DocumentGroupLaunchScene",
-    "DocumentLaunchView",
-    "DOMIdentifable",
-    "DrawingCanvas",
-    "EditButton",
-    "Element",
-    "Ellipse",
-    "EllipticalGradient",
-    "Empty",
-    "EmptyModifier",
-    "EmptyView",
-    "EnvironmentValue",
-    "EquatableView",
-    "FillShapeView",
-    "FilterChildren",
-    "CustomFont",
-    "FontCustom",
-    "ForEach",
-    "ForEachSectionCollection",
-    "ForEachSubviewCollection",
-    "Form",
-    "Gauge",
-    "GeometryReader",
-    "GeometryReader3D",
-    "GlassEffectContainer",
-    "Grid",
-    "GridRow",
-    "Group",
-    "GroupBox",
-    "GroupElementsOfContent",
-    "GroupSectionsOfContent",
-    "HelpLink",
-    "HSplitView",
-    "HStack",
-    "Image",
-    "ImmersiveSpaceViewContent",
-    "KeyframeAnimator",
-    "Label",
-    "LabeledControlGroupContent",
-    "LabeledToolbarItemGroupContent",
-    "LazyHGrid",
-    "LazyHStack",
-    "LazyVGrid",
-    "LazyVStack",
-    "LinearGradient",
-    "Link",
-    "List",
-    "Main",
-    "MarkedValueLabel",
-    "Material",
-    "MaximumValueLabel",
-    "Menu",
-    "MenuBarExtra",
-    "MenuButton",
-    "MinimumValueLabel",
-    "Model3D",
-    "MultiDatePicker",
-    "NavigationLink",
-    "NavigationSplitView",
-    "NavigationStack",
-    "NavigationView",
-    "NewDocumentButton",
-    "OutlineSubgroupChildren",
-    "PasteButton",
-    "Path",
-    "PhaseAnimator",
-    "Picker",
-    "Placeholder",
-    "PlaceholderContentView",
-    "PresentedWindowContent",
-    "ProgressView",
-    "RadialGradient",
-    "ReactRepresentable",
-    "Rectangle",
-    "RenameButton",
-    "RoundedRectangle",
-    "ScrollView",
-    "ScrollViewReader",
-    "Section",
-    "SecureField",
-    "Settings",
-    "SettingsLink",
-    "Shader",
-    "Shape",
-    "ShareLink",
-    "SignInWithAppleButton",
-    "Slider",
-    "Spacer",
-    "Stepper",
-    "StrokeBorderShapeView",
-    "StrokeShapeView",
-    "SubscriptionView",
-    "Subview",
-    "Table",
-    "TableColumn",
-    "TableHeaderRowContent",
-    "TabView",
-    "Text",
-    "TextEditor",
-    "TextField",
-    "TextFieldLink",
-    "Toggle",
-    "ToolbarItem",
-    "ToolbarItemGroup",
-    "ToolbarTitleMenu",
-    "TouchBar",
-    "TupleView",
-    "UnevenRoundedRectangle",
-    "UtilityWindow",
-    "Video",
-    "ViewThatFits",
-    "VSplitView",
-    "VStack",
-    "Window",
-    "WindowGroup",
-    "WindowVisibilityToggle",
-    "ZStack",
-];
-
-function SheetModifier({ args, name }) {
-
-    // Assume args[0] contains the props
-    const props = args[0] ?? { isPresented: false };
-
-    // Extract isPresented value
-    const isPresented = props.isPresented;
-
-    // setIsPresented is already processed by processProps into setIsPresentedId
-    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
-
-    // onDismiss is already processed by processProps into onDismissId
-    const dismissHandlerId = props.onDismissId ?? null;
-
-    const content = props.content;
-
-    // Return AST representation when content handler is called.
-    const contentHandler = content ? () => {
-        // Execute handler, then AST function.
-        return content()();
-    } : () => {
-        return null;
-    };
-
-    return {
-        props: {
-            isPresented: isPresented,
-            setIsPresentedHandlerId: setIsPresentedHandlerId,
-            contentHandlerId: this.storeFunction(contentHandler, this.currentPathId(name + '_content')),
-            dismissHandlerId: dismissHandlerId,
-        }
-    }
+const code = `
+const body = (props, children) => {
+    return (
+        SizeToFitScreen({ width: 512, height: 512 }, children)
+    )
 }
+`;
 
-function NavigationDestinationModifier({ args, name }) {
+const body$1 = `
+const body = (props, children) => {
+    let env = useEnvironment()
+    const bg = env.systemColorScheme == 'dark' ? Color('#1a1a1a') : Color('#fafafa')
 
-    // Assume args[0] contains the props
-    const props = args[0] ?? { isPresented: false };
-
-    // Extract isPresented value
-    const isPresented = props.isPresented;
-
-    // setIsPresented is already processed by processProps into setIsPresentedId
-    const setIsPresentedHandlerId = props.setIsPresentedId ?? null;
-
-    const destination = props.destination;
-
-    // Return AST representation when destination handler is called.
-    const destinationHandler = destination ? () => {
-        // Execute handler, then AST function.
-        return destination()();
-    } : () => {
-        return null;
-    };
-
-    return {
-        props: {
-            isPresented: isPresented,
-            setIsPresentedHandlerId: setIsPresentedHandlerId,
-            destinationHandlerId: this.storeFunction(destinationHandler, this.currentPathId(name + '_destination')),
-        }
+    const platformSizes = {
+        'mobile': { width: 350, height: 750 },
+        'tablet': { width: 1194, height: 834 },
+        'desktop': { width: 1208, height: 832 }
     }
+    
+    const size = platformSizes[props.defaultPlatform ?? 'mobile']
+    
+    return (
+        SizeToFitScreen({ width: size.width, height: size.height, padding: env.screen.height * 0.1 }, [
+            VStack(children)
+                .background(Color('background'))
+                .shadow()
+                .cornerRadius(40)
+        ])
+        .frame({ maxWidth: Infinity, maxHeight: Infinity })
+    )
 }
+`;
 
-function NavigationLink({ args }) {
-    const [arg1, arg2] = args;
+const body = `
+const body = (props, children) => {
+    const env = useEnvironment()
 
-    // Normalize into { destination, label }
-    // If a single arg is passed and it's an object, use it as { destination, label }
-    // If two args are passed, use the first as label and the second as destination
-    var { destination, label } = typeof arg1 === 'object' && Object.keys(arg1).length > 0
-        ? arg1
-        : { label: arg1, destination: arg2 };
+    const padding = (props.padding ?? 0) * 2
+    const contentSize = { width: props.width, height: props.height }
+    const cmsSafeArea = env.safeArea ?? { top: 0, bottom: 0, left: 0, right: 0 }
+    
+    const aspect = contentSize.width / contentSize.height
+    
+    const width = contentSize.height ? Math.floor((contentSize.height * aspect) ) : contentSize.width
+    const height = Math.floor(contentSize.height )
 
-    // Support label as a raw string, convert to Text component
-    if (typeof label === 'string') {
-        label = AST.Directive('Text', { rawValue: label });
-    }
+    const safeAreaVertical = cmsSafeArea.top + cmsSafeArea.bottom;
 
-    // Store the destination handler
-    const path = this.currentPathId();
-    const environmentId = this.storeEnvironment(path);
+    // Screen Scale
+    const hscale = Math.min(( (env.screen?.height ?? 800) - padding - safeAreaVertical) / (height ), 1.0);
+    const wscale = Math.min(( (env.screen?.width ?? 400) - padding - cmsSafeArea.left - cmsSafeArea.right) / (width ), 1.0);
+    const scale = Math.min(wscale,hscale);
 
-    // Create destination handler that returns AST when called
-    const destinationHandler = destination ? () => {
-        return destination()();
-    } : () => null;
-
-    const destinationHandlerId = this.storeFunction(destinationHandler, this.currentPathId('NavigationLink_destination'));
-
-    // Process label
-    const { label: finalLabel } = this.processProps({ label });
-
-    return {
-        props: { destinationHandlerId, label: finalLabel, environmentId },
-        children: []
-    };
+    return (
+        ZStack(children)
+            .environment('screen', contentSize)
+            .offset({ y: 0 })
+            .isScaledToFit(scale != 1.0)
+            .scaleEffect(scale) 
+            .frame({ width: contentSize.width, height: contentSize.height })
+    )
 }
+`;
 
-const Detent = {
-    medium: { detentType: 'medium' },
-    large: { detentType: 'large' },
-    fraction: (value) => ({ detentType: 'fraction', value }),
-    height: (value) => ({ detentType: 'height', value }),
-};
+// Core
 
-function CallbackComponent({ args, name }) {
-    const callback = args[0];
-
-    if (!callback || typeof callback !== 'function') {
-        return { props: { handlerId: null } };
-    }
-
-    // Wrap the callback to unwrap component functions
-    const handler = (geometry) => this.unwrapComponentAST(callback(geometry));
-
-    const id = this.currentPathId('CallbackComponent_' + name);
-    const handlerId = this.storeFunction(handler, id);
-    const environmentId = this.storeEnvironment(id);
-
-    return { props: { handlerId, environmentId } };
-}
 
 class BindJSRuntime {
     constructor(options) {
@@ -1618,8 +1816,12 @@ class BindJSRuntime {
     }
 
     reset() {
-        this.context = {};
+        this.context = {
+            'Self': () => { }
+        };
+
         this.components = {};
+
         this.functionCache = {};
         this.modifierFunctions = {};
         this.callStack = [];
@@ -1631,6 +1833,9 @@ class BindJSRuntime {
         this.hookState = {};
         this.modifierRegistry = { GenericModifier };
         this.componentRegistry = { GenericComponent };
+
+        // Current component being registered
+        this._currentComponentName = undefined;
 
         // Default app state that can be managed by the renderer. Can be overridden by the renderer.
         this.appState = {};
@@ -1644,9 +1849,14 @@ class BindJSRuntime {
         };
 
         // Default open url implementation. Can be overriden
-        this.onOpenURL = (url, resultCallback) => {
-            console.log('onOpenURL', url);
-            window.open(url, '_blank');
+        this.onOpenURL = (url, resultCallback, options = { preferInApp: false }) => {
+            console.log('onOpenURL', url, options);
+            if (options?.preferInApp) {
+                window.open(url, '_self');
+            } else {
+                window.open(url, '_blank');
+            }
+
             if (resultCallback) {
                 resultCallback(true);
             }
@@ -1660,12 +1870,12 @@ class BindJSRuntime {
             this.appState[key] = value;
         };
 
-        this.navigateCallback = (path, options) => {
-            console.log('Navigate not implemented', path, options);
+        this.navigateCallback = ({ to, props }) => {
+            console.log('Navigate not implemented', to, props);
         };
 
-        this.actionCallback = (action, options) => {
-            console.log('Action not implemented', path, options);
+        this.actionCallback = ({ name, props }) => {
+            console.log('Action not implemented', name, props);
         };
 
         this.withAnimation = (handlerId) => {
@@ -1724,7 +1934,7 @@ class BindJSRuntime {
 
     resetStorage() {
         this.storedEnvironments = {};
-        this.storedFunctions = {};
+        //this.storedFunctions = {}
         this.storedData = {};
         this.storedHookStates = {};
     }
@@ -1747,10 +1957,19 @@ class BindJSRuntime {
         // Register specific handlers for inbuilt components
         this.#registerBuiltInComponent('Color', Color);
         this.#registerBuiltInComponent('Button', Button);
-        this.#registerBuiltInComponent('NavigationLink', NavigationLink);
         this.#registerBuiltInComponent('ForEach', ForEach);
         this.#registerBuiltInComponent('Content', Content);
         this.#registerBuiltInComponent('Picker', Picker);
+        this.#registerBuiltInComponent('NavigationLink', NavigationLink);
+
+        this.registerComponentName('ThumbnailComponent');
+        this.registerComponentName('ThumbnailContent');
+        this.registerComponentName('SizeToFitScreen');
+
+        // Register default components. These are components initalised with bindjs body string.
+        this.#registerDefaultComponent('ThumbnailComponent', code);
+        this.#registerDefaultComponent('ThumbnailContent', body$1);
+        this.#registerDefaultComponent('SizeToFitScreen', body);
 
         // Register specific handlers for inbuilt modifiers
         this.#registerBuiltInModifier('padding', Padding);
@@ -1811,19 +2030,27 @@ class BindJSRuntime {
             this.registerCallback(key, funcs[key]);
         }
 
+        this.registerCallback('OpenURLAction', OpenURLAction.bind(this));
 
         // useState
         this.registerCallback('useState', useState.bind(this));
 
-        // useState
+        // useAppState (deprecated)
         this.registerCallback('useAppState', useAppState.bind(this));
+
+        // useStore
+        this.registerCallback('useStore', useStore.bind(this));
 
         // useNavigate
         this.registerCallback('useNavigate', useNavigate.bind(this));
         this.registerCallback('useAction', useAction.bind(this));
 
-        // makeComponent
+        // DEPRECATED: makeComponent
         this.registerCallback('makeComponent', makeComponent.bind(this));
+
+        // Define
+        this.registerCallback('defineComponent', this.defineComponent.bind(this));
+        this.registerCallback('defineButtonStyle', this.defineButtonStyle.bind(this));
 
         // getContent
         this.registerCallback('getContent', getContent.bind(this));
@@ -1852,6 +2079,14 @@ class BindJSRuntime {
         };
     }
 
+    #registerDefaultComponent(name, bodyCode) {
+        const code = bodyCode += `
+        exports.default = defineComponent({ body })
+        `;
+        this.registerComponentName(name);
+        this.registerComponent(name, code);
+    }
+
     /**
      * Registers a built in modifier using a callback
      */
@@ -1873,37 +2108,297 @@ class BindJSRuntime {
         }
     }
 
-    registerComponent(componentName, content, entryPoint = 'body') {
-        const name = componentName.replace(/\s/g, '');
+    aliasComponent(componentName, aliasName) {
+        this.components[aliasName] = this.components[componentName];
+        this.context[aliasName] = this.context[componentName];
+    }
+
+    registerComponentName(componentName) {
+        const name = this.sanitizeName(componentName);
+        this.context[name] = this.makeComponent(() => {
+            return AST.Directive('Text', { rawValue: "Placeholder" })
+        });
+    }
+
+    sanitizeName = (componentName) => {
+        // Remove all characters that are NOT (letters, digits, $, _)
+        let name = componentName.replace(/[^a-zA-Z0-9$_]/g, '');
+
+        // If the name starts with a digit, prefix with an underscore
+        if (/^[0-9]/.test(name)) {
+            name = '_' + name;
+        }
+
+        return name;
+    };
+
+    /**
+     * Checks if content has an explicit export statement (ignoring comments)
+     * @private
+     */
+    #hasExplicitExport(content) {
+        // Match exports.default = at the start of a line, ignoring leading whitespace
+        // but not if it's in a comment
+        const regex = /^(?!\s*\/\/)(?!\s*\/\*)\s*exports\.default\s*=/m;
+        return regex.test(content);
+    }
+
+    /**
+     * Checks if content has a const declaration with the given name
+     * @private
+     */
+    #hasConst(content, name) {
+        const regex = new RegExp(`^(?!\\s*//)\\s*const\\s+${name}\\s*=`, "m");
+        return regex.test(content);
+    }
+
+    /**
+     * Wraps legacy component code in a defineComponent export
+     * @private
+     */
+    #wrapInDefineComponent(content) {
+        const componentParts = {
+            body: this.#hasConst(content, 'body') ? 'body' : '() => null',
+            metadata: this.#hasConst(content, 'metadata') ? 'metadata' : '{}',
+            properties: this.#hasConst(content, 'properties') ? 'properties' : '{}',
+            previews: this.#hasConst(content, 'previews') ? 'previews' : 'null',
+            thumbnail: this.#hasConst(content, 'thumbnail') ? 'thumbnail' : 'null'
+        };
+
+        const exportStatement = `
+exports.default = defineComponent({
+    body: ${componentParts.body},
+    metadata: ${componentParts.metadata},
+    properties: ${componentParts.properties},
+    previews: ${componentParts.previews},
+    thumbnail: ${componentParts.thumbnail}
+});`;
+
+        return content + exportStatement;
+    }
+
+
+    // Registers the content of a component into the runtime.
+    // Content is the JS of the component.
+    // Entry point is the export to use. i.e. exports.default
+    registerComponent(componentName, content, entryPoint = 'default') {
+        const name = this.sanitizeName(componentName);
+
         this.callStack = [];
         this.functionCache[name] = {};
+
+        this._currentComponentName = name;
+
+        /**
+         * Backward compatibility: Auto-wrap legacy component code in defineComponent
+         * TODO: Migration removal - remove once all components use explicit exports
+         */
+        if ((entryPoint === 'default' || entryPoint === 'body') && !this.#hasExplicitExport(content)) {
+            content = this.#wrapInDefineComponent(content);
+        }
+
         this.components[name] = content;
 
+        // Create the function
+        // This will defer the compiling of the component until it is called.
         this.context[name] = (arg1, arg2, ...otherArgs) => {
             const { props, children } = processComponentArgs(arg1, arg2);
 
             return this.#makeComponent((props, children) => {
+                this._currentComponentName = name;
 
-                // Call the body of our registered component
-                let componentFunction = this.call(name, entryPoint, this.convertComponentProps(props), children, ...otherArgs);
-
-                // It's assumed a component returns an inbuilt component.
-                // Run the returned function to generate the ast
-                let ast = componentFunction ? componentFunction() : null;
-
-                if (ast && ast._component) {
-                    ast = ast();
+                // Get the export and the body content to run.
+                try {
+                    let exportComponent = this.getComponentExport(name);
+                    if (typeof exportComponent?._body == 'boolean' && exportComponent?._body == true) {
+                        return exportComponent?._bodyContent(props, children, ...otherArgs);
+                    } else {
+                        return exportComponent;
+                    }
+                } catch (error) {
+                    //console.error('Error running component', name, error);
+                    return null;
                 }
 
-                // Wrap the component in a directive so the renderer knows what component generated that part of the AST
-                let componentAst = AST.Directive('ComponentCall', { name: name, props: props }, [ast]);
-
-                // Return
-                return componentAst
-
             }, props, children, name)
-
         };
+
+    }
+
+    // Gets default export from a registered component.
+    //
+    // If property is passed will return that property from the default export.
+    // Each property is executed and cached individually so that the function list is correctly resolved.
+    // Meaning , trys to avoid issue of if say metadata is accessed before all functions have been registered , it'll only be the metadata funciton that will have the incomplete list.
+    getComponentExport(componentName, property, cache = true) {
+        const componentKeys = Object.keys(this.context);
+        const functionList = componentKeys.join(', ');
+        //console.log('getComponetnExport ', componentName, componentKeys);
+        let func = null;
+
+        if (cache && this.functionCache[componentName] && this.functionCache[componentName]['export_' + property]) {
+            func = this.functionCache[componentName]['export_' + property];
+        } else {
+            const returnStatement = property ? `return exports.default?.${property};` : "return exports.default;";
+
+            try {
+                func = new Function(`{ ${functionList} }`, `var exports = {}; ${this.components[componentName]}; ${returnStatement}`)(this.context);
+            } catch (error) {
+                //console.error('Error running component', componentName, error);
+                return null;
+            }
+
+            if (cache && func) {
+                this.functionCache[componentName]['export_' + property] = func;
+            }
+        }
+
+        return func
+    }
+
+    getComponentType(componentName) {
+        let exportComponent = this.getComponentExport(componentName);
+        if (!exportComponent) {
+            return null;
+        }
+        if (exportComponent._component) {
+            return "Component"
+        } else if (exportComponent._buttonStyle) {
+            return "ButtonStyleComponent"
+        } else {
+            return null;
+        }
+    }
+
+    defineProperties(definitionProps) {
+        return definitionProps
+    }
+
+    /**
+     * Defines a component with its body, metadata, properties, previews, and thumbnail.
+     *
+     * This is the primary method used within component code to export a complete component
+     * definition. It packages all aspects of a component into a single callable function
+     * that can be used throughout the runtime.
+     *
+     * The component definition includes:
+     * - **body**: The main rendering function that returns the component's UI structure
+     * - **metadata**: Descriptive information (title, description, category, visibility)
+     * - **properties**: Property definitions for configurable inputs
+     * - **previews**: Array of pre-configured component instances for documentation
+     * - **thumbnail**: Visual representation (SVG string or function) for galleries
+     *
+     * This method is typically called at the end of a component file as:
+     * `exports.default = defineComponent({ body, metadata, properties, previews, thumbnail })`
+     *
+     * @param {Object} definitionProps - The component definition object
+     * @param {Function} definitionProps.body - The component's body function (props, children) => Component
+     * @param {Object|Function} [definitionProps.metadata] - Component metadata (title, description, etc.)
+     * @param {Object|Function} [definitionProps.properties] - Property definitions for the component
+     * @param {Array|Function} [definitionProps.previews] - Array of preview component instances
+     * @param {string|Function} [definitionProps.thumbnail] - Thumbnail representation (SVG or function)
+     * @returns {Function} A callable component function with attached metadata, properties, previews, and thumbnail
+     *
+     * @example
+     * // Basic component definition
+     * const body = (props, children) => {
+     *   return Text(props.label)
+     * }
+     *
+     * const metadata = {
+     *   title: 'My Button',
+     *   description: 'A simple button component',
+     *   category: 'Controls'
+     * }
+     *
+     * const properties = {
+     *   label: { type: 'string', defaultValue: 'Click me' }
+     * }
+     *
+     * exports.default = defineComponent({ body, metadata, properties })
+     */
+    defineComponent(definitionProps) {
+        const { metadata, properties, body, previews, thumbnail } = definitionProps;
+
+        var componentName = this._currentComponentName;
+        if (!componentName) {
+            // If it isn't passed in, generate one from the call order
+            const componentIndex = this.hookState.makeComponentIndex++;
+            componentName = `Component_${componentIndex}`;
+        }
+
+        // Body content of the component.
+        const bodyContent = (props, children, ...otherArgs) => {
+
+            const convertedProps = this.convertComponentProps(props);
+
+            // Call the body of our registered component
+            const componentFunction = body(convertedProps, children, ...otherArgs);
+
+            // It's assumed a component returns an inbuilt component.
+            // Run the returned function to generate the ast
+            let ast = componentFunction && typeof componentFunction === 'function' ? componentFunction() : null;
+
+            if (ast && ast._component) {
+                ast = ast();
+            }
+
+            // Wrap the component in a directive so the renderer knows what component generated that part of the AST
+            const componentAst = AST.Directive('ComponentCall', { name: componentName, props: props }, [ast]);
+
+            // Return
+            return componentAst
+        };
+
+        // This body is executed when the return from defineComponent is called directly.
+        // So by components that are defined inline using defineComponent().
+        // Execution of the body uses the bodyContent function when called from a registered component.
+        const bodyDefinition = (arg1, arg2, ...otherArgs) => {
+            const { props, children } = processComponentArgs(arg1 ?? {}, arg2 ?? []);
+            return this.#makeComponent(bodyContent, props, children, componentName)
+        };
+
+        // Flag this definition function as being a component but also that it's a body function.
+        bodyDefinition._component = true;
+        bodyDefinition._body = true;
+        bodyDefinition._bodyContent = bodyContent;
+
+        bodyDefinition.metadata = metadata;
+        bodyDefinition.properties = properties;
+        bodyDefinition.thumbnail = thumbnail;
+        bodyDefinition.previews = previews;
+        bodyDefinition.body = body;
+
+        // Return the definition
+        return bodyDefinition
+    }
+
+    defineButtonStyle(buttonStyleDefinition) {
+        const { body } = buttonStyleDefinition;
+
+        const bodyContent = (props, children) => {
+            // Store handle to the body function for the buttonStyle modifier
+            const path = this.currentPathId('buttonStyle');
+            let handlerId = this.storeFunction(body, path);
+
+            // When called as a component, render using the body
+            let renderAsComponentAST = AST.Directive('Text', { rawValue: 'Button Style' });
+            let ast = body({ label: this.makeComponent(() => renderAsComponentAST) }, props);
+            ast = this.unwrapComponentAST(ast);
+
+            // Return with both ast and the handlerId.
+            return { props: (props ?? {}), handlerId, ...ast }
+        };
+
+        const bodyDefinition = (props) => {
+            return this.makeComponent(bodyContent, props)
+        };
+
+        bodyDefinition._buttonStyle = true;
+        bodyDefinition._body = true;
+        bodyDefinition._bodyContent = bodyContent;
+        bodyDefinition.body = bodyDefinition;
+        return bodyDefinition
     }
 
     /**
@@ -1919,9 +2414,9 @@ class BindJSRuntime {
      * Open URL handling
      * @param {*} url
      */
-    openURLAction(url, resultCallback) {
+    openURL(url, resultCallback, options = { preferInApp: false }) {
         if (this.onOpenURL) {
-            this.onOpenURL(url, resultCallback);
+            this.onOpenURL(url, resultCallback, options);
         } else if (resultCallback) {
             resultCallback(false);
         }
@@ -1932,7 +2427,7 @@ class BindJSRuntime {
      * @param {*} environment
      */
     registerEnvironment(environment = {}) {
-        this.environment = { openURL: this.openURLAction.bind(this), ...environment };
+        this.environment = { openURL: this.openURL.bind(this), ...environment };
     }
 
     /**
@@ -1994,17 +2489,282 @@ class BindJSRuntime {
     }
 
     /**
-     * Calls the main body of a component for rendering the AST
+     * Calls the body of registered component and returns its body as an AST.
+     *
+     * This is the primary method for executing a component that has been registered
+     * via registerComponent(). It looks up the component by name in the context,
+     * calls it with the provided parameters, and unwraps any component functions
+     * to return the final AST representation.
+     *
+     * @param {string} componentName - The name of the registered component to call
+     * @param {Object} params - Props/parameters to pass to the component
+     * @param {Array} children - Child components to pass to the component
+     * @param {boolean} unwrap - Whether to unwrap the component AST or just return the body function. Useful if wanting to wrap the output in the children another element to be called.
+     * @param {...any} args - Additional arguments to pass to the component
+     * @returns {Object|null} The component's AST, or null if the component doesn't exist
+     *
+     * @example
+     * const ast = runtime.callComponent('MyComponent', { color: 'blue' }, []);
      */
-    callComponent(componentName, params, children, ...args) {
+    callComponent(componentName, params, children, unwrap = true, ...args) {
+        componentName = this.sanitizeName(componentName);
+
         let body = this.context[componentName];
         if (body) {
             let b = body(params, children, ...args);
-            if (typeof b === 'function' && b._component) {
-                return b()
-            }
+            return unwrap ? this.invokeComponent(b) : b
         }
         return null
+    }
+
+    /**
+     * Invokes a component function and returns its AST.
+     */
+    invokeComponent(element) {
+        return this.unwrapComponentAST(element)
+    }
+
+    /**
+     * Calls a specific preview variant of a registered component and returns its AST.
+     *
+     * This method retrieves and executes a preview from the component's previews array.
+     * Previews are alternative representations of a component, typically used for
+     * documentation, galleries, or showcasing different states/configurations.
+     *
+     * If the requested preview doesn't exist or the component has no previews defined,
+     * this method falls back to calling the component's main body.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @param {number} previewIndex - The index of the preview to render (0-based)
+     * @param {Object} params - Props/parameters to pass to the preview or body
+     * @param {Array} children - Child components to pass to the preview or body
+     * @param {...any} args - Additional arguments to pass
+     * @returns {Object|null} The preview's AST, or the body's AST if no preview exists
+     *
+     * @example
+     * // Render the first preview of a Button component
+     * const ast = runtime.callComponentPreview('Button', 0, { label: 'Click me' }, []);
+     */
+    callComponentPreview(componentName, previewIndex, params, children, unwrap = true, ...args) {
+        componentName = this.sanitizeName(componentName);
+
+        let previews = this.getComponentPreviews(componentName);
+        if (previews && Array.isArray(previews) && previews.length > 0) {
+            let b = previews[previewIndex];
+            if (b) {
+                return unwrap ? this.unwrapComponentAST(b) : b
+            }
+        }
+
+        // Fallback to body
+        return this.callComponent(componentName, params, children, unwrap, ...args)
+    }
+
+    /**
+     * Renders a component as a thumbnail with optional framing.
+     *
+     * This method generates a thumbnail representation of a component, which is useful
+     * for component galleries, content previews, or visual catalogs. The thumbnail can be:
+     * 1. A custom thumbnail defined by the component (string SVG or function)
+     * 2. The component's first preview (fallback)
+     * 3. Optionally wrapped in a frame component for consistent presentation
+     *
+     * The thumbnail can be framed in two ways:
+     * - 'component': Wraps in ThumbnailComponent (for component library thumbnails)
+     * - 'content': Wraps in ThumbnailContent (for content/page thumbnails with platform sizing)
+     *
+     * @param {string} componentName - The name of the registered component
+     * @param {Object} thumbnailOptions - Configuration for thumbnail rendering
+     * @param {string} thumbnailOptions.type - Frame type: 'component', 'content', or undefined for no frame
+     * @param {string} [thumbnailOptions.defaultPlatform] - Platform size for 'content' type (mobile/tablet/desktop)
+     * @param {number} [thumbnailOptions.padding] - Padding for the thumbnail frame
+     * @param {Object} params - Props/parameters to pass to the component
+     * @param {Array} children - Child components to pass
+     * @param {...any} args - Additional arguments
+     * @returns {Object} The thumbnail's AST, optionally wrapped in a frame component
+     *
+     * @example
+     * // Render a component thumbnail with component frame
+     * const ast = runtime.callComponentThumbnail('MyButton', { type: 'component' }, {}, []);
+     *
+     * @example
+     * // Render a content thumbnail with mobile sizing
+     * const ast = runtime.callComponentThumbnail('HomePage',
+     *   { type: 'content', defaultPlatform: 'mobile', padding: 20 },
+     *   {}, []
+     * );
+     */
+    callComponentThumbnail(componentName, thumbnailOptions = {}, params, children, unwrap = true, ...args) {
+        componentName = this.sanitizeName(componentName);
+
+        // First determine if the component specifies a custom thumbnail.
+        let thumbnail = this.getComponentThumbnail(componentName);
+        if (typeof thumbnail == 'string') {
+            thumbnail = AST.Directive('Image', { svg: thumbnail });
+        } else if (typeof thumbnail == 'function') {
+            thumbnail = thumbnail(params, children);
+        }
+
+        var thumbnailContent = thumbnail;
+
+        // Fallback to preview when no thumbnail is defined
+        if (!thumbnail) {
+            thumbnailContent = this.callComponentPreview(componentName, 0, params, children, unwrap, ...args);
+        }
+
+        // Apply the built in thumbnail component views.
+        // These will be applied when thumbnailOptions is passed with type component | content.
+        // Otherwise if not passed then the thumbnail content is returned as is.
+        if (thumbnailOptions.type == 'component') {
+            return this.callComponent('ThumbnailComponent', thumbnailOptions, [thumbnailContent], unwrap, ...args)
+        } else if (thumbnailOptions.type == 'content') {
+            return this.callComponent('ThumbnailContent', thumbnailOptions, [thumbnailContent], unwrap, ...args)
+        } else {
+            return thumbnailContent
+        }
+
+    }
+
+    /**
+     * Retrieves the metadata for a registered component.
+     *
+     * Metadata provides descriptive information about a component, such as its title,
+     * description, category, and visibility settings. This is commonly used for:
+     * - Component documentation and catalogs
+     * - IDE autocomplete and tooltips
+     * - Component organization and filtering
+     *
+     * If the metadata is defined as a function, it will be executed and the result returned.
+     * If no metadata is defined, an empty object is returned.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @returns {Object} The component's metadata object (always returns an object, never null)
+     *
+     * @example
+     * const metadata = runtime.getComponentMetadata('Button');
+     * // Returns: { title: 'Button', description: 'A clickable button', category: 'Controls' }
+     */
+    getComponentMetadata(componentName) {
+        let metadata = this.getComponentExport(componentName, 'metadata');
+        metadata = typeof metadata === 'function' ? metadata() : metadata ?? {};
+        return metadata
+    }
+
+    /**
+     * Retrieves the property definitions for a registered component.
+     *
+     * Properties define the configurable inputs (props) that a component accepts,
+     * including their types, default values, validation rules, and inspector UI settings.
+     * This information is used for:
+     * - Visual property editors and inspectors
+     * - Type checking and validation
+     * - Auto-generating component documentation
+     * - IDE autocomplete for component props
+     *
+     * If the properties are defined as a function, it will be executed and the result returned.
+     * If no properties are defined, an empty object is returned.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @returns {Object} The component's property definitions (always returns an object, never null)
+     *
+     * @example
+     * const properties = runtime.getComponentProperties('Button');
+     * // Returns: { label: { type: 'string', defaultValue: 'Click me' }, ... }
+     */
+    getComponentProperties(componentName) {
+        let properties = this.getComponentExport(componentName, 'properties');
+        properties = typeof properties === 'function' ? properties() : properties ?? {};
+        return properties
+    }
+
+    /**
+     * Retrieves the preview variants for a registered component.
+     *
+     * Previews are pre-configured instances of a component that showcase different
+     * states, configurations, or use cases. They are commonly used for:
+     * - Component documentation and galleries
+     * - Visual regression testing
+     * - Design system showcases
+     * - Quick component exploration
+     *
+     * If the previews are defined as a function, it will be executed and the result returned.
+     * Previews should be an array of component instances or null/undefined if none are defined.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @returns {Array|null|undefined} Array of preview component instances, or null/undefined if none defined
+     * 
+     * @example
+     * const previews = runtime.getComponentPreviews('Button');
+     * // Returns: [Button({ label: 'Primary' }), Button({ label: 'Secondary', variant: 'outline' })]
+     */
+    getComponentPreviews(componentName) {
+        let previews = this.getComponentExport(componentName, 'previews');
+        if (previews && typeof previews == 'function') {
+            previews = previews();
+        }
+        if (!Array.isArray(previews)) {
+            previews = [];
+        }
+        return previews
+    }
+
+    /**
+     * Retrieves component previews with extracted metadata (id, title, component).
+     *
+     * This method processes previews to extract custom names from the previewName modifier.
+     * If a preview uses .previewName('Custom Name'), that name will be used as the title.
+     * Otherwise, it defaults to "Preview N" where N is the 1-based index.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @returns {Array<{id: string, title: string, component: any}>} Array of preview metadata objects
+     *
+     * @example
+     * const previews = runtime.getComponentPreviewsWithMetadata('Button');
+     * // Returns: [
+     * //   { id: '0', title: 'Default', component: [preview AST] },
+     * //   { id: '1', title: 'Preview 2', component: [preview AST] }
+     * // ]
+     */
+    getComponentPreviewsWithMetadata(componentName) {
+        let previews = this.getComponentPreviews(componentName);
+        return previews.map((preview, index) => {
+            let previewAST = preview();
+            let title = null;
+
+            // Extract preview name if available from the previewName modifier
+            if (previewAST?.type === "ModifiedComponent" && previewAST.modifier?.type === "previewName") {
+                title = previewAST.modifier?.props?.rawValue;
+            }
+
+            return {
+                id: String(index),
+                title: title ?? `Preview ${index + 1}`,
+                component: preview
+            };
+        });
+    }
+
+    /**
+     * Retrieves the thumbnail representation for a registered component.
+     *
+     * A thumbnail is a visual representation of a component used in galleries, catalogs,
+     * or selection interfaces. The thumbnail can be defined as:
+     * - A string containing SVG markup for a static icon/image
+     * - A function that returns a component instance for dynamic thumbnails
+     * - null/undefined if no custom thumbnail is defined (will fallback to preview)
+     *
+     * Thumbnails are typically smaller, simplified versions of components optimized
+     * for quick visual identification in component libraries or content browsers.
+     *
+     * @param {string} componentName - The name of the registered component
+     * @returns {string|Function|null|undefined} SVG string, thumbnail function, or null/undefined
+     *
+     * @example
+     * const thumbnail = runtime.getComponentThumbnail('Button');
+     * // Returns: '<svg>...</svg>' or a function that generates the thumbnail
+     */
+    getComponentThumbnail(componentName) {
+        return this.getComponentExport(componentName, 'thumbnail')
     }
 
     /**
@@ -2024,6 +2784,7 @@ class BindJSRuntime {
     }
 
     /**
+     * DEPRECATED
      * Calls a function within a registered component
      * @param {*} componentName
      * @param {*} componentEntryPoint
@@ -2033,18 +2794,26 @@ class BindJSRuntime {
         const componentKeys = Object.keys(this.context);
         const functionList = componentKeys.join(', ');
 
+        //console.log('call deprecated: ', componentName, componentEntryPoint);
+
         let func = null;
         if (this.functionCache[componentName] && this.functionCache[componentName][componentEntryPoint]) {
             //console.log(`[cache hit ${componentName}.${componentEntryPoint}]`)
             func = this.functionCache[componentName][componentEntryPoint];
         } else {
             //console.log(`[constructing ${componentName}.${componentEntryPoint}]`)
-            func = new Function(`{ ${functionList} }`, `${this.components[componentName]}; return ${componentEntryPoint}`)(this.context);
+            func = new Function(`{ ${functionList} }`, `var exports = {}; ${this.components[componentName]}; return ${componentEntryPoint}`)(this.context);
             this.functionCache[componentName][componentEntryPoint] = func;
+        }
+
+        // Backward compatibility. Migrating props and metadata just to objects.
+        if (typeof func === 'object') {
+            return func
         }
 
         return func(params, children, ...args)
     }
+
 
     /**
      * Process the props for a component or a modifier ,expanding functions in arrays or values
@@ -2208,6 +2977,7 @@ class BindJSRuntime {
     }
 
     makeComponent(body, props, children) {
+        //console.log('Make component', body, props, children)
         return this.#makeComponent(body, props, children)
     }
 
@@ -2224,12 +2994,13 @@ class BindJSRuntime {
             // Use id if specified otherwise use child index + component name to create a deterministct path to that item.
             var id = null;
             if (modifierId) {
-                id = modifierId;
+                id = modifierId + componentName + '_' + childIndex;
             } else if (forEachElementId) {
                 id = forEachElementId;
             } else {
                 id = componentName + '_' + childIndex;
             }
+
             path.push(id);
 
             // Create path key. This is a unique key consistent across renders
@@ -2346,4 +3117,10 @@ class BindJSRuntime {
         return result
     }
 
+    /**
+     * Gets a component from the context
+     */
+    getComponent(name) {
+        return this.context[name]
+    }
 }
