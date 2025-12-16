@@ -275,13 +275,15 @@ public class BindJSContext: ObservableObject {
 
     private static func loadRuntime() -> String {
         guard
-            let url = Bundle.module.url(forResource: "JSRuntime", withExtension: "js"),
-            let jsCode = try? String(contentsOf: url, encoding: .utf8)
+            let coreUrl = Bundle.module.url(forResource: "BindJSRuntime", withExtension: "js"),
+            let wrapperUrl = Bundle.module.url(forResource: "BindJSRuntimeWrapper", withExtension: "js"),
+            let coreCode = try? String(contentsOf: coreUrl, encoding: .utf8),
+            let wrapperCode = try? String(contentsOf: wrapperUrl, encoding: .utf8)
         else {
-            print("Error loading JSRuntime.js")
+            print("Error loading JSRuntime files")
             return ""
         }
-        return jsCode
+        return coreCode + "\n" + wrapperCode
     }
     
     /// JSON-encodes a JSValue using the JavaScript JSON.stringify function.

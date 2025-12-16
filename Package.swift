@@ -32,7 +32,8 @@ let package = Package(
                 .product(name: "GLTFKit2", package: "GLTFKit2")
             ],
             resources: [
-                .copy("Resources/JSRuntime.js")
+                .copy("Resources/BindJSRuntime.js"),
+                .copy("Resources/BindJSRuntimeWrapper.js")
             ]
         ),
     ]
