@@ -51,7 +51,7 @@ extension ToolbarVisibilityComponent: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
-        if #available(iOS 16.0, macOS 15.0, *) {
+        if #available(iOS 18.0, macOS 15.0, *) {
             let toolbarVisibility: Visibility = {
                 switch visibility {
                 case "visible":
