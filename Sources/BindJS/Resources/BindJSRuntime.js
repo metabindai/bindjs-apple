@@ -897,7 +897,7 @@ function Opacity({ args, content }) {
         // Return the Color directly
         return { ast: content }
 
-    } else if (content && content.type === 'ModifiedComponent' && content.modifier.type === 'opacity') {
+    } else if (content && content.type === 'ModifiedComponent' && content.props.modifier.type === 'opacity') {
 
         // Collapse opacity modifiers
         content.modifier.props.rawValue *= opacity;
@@ -2148,7 +2148,7 @@ class BindJSRuntime {
      * @private
      */
     #hasConst(content, name) {
-        const regex = new RegExp(`^(?!\\s*//)\\s*const\\s+${name}\\s*=`, "m");
+        const regex = new RegExp(`^(?!\\s*//).*\\bconst\\s+${name}\\s*=`, "m");
         return regex.test(content);
     }
 
@@ -2216,7 +2216,7 @@ exports.default = defineComponent({
                         return exportComponent;
                     }
                 } catch (error) {
-                    //console.error('Error running component', name, error);
+                    console.log('Error running component', name, error?.message);
                     return null;
                 }
 
@@ -2244,7 +2244,7 @@ exports.default = defineComponent({
             try {
                 func = new Function(`{ ${functionList} }`, `var exports = {}; ${this.components[componentName]}; ${returnStatement}`)(this.context);
             } catch (error) {
-                //console.error('Error running component', componentName, error);
+                console.log('Error getting component export', componentName, error?.message);
                 return null;
             }
 
@@ -2508,7 +2508,7 @@ exports.default = defineComponent({
      */
     callComponent(componentName, params, children, unwrap = true, ...args) {
         componentName = this.sanitizeName(componentName);
-
+        this.aliasComponent(componentName, 'Self');
         let body = this.context[componentName];
         if (body) {
             let b = body(params, children, ...args);
