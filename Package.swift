@@ -19,7 +19,7 @@ let package = Package(
             targets: ["BindJS"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/exyte/SVGView", from: "1.0.6"),
+        .package(url: "https://github.com/yapstudios/SVGView.git", from: "1.0.7"),
         .package(url: "https://github.com/warrenm/GLTFKit2", from: "0.5.11")
     ],
     targets: [
@@ -28,7 +28,7 @@ let package = Package(
         .target(
             name: "BindJS",
             dependencies: [
-                .product(name: "SVGView", package: "SVGView"),
+                .product(name: "SVGViewKit", package: "SVGView"),
                 .product(name: "GLTFKit2", package: "GLTFKit2")
             ],
             resources: [
