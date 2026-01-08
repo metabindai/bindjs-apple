@@ -5,7 +5,6 @@
 
 import SwiftUI
 import Combine
-import BindJS
 
 // MARK: - Pure Rendering View (No Networking)
 
