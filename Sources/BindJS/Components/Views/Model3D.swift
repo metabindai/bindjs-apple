@@ -1,6 +1,6 @@
 import SwiftUI
 import SceneKit
-import GLTFKit2
+@_implementationOnly import GLTFKit2
 import OSLog
 
 // MARK: - Model3DComponent

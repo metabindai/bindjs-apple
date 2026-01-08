@@ -9,18 +9,22 @@ ZIP_OUTPUT="$OUTPUT_DIR/$FRAMEWORK_NAME.xcframework.zip"
 DERIVED_DATA_DEVICE="$OUTPUT_DIR/DerivedData-device"
 DERIVED_DATA_SIM="$OUTPUT_DIR/DerivedData-simulator"
 PACKAGE_SWIFT="$(pwd)/Package.swift"
+PACKAGE_BACKUP="$(pwd)/Package.swift.backup"
 
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 echo "=== Building XCFramework for $FRAMEWORK_NAME ==="
 
-# Temporarily add type: .dynamic to Package.swift
-echo "Adding type: .dynamic to Package.swift..."
-sed -i '' 's/targets: \["BindJS"\])/type: .dynamic, targets: ["BindJS"])/' "$PACKAGE_SWIFT"
+# Backup Package.swift
+cp "$PACKAGE_SWIFT" "$PACKAGE_BACKUP"
 
 # Restore Package.swift on exit
-trap 'echo "Restoring Package.swift..."; sed -i "" "s/type: .dynamic, targets: \[\"BindJS\"\])/targets: [\"BindJS\"])/" "$PACKAGE_SWIFT"' EXIT
+trap 'echo "Restoring Package.swift..."; mv "$PACKAGE_BACKUP" "$PACKAGE_SWIFT"' EXIT
+
+# Add type: .dynamic to the library product in Package.swift
+echo "Adding type: .dynamic to Package.swift..."
+sed -i '' 's/targets: \["BindJS"\])/type: .dynamic, targets: ["BindJS"])/' "$PACKAGE_SWIFT"
 
 # Build for iOS device
 echo "Building for iOS device..."
@@ -31,6 +35,7 @@ xcodebuild archive \
     -derivedDataPath "$DERIVED_DATA_DEVICE" \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    SWIFT_SERIALIZE_DEBUGGING_OPTIONS=NO \
     -quiet
 
 # Build for iOS Simulator
@@ -42,6 +47,7 @@ xcodebuild archive \
     -derivedDataPath "$DERIVED_DATA_SIM" \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES \
+    SWIFT_SERIALIZE_DEBUGGING_OPTIONS=NO \
     -quiet
 
 # Copy swiftmodule into frameworks
@@ -50,14 +56,18 @@ echo "Copying Swift modules..."
 # iOS device
 DEVICE_FRAMEWORK="$OUTPUT_DIR/ios-device.xcarchive/Products/usr/local/lib/$FRAMEWORK_NAME.framework"
 DEVICE_SWIFTMODULE="$DERIVED_DATA_DEVICE/Build/Intermediates.noindex/ArchiveIntermediates/$SCHEME_NAME/BuildProductsPath/Release-iphoneos/$FRAMEWORK_NAME.swiftmodule"
+DEVICE_BUNDLE="$DERIVED_DATA_DEVICE/Build/Intermediates.noindex/ArchiveIntermediates/$SCHEME_NAME/BuildProductsPath/Release-iphoneos/${SCHEME_NAME}_${FRAMEWORK_NAME}.bundle"
 mkdir -p "$DEVICE_FRAMEWORK/Modules"
 cp -R "$DEVICE_SWIFTMODULE" "$DEVICE_FRAMEWORK/Modules/"
+cp -RL "$DEVICE_BUNDLE" "$DEVICE_FRAMEWORK/"
 
 # iOS simulator
 SIM_FRAMEWORK="$OUTPUT_DIR/ios-simulator.xcarchive/Products/usr/local/lib/$FRAMEWORK_NAME.framework"
 SIM_SWIFTMODULE="$DERIVED_DATA_SIM/Build/Intermediates.noindex/ArchiveIntermediates/$SCHEME_NAME/BuildProductsPath/Release-iphonesimulator/$FRAMEWORK_NAME.swiftmodule"
+SIM_BUNDLE="$DERIVED_DATA_SIM/Build/Intermediates.noindex/ArchiveIntermediates/$SCHEME_NAME/BuildProductsPath/Release-iphonesimulator/${SCHEME_NAME}_${FRAMEWORK_NAME}.bundle"
 mkdir -p "$SIM_FRAMEWORK/Modules"
 cp -R "$SIM_SWIFTMODULE" "$SIM_FRAMEWORK/Modules/"
+cp -RL "$SIM_BUNDLE" "$SIM_FRAMEWORK/"
 
 # Create XCFramework
 echo "Creating XCFramework..."

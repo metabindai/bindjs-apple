@@ -14,7 +14,7 @@ import ImageIO
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import OSLog
-import SVGViewKit
+@_implementationOnly import SVGViewKit
 
 public struct ImageComponent: Component {
     public static var directiveName: String = "Image"
