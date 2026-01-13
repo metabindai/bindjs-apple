@@ -134,6 +134,7 @@ const componentNames = [
     "Link",
     "List",
     "Main",
+    "Markdown",
     "MarkedValueLabel",
     "Material",
     "MaximumValueLabel",
@@ -280,7 +281,7 @@ function Color({ args }) {
         // Normalize the color input
         colorProps = normalizeColor(props);
     }
-
+    
 
     return { props: colorProps, children: [] }
 }
@@ -297,20 +298,20 @@ function isNamedColor(value) {
 function hexToRgba(hex) {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
     } else if (hex.length === 4) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
     }
     let r = 0, g = 0, b = 0, a = 1;
     if (hex.length === 6) {
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
+        r = parseInt(hex.substring(0,2), 16);
+        g = parseInt(hex.substring(2,4), 16);
+        b = parseInt(hex.substring(4,6), 16);
     } else if (hex.length === 8) {
-        r = parseInt(hex.substring(0, 2), 16);
-        g = parseInt(hex.substring(2, 4), 16);
-        b = parseInt(hex.substring(4, 6), 16);
-        a = parseInt(hex.substring(6, 8), 16) / 255;
+        r = parseInt(hex.substring(0,2), 16);
+        g = parseInt(hex.substring(2,4), 16);
+        b = parseInt(hex.substring(4,6), 16);
+        a = parseInt(hex.substring(6,8), 16) / 255;
     }
     return { r, g, b, a };
 }
@@ -322,12 +323,12 @@ function hsvToRgb(h, s, v) {
     let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
     let m = v - c;
     let r1 = 0, g1 = 0, b1 = 0;
-    if (h < 60) { r1 = c; g1 = x; b1 = 0; }
-    else if (h < 120) { r1 = x; g1 = c; b1 = 0; }
-    else if (h < 180) { r1 = 0; g1 = c; b1 = x; }
-    else if (h < 240) { r1 = 0; g1 = x; b1 = c; }
-    else if (h < 300) { r1 = x; g1 = 0; b1 = c; }
-    else { r1 = c; g1 = 0; b1 = x; }
+    if (h < 60)      { r1 = c; g1 = x; b1 = 0; }
+    else if (h < 120){ r1 = x; g1 = c; b1 = 0; }
+    else if (h < 180){ r1 = 0; g1 = c; b1 = x; }
+    else if (h < 240){ r1 = 0; g1 = x; b1 = c; }
+    else if (h < 300){ r1 = x; g1 = 0; b1 = c; }
+    else             { r1 = c; g1 = 0; b1 = x; }
     const rgb = {
         r: Math.round((r1 + m) * 255),
         g: Math.round((g1 + m) * 255),
@@ -479,7 +480,7 @@ function Picker({ args }) {
         props: { label, selection, currentValueId: dataId, setterId: setFunctionId, environmentId },
         children: childrenAST
     }
-
+    
 }
 
 function AnimationComponent({ args, name }) {
@@ -494,8 +495,6 @@ function AnimationComponent({ args, name }) {
         'InterpolatingSpring': 'interpolatingSpring',
     };
 
-    console.log('AnimationComponent', name, args);
-
     const props = {
         type: typeMap[name] ?? 'unknown',
         ...(args[0] ?? {})
@@ -505,18 +504,18 @@ function AnimationComponent({ args, name }) {
 }
 
 const propertyNameMap = {
-    'PropertyString': 'string',
-    'PropertyNumber': 'number',
-    'PropertyBoolean': 'boolean',
-    'PropertyEnum': 'enum',
-    'PropertyDate': 'date',
-    'PropertyArray': 'array',
-    'PropertyAsset': 'asset',
-    'PropertyGroup': 'group',
-    'PropertyContent': 'content',
+    'PropertyString'  : 'string',
+    'PropertyNumber'  : 'number',
+    'PropertyBoolean' : 'boolean',
+    'PropertyEnum'    : 'enum',
+    'PropertyDate'    : 'date',
+    'PropertyArray'   : 'array',
+    'PropertyAsset'   : 'asset',
+    'PropertyGroup'   : 'group',
+    'PropertyContent' : 'content',
     'PropertyComponent': 'component',
     'PropertyComponentList': 'componentList',
-    'PropertyChildren': 'children',
+    'PropertyChildren' : 'children',
 };
 
 function PropertyComponent({ args, name }) {
@@ -526,12 +525,12 @@ function PropertyComponent({ args, name }) {
         type: propertyNameMap[name] || 'unknown',
         ...props,
     };
-
+    
     return result;
 }
 
 function ComposerGroup({ args, name }) {
-    const props = {};
+    const props = { };
 
     const env = this.environment;
     var children = null;
@@ -579,12 +578,12 @@ function ComposerGroup({ args, name }) {
         // return (childGroupName === groupName)
     });
 
-
+    
     const result = {
         props: this.processProps(props),
         children: childrenAST
     };
-
+    
     return result;
 }
 
@@ -706,7 +705,7 @@ var modifiersToAddToEnvironment = [
     'imageScale',
     'colorScheme',
     'environment',
-
+    
     // EnvironmentValues from Environment.tsx
     'displayScale',
     'dynamicTypeSize',
@@ -865,7 +864,7 @@ function Resizable({ args, content }) {
 
         // If the content is a Image component, we need to modify its prop directly
         const imageProps = content.props;
-        imageProps.resizable = resizable == false ? false : true;
+        imageProps.resizable = resizable == false ? false : true ;
 
         // Return the Image directly
         return { ast: content }
@@ -897,7 +896,7 @@ function Opacity({ args, content }) {
         // Return the Color directly
         return { ast: content }
 
-    } else if (content && content.type === 'ModifiedComponent' && content.props.modifier.type === 'opacity') {
+    } else if (content && content.type === 'ModifiedComponent' && content.modifier.type === 'opacity') {
 
         // Collapse opacity modifiers
         content.modifier.props.rawValue *= opacity;
@@ -950,14 +949,14 @@ function OnHandler({ args, name }) {
     }
 }
 
-function AnimationModifier({ args, name, content }) {
+function AnimationModifier({ args,  name, content }) {
 
     const value = args[0];
-
+    
     // Add the value directly to the props of the content
     const props = content.props;
     props[name] = value;
-
+    
     // Return the AnimationComponent directly to squash the modifier.
     return { ast: content }
 }
@@ -1033,7 +1032,7 @@ function Fill({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.fill = this.processProps({ ...style });
 
-        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.fill = this.processProps({ style: style });
     }
@@ -1055,13 +1054,13 @@ function Stroke({ args, content }) {
     if (typeof style === 'object' && style.style != null) {
         shapeProps.stroke = this.processProps({ ...style });
 
-        // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
+    // Otherwise if the value is the style itself e.g. Color('red') or 'red', then setup the fill property
     } else if (typeof style === 'function') {
         shapeProps.stroke = this.processProps({ style: style });
     } else if (typeof style === 'number') {
         shapeProps.stroke = { lineWidth: style };
     }
-
+    
     // Return the Color directly
     return { ast: content }
 }
@@ -1078,7 +1077,7 @@ function ButtonStyle({ args, name }) {
         // Arg is a handler function
         if (arg._buttonStyle) {
             let unwrapped = arg();
-            return { props: unwrapped.props, handlerId: unwrapped.handlerId }
+            return { props: unwrapped.props, handlerId: unwrapped.handlerId, environmentId: unwrapped.environmentId }
         } else {
             return {}
         }
@@ -1185,7 +1184,7 @@ class VisualEffectBuilder {
         const hasTransform =
             m11 !== undefined || m12 !== undefined ||
             m21 !== undefined || m22 !== undefined ||
-            tx !== undefined || ty !== undefined;
+            tx  !== undefined || ty  !== undefined;
 
         if (hasTransform) {
             this.result.transform = {
@@ -1193,8 +1192,8 @@ class VisualEffectBuilder {
                 m12: m12 ?? 0,
                 m21: m21 ?? 0,
                 m22: m22 ?? 1,
-                tx: tx ?? 0,
-                ty: ty ?? 0,
+                tx:  tx  ?? 0,
+                ty:  ty  ?? 0,
             };
         }
 
@@ -1248,7 +1247,7 @@ function SheetModifier({ args, name }) {
     const onDismiss = props.onDismiss;
 
     const content = props.content;
-
+    
     // Return AST representation when content handler is called.
     const contentHandler = content ? () => {
         // Execute handler, then AST function.
@@ -1308,7 +1307,7 @@ function LayoutGroup({ args, name }) {
     const result = {
         ...props,
     };
-
+    
     return result;
 }
 
@@ -1322,7 +1321,7 @@ const Detent = {
 const getComponentData = (child) => {
     let ast = child();
     let data = findComponentDataInAST(ast);
-    return data ?? { name: null, props: {} }
+    return data ?? { name: null, props: {}  }
 };
 
 const findComponentDataInAST = (node) => {
@@ -1372,10 +1371,10 @@ const findComponentDataInAST = (node) => {
 };
 
 function useState(initialValue) {
-
+    
     // Sanity check
     if (this.hookState.currentComponent == null) {
-        return [initialValue, () => { }]
+        return [initialValue, () => {}]
     }
 
     // Get current state
@@ -1383,7 +1382,7 @@ function useState(initialValue) {
     const hookIndex = this.hookState.currentComponent.hookIndex;
 
     //console.log(`useState index ${currentHook} value ${hooks[currentHook]} initialValue ${initialValue}`);
-
+    
     // Initialise hook with initialValue if needed
     hooks[hookIndex] = hooks[hookIndex] == null ? initialValue : hooks[hookIndex];
 
@@ -1505,7 +1504,7 @@ function useAction() {
     return this.actionCallback
 }
 
-function makeComponent(component) {
+function makeComponent (component) {
 
     // Pass body directly or in dictionary
     let body = component.body ? component.body : component;
@@ -1518,7 +1517,7 @@ function makeComponent(component) {
     // Create body function
     let f = (props, children) =>
         this.makeComponent((props, children) => body(props, children), props, children, componentIndex);
-
+    
     f._component = true;
 
     return f
@@ -1531,7 +1530,7 @@ async function getContent(content) {
     if (this.getContent == null || contentId == null) {
         return null
 
-        // Call the getContent property assigned to the runtime with the contentId.
+    // Call the getContent property assigned to the runtime with the contentId.
     } else {
         return await this.getContent(contentId)
     }
@@ -1643,8 +1642,6 @@ function withAnimation(arg1, arg2) {
     } else if (typeof component === 'object') {
         options = component;
     }
-
-    console.log('withAnimation', options);
 
     let handlerId = this.storeFunction(callback, this.currentPathId('withAnimation'));
     if (this.withAnimation) {
@@ -1989,7 +1986,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
         // Register event handlers
-        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));
+        ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onHover', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));
 
         // Register animation components
         ['Spring', 'Linear', 'EaseIn', 'EaseOut', 'EaseInOut', 'Bouncy', 'Snappy', 'InterpolatingSpring'].map(name => this.#registerBuiltInComponent(name, AnimationComponent));
@@ -2148,7 +2145,7 @@ class BindJSRuntime {
      * @private
      */
     #hasConst(content, name) {
-        const regex = new RegExp(`^(?!\\s*//).*\\bconst\\s+${name}\\s*=`, "m");
+        const regex = new RegExp(`(^|[^\\w/])const\\s+${name}\\s*=`, "m");
         return regex.test(content);
     }
 
@@ -2216,7 +2213,7 @@ exports.default = defineComponent({
                         return exportComponent;
                     }
                 } catch (error) {
-                    console.log('Error running component', name, error?.message);
+                    console.error('Error running component', name, error);
                     return null;
                 }
 
@@ -2239,12 +2236,14 @@ exports.default = defineComponent({
         if (cache && this.functionCache[componentName] && this.functionCache[componentName]['export_' + property]) {
             func = this.functionCache[componentName]['export_' + property];
         } else {
+            this.aliasComponent(componentName, 'Self');
+
             const returnStatement = property ? `return exports.default?.${property};` : "return exports.default;";
 
             try {
                 func = new Function(`{ ${functionList} }`, `var exports = {}; ${this.components[componentName]}; ${returnStatement}`)(this.context);
             } catch (error) {
-                console.log('Error getting component export', componentName, error?.message);
+                console.error('Error running component', componentName, error);
                 return null;
             }
 
@@ -2380,6 +2379,7 @@ exports.default = defineComponent({
             // Store handle to the body function for the buttonStyle modifier
             const path = this.currentPathId('buttonStyle');
             let handlerId = this.storeFunction(body, path);
+            let environmentId = this.storeEnvironment(path, { restoreHookStateStorage: true });
 
             // When called as a component, render using the body
             let renderAsComponentAST = AST.Directive('Text', { rawValue: 'Button Style' });
@@ -2387,7 +2387,7 @@ exports.default = defineComponent({
             ast = this.unwrapComponentAST(ast);
 
             // Return with both ast and the handlerId.
-            return { props: (props ?? {}), handlerId, ...ast }
+            return { props: (props ?? {}), handlerId, environmentId, ...ast }
         };
 
         const bodyDefinition = (props) => {
@@ -2453,14 +2453,38 @@ exports.default = defineComponent({
      */
     restoreEnvironment(environmentId) {
         let env = this.storedEnvironments[environmentId];
+
         if (env) {
             this.environment = env;
         }
 
         let hookState = this.storedHookStates[environmentId];
         if (hookState) {
+
+            // Restore hook state path
             this.hookState.path = [...hookState.path];
+
+            // Restore storage for current function.
+            if (hookState.restoreHookStateStorage) {
+                this.restoreHookStateStorage();
+            }
         }
+    }
+
+    restoreHookStateStorage() {
+        // Setup currentComponent content.
+        // This is needed if when restoring a function that would be accessing state.
+        let { path, componentHookStore, currentComponent } = this.hookState;
+
+        // Create path key. This is a unique key consistent across renders
+        let hookKey = path.join('.');
+
+        // Get hook storage for this component
+        let hookStorage = componentHookStore[hookKey] ?? (componentHookStore[hookKey] = []);
+
+        // Setup component hook state for the component we're about to call
+        currentComponent.hookStorage = hookStorage;
+        currentComponent.hookIndex = 0;
     }
 
     getEnvironment(environmentId) {
@@ -2508,7 +2532,9 @@ exports.default = defineComponent({
      */
     callComponent(componentName, params, children, unwrap = true, ...args) {
         componentName = this.sanitizeName(componentName);
+
         this.aliasComponent(componentName, 'Self');
+
         let body = this.context[componentName];
         if (body) {
             let b = body(params, children, ...args);
@@ -2547,6 +2573,8 @@ exports.default = defineComponent({
      */
     callComponentPreview(componentName, previewIndex, params, children, unwrap = true, ...args) {
         componentName = this.sanitizeName(componentName);
+
+        this.aliasComponent(componentName, 'Self');
 
         let previews = this.getComponentPreviews(componentName);
         if (previews && Array.isArray(previews) && previews.length > 0) {
@@ -2692,7 +2720,7 @@ exports.default = defineComponent({
      *
      * @param {string} componentName - The name of the registered component
      * @returns {Array|null|undefined} Array of preview component instances, or null/undefined if none defined
-     * 
+     *
      * @example
      * const previews = runtime.getComponentPreviews('Button');
      * // Returns: [Button({ label: 'Primary' }), Button({ label: 'Secondary', variant: 'outline' })]
@@ -3041,13 +3069,13 @@ exports.default = defineComponent({
         return Math.random().toString(36).substring(7)
     }
 
-    storeEnvironment(environmentId) {
+    storeEnvironment(environmentId, options = {}) {
         const id = environmentId ?? this.#generateUniqueID();
         if (this.environment) {
             this.storedEnvironments[id] = { ...this.environment };
         }
         if (this.hookState) {
-            this.storedHookStates[id] = { path: [...this.hookState.path] };
+            this.storedHookStates[id] = { path: [...this.hookState.path], restoreHookStateStorage: options?.restoreHookStateStorage };
         }
         return id
     }
