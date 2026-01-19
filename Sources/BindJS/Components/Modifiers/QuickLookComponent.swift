@@ -36,7 +36,7 @@ extension QuickLookComponent: ViewModifier {
                 set: { newUrl in
                     if let setUrlId {
                         context.restoreEnvironment(id: environmentId)
-                        context.callEventHandler(id: setUrlId, arguments: newUrl)
+                        _ = context.callEventHandler(id: setUrlId, arguments: newUrl)
                     }
                 }
             ),
@@ -45,7 +45,7 @@ extension QuickLookComponent: ViewModifier {
             onLoadingChanged: { isLoading in
                 if let onLoadingChangedId {
                     context.restoreEnvironment(id: environmentId)
-                    context.callEventHandler(id: onLoadingChangedId, arguments: isLoading)
+                    _ = context.callEventHandler(id: onLoadingChangedId, arguments: isLoading)
                 }
             }
         )

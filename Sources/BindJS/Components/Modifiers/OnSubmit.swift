@@ -28,7 +28,7 @@ extension OnSubmitComponent: ViewModifier {
                 .onSubmit {
                     if let onSubmitId {
                         context.restoreEnvironment(id: environmentId)
-                        context.callEventHandler(id: onSubmitId, arguments: [])
+                        _ = context.callEventHandler(id: onSubmitId, arguments: [])
                     }
                 }
         } else {

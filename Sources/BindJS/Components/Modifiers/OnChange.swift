@@ -27,12 +27,12 @@ extension OnChangeComponent: ViewModifier {
         if #available(iOS 17.0, macOS 14.0, tvOS 17.0, watchOS 10.0, *) {
             content
                 .onChange(of: value) { oldValue, newValue in
-                    context.callEventHandler(id: handlerId, arguments: [oldValue, newValue])
+                    _ = context.callEventHandler(id: handlerId, arguments: [oldValue, newValue])
                 }
         } else {
             content
                 .onChange(of: value) { newValue in
-                    context.callEventHandler(id: handlerId, arguments: [newValue, newValue])
+                    _ = context.callEventHandler(id: handlerId, arguments: [newValue, newValue])
                 }
         }
     }

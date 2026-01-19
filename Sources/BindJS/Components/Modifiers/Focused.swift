@@ -52,13 +52,13 @@ private struct FocusedView<Content: View>: View {
     var body: some View {
         content
             .focused($focusState)
-            .onChange(of: focusState) { newValue in
+            .onChange(of: focusState) { oldValue, newValue in
                 if let setIsFocusedId {
                     context.restoreEnvironment(id: environmentId)
-                    context.callEventHandler(id: setIsFocusedId, arguments: newValue)
+                    _ = context.callEventHandler(id: setIsFocusedId, arguments: newValue)
                 }
             }
-            .onChange(of: isFocused) { newValue in
+            .onChange(of: isFocused) { oldValue, newValue in
                 focusState = newValue ?? false
             }
             .onAppear {

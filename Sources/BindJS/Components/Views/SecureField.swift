@@ -35,7 +35,7 @@ extension SecureFieldComponent: View {
             set: { newValue in
                 if let setTextId {
                     context.restoreEnvironment(id: environmentId)
-                    context.callEventHandler(id: setTextId, arguments: newValue)
+                    _ = context.callEventHandler(id: setTextId, arguments: newValue)
                 }
             }
         ))
