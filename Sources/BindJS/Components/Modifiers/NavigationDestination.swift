@@ -15,7 +15,7 @@ public struct NavigationDestinationComponent: Component {
 
     func handleChange(isPresented: Bool) {
         if let setIsPresentedHandlerId {
-            context.callEventHandler(id: setIsPresentedHandlerId, arguments: isPresented)
+            _ = context.callEventHandler(id: setIsPresentedHandlerId, arguments: isPresented)
         }
     }
 

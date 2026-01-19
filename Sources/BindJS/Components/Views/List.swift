@@ -37,7 +37,7 @@ extension ListComponent: View {
                 set: { newValue in
                     context.restoreEnvironment(id: environmentId)
                     if let selectionSetterId = setSelectionId {
-                        context.callEventHandler(id: selectionSetterId, arguments: newValue)
+                        _ = context.callEventHandler(id: selectionSetterId, arguments: newValue)
                     }
                 }
             )) {

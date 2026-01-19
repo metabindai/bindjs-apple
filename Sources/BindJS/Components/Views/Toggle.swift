@@ -35,7 +35,7 @@ extension ToggleComponent: View {
             set: { newValue in
                 if let setIsOnId {
                     context.restoreEnvironment(id: environmentId)
-                    context.callEventHandler(id: setIsOnId, arguments: newValue)
+                    _ = context.callEventHandler(id: setIsOnId, arguments: newValue)
                 }
             }
         ))

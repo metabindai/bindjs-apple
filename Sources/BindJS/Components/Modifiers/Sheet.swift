@@ -14,13 +14,13 @@ public struct SheetComponent: Component {
 
     func handleChange(isPresented: Bool) {
         if let setIsPresentedHandlerId {
-            context.callEventHandler(id: setIsPresentedHandlerId, arguments: isPresented)
+            _ = context.callEventHandler(id: setIsPresentedHandlerId, arguments: isPresented)
         }
     }
     
     func handleDismiss() {
         if let dismissHandlerId {
-            context.callEventHandler(id: dismissHandlerId, arguments: [])
+            _ = context.callEventHandler(id: dismissHandlerId, arguments: [])
         }
     }
     
