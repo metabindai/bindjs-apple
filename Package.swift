@@ -1,6 +1,5 @@
 // swift-tools-version: 5.11
 // The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
 
 let package = Package(
@@ -13,18 +12,15 @@ let package = Package(
         .visionOS(.v1)
     ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "BindJS",
             targets: ["BindJS"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/yapstudios/SVGView.git", from: "1.0.7"),
-        .package(url: "https://github.com/warrenm/GLTFKit2", from: "0.5.11")
+        .package(url: "https://github.com/yapstudios/SVGView.git", exact: "1.0.7"),
+        .package(url: "https://github.com/warrenm/GLTFKit2", exact: "0.5.14")
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "BindJS",
             dependencies: [
