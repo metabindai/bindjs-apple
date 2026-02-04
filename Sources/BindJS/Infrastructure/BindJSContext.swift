@@ -46,6 +46,17 @@ public class BindJSContext: ObservableObject {
                 if jsVal.isString      { return jsVal.toString() ?? "" }
                 if jsVal.isBoolean     { return jsVal.toBool() ? "true" : "false" }
                 if jsVal.isNumber      { return String(jsVal.toDouble()) }
+
+                // Check if it's an Error object (has message and/or stack properties)
+                if let message = jsVal.forProperty("message"), !message.isUndefined {
+                    let stack = jsVal.forProperty("stack")?.toString() ?? ""
+                    let errorMessage = message.toString() ?? "Unknown error"
+                    if !stack.isEmpty {
+                        return "\(errorMessage)\n\(stack)"
+                    }
+                    return errorMessage
+                }
+
                 return json
                     .invokeMethod("stringify", withArguments: [jsVal])?
                     .toString() ?? "[object]"
@@ -55,6 +66,8 @@ public class BindJSContext: ObservableObject {
 
         let console = JSValue(newObjectIn: jsContext)!
         console.setObject(logBlock, forKeyedSubscript: "log" as NSString)
+        console.setObject(logBlock, forKeyedSubscript: "error" as NSString)
+        console.setObject(logBlock, forKeyedSubscript: "warn" as NSString)
         jsContext.globalObject.setValue(console, forProperty: "console")
     }
 
