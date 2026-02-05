@@ -896,10 +896,10 @@ function Opacity({ args, content }) {
         // Return the Color directly
         return { ast: content }
 
-    } else if (content && content.type === 'ModifiedComponent' && content.modifier.type === 'opacity') {
+    } else if (content && content.type === 'ModifiedComponent' && content.props?.modifier?.type === 'opacity') {
 
         // Collapse opacity modifiers
-        content.modifier.props.rawValue *= opacity;
+        content.props.modifier.props.rawValue *= opacity;
         return { ast: content }
 
     } else {
@@ -2760,8 +2760,8 @@ exports.default = defineComponent({
             let title = null;
 
             // Extract preview name if available from the previewName modifier
-            if (previewAST?.type === "ModifiedComponent" && previewAST.modifier?.type === "previewName") {
-                title = previewAST.modifier?.props?.rawValue;
+            if (previewAST?.type === "ModifiedComponent" && previewAST.props?.modifier?.type === "previewName") {
+                title = previewAST.props?.modifier?.props?.rawValue;
             }
 
             return {
