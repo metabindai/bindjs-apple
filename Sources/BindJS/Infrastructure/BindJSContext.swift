@@ -1,6 +1,11 @@
 import SwiftUI
 import JavaScriptCore
 
+public struct BindJSPreviewInfo: Sendable, Equatable {
+    public let id: String
+    public let title: String
+}
+
 public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
@@ -193,7 +198,52 @@ public class BindJSContext: ObservableObject {
 
         return component
     }
-    
+
+    // MARK: - Component Previews
+
+    public func previewsForComponent(_ name: String) -> [BindJSPreviewInfo] {
+        guard let jsValue = runtime.invokeMethod("getComponentPreviewsWithMetadata", withArguments: [[name]]) else {
+            return []
+        }
+        guard jsValue.isArray, let array = jsValue.toArray() else {
+            return []
+        }
+        return array.enumerated().compactMap { index, item in
+            guard let dict = item as? [String: Any] else { return nil }
+            let title = dict["title"] as? String ?? "Preview \(index + 1)"
+            return BindJSPreviewInfo(id: "\(index)", title: title)
+        }
+    }
+
+    @ViewBuilder
+    public func viewForPreview(_ name: String, previewIndex: Int, arguments: [String: Any] = [:]) -> (some View)? {
+        let _ = runtime.invokeMethod("willRender", withArguments: [])
+
+        if let component = componentForPreview(name, previewIndex: previewIndex, arguments: arguments) {
+            ComponentView(component)
+                .contentTransition(.numericText())
+                .environment(\.contentTransitionAddsDrawingGroup, true)
+                .environmentObject(self)
+                .id("\(name)_preview_\(previewIndex)")
+        }
+    }
+
+    public func componentForPreview(_ name: String, previewIndex: Int, arguments: [String: Any] = [:]) -> Component? {
+        guard let jsValue = runtime.invokeMethod("callComponentPreview", withArguments: [[name, previewIndex, JSValue(object: arguments, in: jsContext)!]]) else {
+            return nil
+        }
+
+        guard let directive = jsValue.toDirective() else {
+            return nil
+        }
+
+        guard let component = makeComponent(directive) else {
+            return nil
+        }
+
+        return component
+    }
+
     private func objectWillChange() {
         objectWillChange.send()
     }

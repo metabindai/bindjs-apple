@@ -12,13 +12,29 @@ import Combine
 /// Works like SwiftUI's Image - you provide the data, it renders
 public struct BindJSView: View {
     let content: ResolvedContent
+    let previewIndex: Int?
 
     public init(content: ResolvedContent) {
         self.content = content
+        self.previewIndex = nil
+    }
+
+    public init(content: ResolvedContent, previewIndex: Int?) {
+        self.content = content
+        self.previewIndex = previewIndex
     }
 
     public var body: some View {
-        ContextHostView(content: content)
+        ContextHostView(content: content, previewIndex: previewIndex)
+    }
+}
+
+// MARK: - Preview Preference Key
+
+public struct BindJSPreviewsKey: PreferenceKey {
+    public static let defaultValue: [BindJSPreviewInfo] = []
+    public static func reduce(value: inout [BindJSPreviewInfo], nextValue: () -> [BindJSPreviewInfo]) {
+        value = nextValue()
     }
 }
 
@@ -54,16 +70,19 @@ public extension View {
 
 private struct ContextHostView: View {
     let content: ResolvedContent
+    let previewIndex: Int?
 
     @StateObject private var context: BindJSContext
     @State private var registeredContentHash: Int
+    @State private var availablePreviews: [BindJSPreviewInfo] = []
 
     @Environment(\.bindJS) private var bindJS
     @Environment(\.self) private var environment
     @Environment(\.openURL) private var openURL
 
-    init(content: ResolvedContent) {
+    init(content: ResolvedContent, previewIndex: Int? = nil) {
         self.content = content
+        self.previewIndex = previewIndex
 
         // Create and register context
         let ctx = BindJSContext()
@@ -90,14 +109,26 @@ private struct ContextHostView: View {
                 setupHooks()
                 setupEnvironment()
             }
-            context.viewForName("_body")
+            if let index = previewIndex {
+                context.viewForPreview("_body", previewIndex: index)
+            } else {
+                context.viewForName("_body")
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .preference(key: BindJSPreviewsKey.self, value: availablePreviews)
+        .task {
+            queryPreviews()
+        }
         .onChange(of: content) { _, newContent in
             withAnimation(.snappy) {
                 reregisterIfNeeded(newContent)
             }
         }
+    }
+
+    private func queryPreviews() {
+        availablePreviews = context.previewsForComponent("_body")
     }
 
     private func reregisterIfNeeded(_ newContent: ResolvedContent) {
@@ -114,6 +145,9 @@ private struct ContextHostView: View {
 
         // Re-register main content body (entry point for rendering)
         context.register(name: "_body", source: newContent.compiled)
+
+        // Re-query previews after content update
+        queryPreviews()
     }
 
     private func setupAction() {
