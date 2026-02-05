@@ -15,6 +15,8 @@ Object.assign(this, {
     setASTComponents: (components, modifiers) => runtime.registerASTComponents(components, modifiers),
     call: (args) => runtime.call(...args)(),
     callComponent: (args) => runtime.callComponent(...args),
+    callComponentPreview: (args) => runtime.callComponentPreview(...args),
+    getComponentPreviewsWithMetadata: (args) => runtime.getComponentPreviewsWithMetadata(...args),
     setEnvironment: (environment) => runtime.registerEnvironment(environment),
     makeComponent: (body, props, children) => runtime.makeComponent(body, props, children),
     restoreEnvironment: (environmentId) => runtime.restoreEnvironment(environmentId),
