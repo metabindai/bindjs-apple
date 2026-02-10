@@ -27,8 +27,19 @@ extension FlexibleFrameComponent {
 }
 
 extension FlexibleFrameComponent: ViewModifier {
+    private func sanitize(_ value: CGFloat?) -> CGFloat? {
+        guard let value, value >= 0, !value.isNaN else { return nil }
+        return value
+    }
+
     public func body(content: Content) -> some View {
         content
-            .frame(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight, alignment: alignment)
+            .frame(
+                minWidth: sanitize(minWidth),
+                maxWidth: sanitize(maxWidth),
+                minHeight: sanitize(minHeight),
+                maxHeight: sanitize(maxHeight),
+                alignment: alignment
+            )
     }
 }

@@ -10,11 +10,12 @@ public class BindJSContext: ObservableObject {
     private let jsContext: JSContext
     private let runtime: JSValue
     private var actionCallback: ((ContentAction) -> Void)?
-    
+
     private var openURL: OpenURLAction?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
     private var jsTimers: JSTimers
+    private var rerenderScheduled = false
 
     public init() {
         jsContext = JSContext()!
@@ -78,7 +79,12 @@ public class BindJSContext: ObservableObject {
 
     private func setupNeedsRerender() {
         let rerender: @convention(block) () -> Void = { [weak self] in
-            self?.objectWillChange()
+            guard let self, !self.rerenderScheduled else { return }
+            self.rerenderScheduled = true
+            DispatchQueue.main.async {
+                self.rerenderScheduled = false
+                self.objectWillChange.send()
+            }
         }
         jsContext.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
         _ = jsContext.evaluateScript("runtime.needsRerender = needsRerender")
@@ -176,8 +182,6 @@ public class BindJSContext: ObservableObject {
 
         if let component = componentForName(name, arguments: arguments) {
             ComponentView(component)
-                .contentTransition(.numericText())
-                .environment(\.contentTransitionAddsDrawingGroup, true)
                 .environmentObject(self)
                 .id(name)
         }
@@ -196,7 +200,7 @@ public class BindJSContext: ObservableObject {
             return nil
         }
 
-        return component
+        return resolveForEachChildren(in: component)
     }
 
     // MARK: - Component Previews
@@ -221,8 +225,6 @@ public class BindJSContext: ObservableObject {
 
         if let component = componentForPreview(name, previewIndex: previewIndex, arguments: arguments) {
             ComponentView(component)
-                .contentTransition(.numericText())
-                .environment(\.contentTransitionAddsDrawingGroup, true)
                 .environmentObject(self)
                 .id("\(name)_preview_\(previewIndex)")
         }
@@ -241,7 +243,40 @@ public class BindJSContext: ObservableObject {
             return nil
         }
 
-        return component
+        return resolveForEachChildren(in: component)
+    }
+
+    // MARK: - ForEach Pre-computation
+
+    private struct ForEachResolver: ComponentRewriter {
+        unowned let context: BindJSContext
+
+        mutating func visitForEach(_ forEach: ForEachComponent) -> Component {
+            var copy = forEach
+            copy.resolvedChildren = context.evaluateForEachChildren(forEach)
+                .map { $0.accept(visitor: &self) }
+            return copy
+        }
+    }
+
+    private func resolveForEachChildren(in component: Component) -> Component {
+        var resolver = ForEachResolver(context: self)
+        return resolver.visit(component)
+    }
+
+    private func evaluateForEachChildren(_ forEach: ForEachComponent) -> [Component] {
+        guard let data = restoreForEachData(id: forEach.dataId) else { return [] }
+        restoreEnvironment(id: forEach.environmentId)
+
+        var components: [Component] = []
+        for index in 0..<forEach.count {
+            guard let item = data.atIndex(index),
+                  let jsValue = callForEachFunction(id: forEach.functionId, element: item, index: Int32(index)),
+                  let directive = jsValue.toDirective(),
+                  let component = makeComponent(directive) else { continue }
+            components.append(component)
+        }
+        return components
     }
 
     private func objectWillChange() {
@@ -386,9 +421,13 @@ public class BindJSContext: ObservableObject {
             // Update internal app state
             self.appState = swiftState
             
-            // Trigger UI update
-            DispatchQueue.main.async {
-                self.objectWillChange()
+            // Trigger UI update (coalesced with needsRerender)
+            if !self.rerenderScheduled {
+                self.rerenderScheduled = true
+                DispatchQueue.main.async {
+                    self.rerenderScheduled = false
+                    self.objectWillChange.send()
+                }
             }
             
             // Notify Listener

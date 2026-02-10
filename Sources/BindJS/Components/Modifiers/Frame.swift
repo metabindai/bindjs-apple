@@ -23,8 +23,19 @@ extension FrameComponent {
 }
 
 extension FrameComponent: ViewModifier {
+    
+    var resolvedWidth: CGFloat? {
+        guard let width, width >= 0, width.isFinite else { return nil }
+        return width
+    }
+
+    var resolvedHeight: CGFloat? {
+        guard let height, height >= 0, height.isFinite else { return nil }
+        return height
+    }
+
     public func body(content: Content) -> some View {
         content
-            .frame(width: width, height: height, alignment: alignment)
+            .frame(width: resolvedWidth, height: resolvedHeight, alignment: alignment)
     }
 }

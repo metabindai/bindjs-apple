@@ -3,7 +3,7 @@ import SwiftUI
 public struct NavigationStackComponent: Component {
     public static var directiveName: String = "NavigationStack"
     
-    public let children: [Component]
+    public var children: [Component]
 }
 
 extension NavigationStackComponent {
@@ -21,22 +21,22 @@ extension NavigationStackComponent: View {
     public var body: some View {
         if #available(iOS 16.0, macOS 13.0, *) {
             NavigationStack {
-                ForEach(children.enumerated(), id: \.offset) { _, child in
-                    ComponentView(child)
+                ForEach(children.indices, id: \.self) { index in
+                    ComponentView(children[index])
                 }
             }
         } else {
             #if os(iOS) || os(tvOS)
             NavigationView {
-                ForEach(children.enumerated(), id: \.offset) { _, child in
-                    ComponentView(child)
+                ForEach(children.indices, id: \.self) { index in
+                    ComponentView(children[index])
                 }
             }
             .navigationViewStyle(.stack)
             #else
             NavigationView {
-                ForEach(children.enumerated(), id: \.offset) { _, child in
-                    ComponentView(child)
+                ForEach(children.indices, id: \.self) { index in
+                    ComponentView(children[index])
                 }
             }
             #endif

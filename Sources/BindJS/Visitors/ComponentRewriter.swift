@@ -172,7 +172,87 @@ public extension ComponentRewriter {
     
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result {
         var copy = overlay
-        copy.content = overlay.content.accept(visitor: &self) 
+        copy.content = overlay.content.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
+        var copy = navigationStack
+        copy.children = navigationStack.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> Result {
+        var copy = lazyVStack
+        copy.children = lazyVStack.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result {
+        var copy = lazyHStack
+        copy.children = lazyHStack.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitList(_ list: ListComponent) -> Result {
+        var copy = list
+        copy.children = list.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitMenu(_ menu: MenuComponent) -> Result {
+        var copy = menu
+        copy.label = menu.label.accept(visitor: &self)
+        copy.children = menu.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitLabel(_ label: LabelComponent) -> Result {
+        var copy = label
+        if let title = label.title {
+            copy.title = title.accept(visitor: &self)
+        }
+        if let icon = label.icon {
+            copy.icon = icon.accept(visitor: &self)
+        }
+        return copy
+    }
+
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> Result {
+        var copy = navigationLink
+        copy.label = navigationLink.label.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result {
+        var copy = toolbarItem
+        copy.content = toolbarItem.content.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result {
+        var copy = toolbarItemGroup
+        copy.children = toolbarItemGroup.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> Result {
+        var copy = toolbar
+        copy.items = toolbar.items.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result {
+        var copy = contextMenu
+        copy.content = contextMenu.content.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitMask(_ mask: MaskComponent) -> Result {
+        var copy = mask
+        if let maskContent = mask.maskContent {
+            copy.maskContent = maskContent.accept(visitor: &self)
+        }
         return copy
     }
 }

@@ -13,7 +13,6 @@ import CryptoKit
 import ImageIO
 import CoreImage
 import CoreImage.CIFilterBuiltins
-import OSLog
 @_implementationOnly import SVGViewKit
 
 public struct ImageComponent: Component {
@@ -331,7 +330,6 @@ private final class SharedImageService {
     private let ciContext: CIContext
     private let session: URLSession
     private let inflight: InFlightCoordinator
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "AsyncImage", category: "ImageService")
 
     private init() {
         memoryCache = MemoryImageCache()
@@ -351,14 +349,12 @@ private final class SharedImageService {
     ) async throws -> PlatformImage {
         // 1. Memory
         if let img = await memoryCache.image(for: url) {
-            logger.debug("Found image in memory cache for \(url.absoluteString)")
             return img
         }
         // 2. Disk
         if let data = diskCache.data(for: url),
            let img = createLanczosImage(from: data, to: desiredSize, scale: scale) {
             await memoryCache.insert(img, for: url)
-            logger.debug("Found image in disk cache for \(url.absoluteString)")
             return img
         }
         // 3. Network
@@ -368,11 +364,10 @@ private final class SharedImageService {
         }
         await memoryCache.insert(img, for: url)
         diskCache.store(data, for: url)
-        logger.debug("Fetched image from network for \(url.absoluteString)")
         return img
     }
 
-    /// Apply Lanczos downsampling
+    /// Apply Lanczos downsampling. Skips the filter when no downsampling is needed.
     private func createLanczosImage(
         from data: Data,
         to size: CGSize,
@@ -380,17 +375,20 @@ private final class SharedImageService {
     ) -> PlatformImage? {
         guard let image = PlatformImage(data: data),
               let baseCG = image.cgImageRef else { return nil }
+
+        // Skip Lanczos when no target size is specified or image is already smaller
+        guard size.width > 0, size.height > 0 else { return image }
+        let factor = min(size.width, size.height) * scale / CGFloat(baseCG.width)
+        guard factor < 1.0 else { return image }
+
         let ciImage = CIImage(cgImage: baseCG)
-        let factor = (size.width > 0 && size.height > 0)
-            ? min(size.width, size.height) * scale / CGFloat(baseCG.width)
-            : 1.0
         let filter = CIFilter.lanczosScaleTransform()
         filter.inputImage = ciImage
         filter.scale = Float(factor)
         filter.aspectRatio = 1.0
         guard let output = filter.outputImage,
               let outCG = ciContext.createCGImage(output, from: output.extent) else {
-            return nil
+            return image
         }
         return PlatformImage(cgImage: outCG)
     }
