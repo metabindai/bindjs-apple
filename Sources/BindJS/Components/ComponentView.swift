@@ -145,7 +145,16 @@ private let componentFactories: [String: (Directive) -> Component?] = [
 
     // Values
     CustomFontComponent.directiveName: { CustomFontComponent(from: $0) },
+].merging(platformComponentFactories) { _, new in new }
+
+#if os(iOS) || os(visionOS)
+private let platformComponentFactories: [String: (Directive) -> Component?] = [
+    GalleryComponent.directiveName: { GalleryComponent(from: $0) },
+    GalleryItemComponent.directiveName: { GalleryItemComponent(from: $0) },
 ]
+#else
+private let platformComponentFactories: [String: (Directive) -> Component?] = [:]
+#endif
 
 private func makeFrameComponent(_ directive: Directive) -> Component? {
     let keys = directive.props.keys
@@ -267,6 +276,10 @@ struct ComponentViewModifier: ViewModifier {
         case let m as FontWidthComponent: content.modifier(m)
         case let m as ForegroundStyleComponent: content.modifier(m)
         case let m as FrameComponent: content.modifier(m)
+        #if os(iOS) || os(visionOS)
+        case let m as GalleryComponent: content.modifier(m)
+        case let m as GalleryItemComponent: content.modifier(m)
+        #endif
         case let m as GlassEffectComponent: content.modifier(m)
         case let m as GrayscaleComponent: content.modifier(m)
         case let m as HiddenComponent: content.modifier(m)

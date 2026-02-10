@@ -1271,6 +1271,22 @@ function SheetModifier({ args, name }) {
     }
 }
 
+function GalleryModifier({ args, name }) {
+    const detailCallback = args[0];
+    if (!detailCallback || typeof detailCallback !== 'function') {
+        return { props: { detailHandlerId: null } };
+    }
+    const detailHandler = (id) => {
+        let result = detailCallback(id);
+        return this.unwrapComponentAST(result);
+    };
+    return {
+        props: {
+            detailHandlerId: this.storeFunction(detailHandler, this.currentPathId(name + '_detail'))
+        }
+    }
+}
+
 function NavigationDestinationModifier({ args, name }) {
 
     // Assume args[0] contains the props
@@ -1983,6 +1999,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
+        this.#registerBuiltInModifier('gallery', GalleryModifier);
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
         // Register event handlers
