@@ -57,12 +57,14 @@ public struct GalleryComponent: Component {
     @State private var itemIDs: [String] = []
 
     public var detailHandlerId: String?
+    public var zoomEnabled: Bool
 }
 
 extension GalleryComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
         detailHandlerId = directive["detailHandlerId"]
+        zoomEnabled = directive["zoomEnabled"] ?? true
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V: ComponentVisitor {
@@ -83,7 +85,8 @@ extension GalleryComponent: ViewModifier {
                     items: itemIDs,
                     selectedItem: $galleryContext.selectedItem,
                     namespace: namespace,
-                    detailHandlerId: detailHandlerId
+                    detailHandlerId: detailHandlerId,
+                    zoomEnabled: zoomEnabled
                 )
             }
     }
@@ -96,6 +99,7 @@ struct GalleryPagerView: View {
     @Binding var selectedItem: String?
     var namespace: Namespace.ID
     var detailHandlerId: String?
+    var zoomEnabled: Bool
 
     @EnvironmentObject private var context: BindJSContext
     @Environment(\.dismiss) private var dismiss
@@ -106,7 +110,9 @@ struct GalleryPagerView: View {
                 ForEach(items, id: \.self) { itemId in
                     GalleryDetailItemView(
                         itemId: itemId,
-                        detailHandlerId: detailHandlerId
+                        detailHandlerId: detailHandlerId,
+                        zoomEnabled: zoomEnabled,
+                        selectedItem: selectedItem
                     )
                     .tag(Optional(itemId))
                 }
@@ -144,16 +150,28 @@ struct GalleryPagerView: View {
 struct GalleryDetailItemView: View {
     let itemId: String
     let detailHandlerId: String?
+    let zoomEnabled: Bool
+    let selectedItem: String?
 
     @EnvironmentObject private var context: BindJSContext
     @State private var detailComponent: Component?
+    @State private var zoomResetID = UUID()
 
     var body: some View {
         Color.clear
             .overlay {
                 if let detailComponent {
-                    ComponentView(detailComponent)
+                    if zoomEnabled {
+                        ZoomableContainer(resetID: zoomResetID) {
+                            ComponentView(detailComponent)
+                        }
+                    } else {
+                        ComponentView(detailComponent)
+                    }
                 }
+            }
+            .onChange(of: selectedItem) {
+                zoomResetID = UUID()
             }
             .task {
                 loadDetail()

@@ -1272,9 +1272,18 @@ function SheetModifier({ args, name }) {
 }
 
 function GalleryModifier({ args, name }) {
-    const detailCallback = args[0];
+    let detailCallback;
+    let zoomEnabled = true;
+
+    if (typeof args[0] === 'function') {
+        detailCallback = args[0];
+    } else if (args[0] && typeof args[0] === 'object') {
+        detailCallback = args[0].detail;
+        zoomEnabled = args[0].zoomEnabled !== false;
+    }
+
     if (!detailCallback || typeof detailCallback !== 'function') {
-        return { props: { detailHandlerId: null } };
+        return { props: { detailHandlerId: null, zoomEnabled } };
     }
     const detailHandler = (id) => {
         let result = detailCallback(id);
@@ -1282,7 +1291,8 @@ function GalleryModifier({ args, name }) {
     };
     return {
         props: {
-            detailHandlerId: this.storeFunction(detailHandler, this.currentPathId(name + '_detail'))
+            detailHandlerId: this.storeFunction(detailHandler, this.currentPathId(name + '_detail')),
+            zoomEnabled
         }
     }
 }
