@@ -1278,8 +1278,8 @@ function GalleryModifier({ args, name }) {
     if (typeof args[0] === 'function') {
         detailCallback = args[0];
     } else if (args[0] && typeof args[0] === 'object') {
-        detailCallback = args[0].detail;
         zoomEnabled = args[0].zoomEnabled !== false;
+        detailCallback = args[1];
     }
 
     if (!detailCallback || typeof detailCallback !== 'function') {
