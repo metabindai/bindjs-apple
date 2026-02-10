@@ -136,4 +136,56 @@ private struct ComponentChildren: ComponentVisitor {
     mutating func visitOverlay(_ overlay: OverlayComponent) -> [any Component] {
         [overlay.content]
     }
+
+    mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> [any Component] {
+        navigationStack.children
+    }
+
+    mutating func visitLazyVStack(_ lazyVStack: LazyVStackComponent) -> [any Component] {
+        lazyVStack.children
+    }
+
+    mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> [any Component] {
+        lazyHStack.children
+    }
+
+    mutating func visitList(_ list: ListComponent) -> [any Component] {
+        list.children
+    }
+
+    mutating func visitMenu(_ menu: MenuComponent) -> [any Component] {
+        [menu.label] + menu.children
+    }
+
+    mutating func visitLabel(_ label: LabelComponent) -> [any Component] {
+        var children: [any Component] = []
+        if let title = label.title { children.append(title) }
+        if let icon = label.icon { children.append(icon) }
+        return children
+    }
+
+    mutating func visitNavigationLink(_ navigationLink: NavigationLinkComponent) -> [any Component] {
+        [navigationLink.label]
+    }
+
+    mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> [any Component] {
+        [toolbarItem.content]
+    }
+
+    mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> [any Component] {
+        toolbarItemGroup.children
+    }
+
+    mutating func visitToolbar(_ toolbar: ToolbarComponent) -> [any Component] {
+        toolbar.items
+    }
+
+    mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> [any Component] {
+        [contextMenu.content]
+    }
+
+    mutating func visitMask(_ mask: MaskComponent) -> [any Component] {
+        if let maskContent = mask.maskContent { return [maskContent] }
+        return []
+    }
 }

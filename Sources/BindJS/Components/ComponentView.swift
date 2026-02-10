@@ -185,14 +185,14 @@ public struct ComponentView: View {
         case let geometryReader as GeometryReaderComponent: geometryReader
         case let group as GroupComponent: group
         case let hStack as HStackComponent: hStack
+        case let image as ImageComponent: image
+        case let label as LabelComponent: label
         case let lazyHStack as LazyHStackComponent: lazyHStack
         case let lazyVStack as LazyVStackComponent: lazyVStack
-        case let label as LabelComponent: label
-        case let image as ImageComponent: image
-        case let menu as MenuComponent: menu
         case let linearGradient as LinearGradientComponent: linearGradient
         case let list as ListComponent: list
         case let material as MaterialComponent: material
+        case let menu as MenuComponent: menu
         case let model3D as Model3DComponent: model3D
         case let modified as ModifiedComponent: modified
         case let navigationLink as NavigationLinkComponent: navigationLink
@@ -212,8 +212,8 @@ public struct ComponentView: View {
         case let textField as TextFieldComponent: textField
         case let toggle as ToggleComponent: toggle
         case let unresolved as UnresolvedComponent: unresolved
-        case let video as VideoComponent: video
         case let vStack as VStackComponent: vStack
+        case let video as VideoComponent: video
         case let zStack as ZStackComponent: zStack
         default: Text("Unsupported: \(type(of: component).directiveName)")
         }
@@ -229,13 +229,13 @@ struct ComponentViewModifier: ViewModifier {
 
     public func body(content: Content) -> some View {
         switch component {
+        case let m as AccessibilityAddTraitsComponent: content.modifier(m)
         case let m as AccessibilityHiddenComponent: content.modifier(m)
         case let m as AccessibilityHintComponent: content.modifier(m)
         case let m as AccessibilityLabelComponent: content.modifier(m)
+        case let m as AccessibilityRemoveTraitsComponent: content.modifier(m)
         case let m as AccessibilityRepresentationComponent: content.modifier(m)
         case let m as AccessibilityValueComponent: content.modifier(m)
-        case let m as AccessibilityAddTraitsComponent: content.modifier(m)
-        case let m as AccessibilityRemoveTraitsComponent: content.modifier(m)
         case let m as AllowsHitTestingComponent: content.modifier(m)
         case let m as AllowsTighteningComponent: content.modifier(m)
         case let m as AspectRatioComponent: content.modifier(m)
@@ -246,16 +246,16 @@ struct ComponentViewModifier: ViewModifier {
         case let m as BoldComponent: content.modifier(m)
         case let m as BorderComponent: content.modifier(m)
         case let m as BrightnessComponent: content.modifier(m)
-        case let m as ClippedComponent: content.modifier(m)
         case let m as ClipShapeComponent: content.modifier(m)
+        case let m as ClippedComponent: content.modifier(m)
         case let m as ColorInvertComponent: content.modifier(m)
         case let m as ColorSchemeComponent: content.modifier(m)
         case let m as ContentShapeComponent: content.modifier(m)
         case let m as ContextMenuComponent: content.modifier(m)
         case let m as ContrastComponent: content.modifier(m)
         case let m as ControlSizeComponent: content.modifier(m)
-        case let m as CornerRadiusComponent: content.modifier(m)
         case let m as CoordinateSpaceComponent: content.modifier(m)
+        case let m as CornerRadiusComponent: content.modifier(m)
         case let m as DisabledComponent: content.modifier(m)
         case let m as DynamicTypeSizeComponent: content.modifier(m)
         case let m as FixedSizeComponent: content.modifier(m)
@@ -291,8 +291,8 @@ struct ComponentViewModifier: ViewModifier {
         case let m as OnDisappearComponent: content.modifier(m)
         case let m as OnDragGestureComponent: content.modifier(m)
         case let m as OnLongPressGestureComponent: content.modifier(m)
-        case let m as OnTapGestureComponent: content.modifier(m)
         case let m as OnSubmitComponent: content.modifier(m)
+        case let m as OnTapGestureComponent: content.modifier(m)
         case let m as OpacityComponent: content.modifier(m)
         case let m as OverlayComponent: content.modifier(m)
         case let m as PaddingComponent: content.modifier(m)
@@ -301,20 +301,20 @@ struct ComponentViewModifier: ViewModifier {
         case let m as QuickLookComponent: content.modifier(m)
         case let m as RotationEffectComponent: content.modifier(m)
         case let m as SaturationComponent: content.modifier(m)
+        case let m as ScaleEffectComponent: content.modifier(m)
         case let m as ScaledToFillComponent: content.modifier(m)
         case let m as ScaledToFitComponent: content.modifier(m)
-        case let m as ScaleEffectComponent: content.modifier(m)
         case let m as ScrollContentBackgroundComponent: content.modifier(m)
         case let m as ScrollEdgeEffectHiddenComponent: content.modifier(m)
         case let m as ScrollEdgeEffectStyleComponent: content.modifier(m)
-        case let m as SubmitLabelComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
         case let m as StrikethroughComponent: content.modifier(m)
+        case let m as SubmitLabelComponent: content.modifier(m)
         case let m as TagComponent: content.modifier(m)
         case let m as TextCaseComponent: content.modifier(m)
-        case let m as TextSelectionComponent: content.modifier(m)
         case let m as TextFieldStyleComponent: content.modifier(m)
+        case let m as TextSelectionComponent: content.modifier(m)
         case let m as TintComponent: content.modifier(m)
         case let m as ToolbarComponent: content.modifier(m)
         case let m as ToolbarVisibilityComponent: content.modifier(m)
@@ -323,8 +323,6 @@ struct ComponentViewModifier: ViewModifier {
         case let m as UnderlineComponent: content.modifier(m)
         case let m as VisualEffectComponent: content.modifier(m)
         case let m as ZIndexComponent: content.modifier(m)
-        
-        // Any other modifier
         default:
             content
         }

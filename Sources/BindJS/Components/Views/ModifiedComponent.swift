@@ -22,10 +22,9 @@ extension ModifiedComponent {
 
 extension ModifiedComponent: View {
     public var body: some View {
-        ForEach(content.indices, id: \.self) { index in
-            ComponentView(content[index])
-        }
-        .modifier(ComponentViewModifier(modifier))
+        // In practice this is only one element ever. We should change in the runtime to not be an array.
+        ComponentView(content[0])
+            .modifier(ComponentViewModifier(modifier))
     }
 }
 

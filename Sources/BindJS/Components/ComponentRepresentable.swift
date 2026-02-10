@@ -32,6 +32,5 @@ public struct ComponentRepresentableContext {
         ForEach(children.indices, id: \.self) { index in
             ComponentView(children[index])
         }
-        
     }
 }

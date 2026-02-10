@@ -4,7 +4,7 @@ public struct ToolbarItemGroupComponent: Component {
     public static var directiveName: String = "ToolbarItemGroup"
     
     public let placement: ToolbarItemPlacement
-    public let children: [Component]
+    public var children: [Component]
 }
 
 extension ToolbarItemGroupComponent {
@@ -22,8 +22,8 @@ extension ToolbarItemGroupComponent {
 extension ToolbarItemGroupComponent: ToolbarContent {
     public var body: some ToolbarContent {
         ToolbarItemGroup(placement: placement) {
-            ForEach(Array(children.enumerated()), id: \.offset) { _, child in
-                ComponentView(child)
+            ForEach(children.indices, id: \.self) { index in
+                ComponentView(children[index])
             }
         }
     }

@@ -1,15 +1,8 @@
 import Foundation
 import CoreText
+import CryptoKit
 import SwiftUI
 import Combine
-import os.log
-
-// MARK: - Logger
-
-extension Logger {
-    /// Logger for font loading operations
-    static let fontLoading = Logger(subsystem: Bundle.main.bundleIdentifier ?? "CustomFont", category: "FontLoading")
-}
 
 // MARK: - CustomFontComponent
 
@@ -43,6 +36,20 @@ extension CustomFontComponent: ViewModifier {
 
 // MARK: - FontLoaderView
 
+private let fontTextStyleMap: [(Font.TextStyle, CGFloat)] = [
+    (.largeTitle, 34),
+    (.title,      28),
+    (.title2,     22),
+    (.title3,     20),
+    (.headline,   17),
+    (.body,       17),
+    (.callout,    16),
+    (.subheadline,15),
+    (.footnote,   13),
+    (.caption,    12),
+    (.caption2,   11)
+]
+
 /// A helper view that owns the @State for font loading.
 /// Using a View (instead of storing @State in the ViewModifier) ensures
 /// stable identity across parent re-renders.
@@ -65,7 +72,6 @@ private struct FontLoaderView<Content: View>: View {
     var body: some View {
         content
             .font(makeFont())
-            .id(postScriptName)
             .task(id: url) {
                 await loadFontIfNeeded()
             }
@@ -85,40 +91,16 @@ private struct FontLoaderView<Content: View>: View {
     private func makeFont() -> Font {
         let textStyle = nearestTextStyle(for: size)
         if let psName = postScriptName {
-            // We have a downloaded font → use it, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Using custom font: \(psName, privacy: .public) at size \(size, privacy: .public)")
             return .custom(psName, size: size, relativeTo: textStyle)
         } else if url != nil {
-            // We're still loading → use system, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Font loading in progress, using system font at size \(size, privacy: .public)")
             return .system(size: size, weight: .regular, design: .default)
         } else {
-            // No URL was provided → try using the family name locally, scaling relative to the nearest text style
-            Logger.fontLoading.debug("Attempting to use local font family: \(family, privacy: .public)")
             return .custom(family, size: size, relativeTo: textStyle)
         }
     }
 
-    /// Find the closest dynamic TextStyle for a given base size
     private func nearestTextStyle(for size: CGFloat) -> Font.TextStyle {
-        // Mapping of base point sizes to SwiftUI TextStyles (iOS default Dynamic Type sizes)
-        let styleMap: [(Font.TextStyle, CGFloat)] = [
-            (.largeTitle, 34),
-            (.title,      28),
-            (.title2,     22),
-            (.title3,     20),
-            (.headline,   17),
-            (.body,       17),
-            (.callout,    16),
-            (.subheadline,15),
-            (.footnote,   13),
-            (.caption,    12),
-            (.caption2,   11)
-        ]
-        // Pick the style whose base size is closest to our requested size
-        let nearest = styleMap.min(by: { abs($0.1 - size) < abs($1.1 - size) })!
-        Logger.fontLoading.debug("Mapped size \(size, privacy: .public) to text style: \(String(describing: nearest.0), privacy: .public)")
-        return nearest.0
+        fontTextStyleMap.min(by: { abs($0.1 - size) < abs($1.1 - size) })!.0
     }
 
     // MARK: — Async loader
@@ -128,26 +110,17 @@ private struct FontLoaderView<Content: View>: View {
             postScriptName == nil,
             let fontURL = url
         else {
-            if isLoading {
-                Logger.fontLoading.debug("Font load already in progress")
-            } else if postScriptName != nil {
-                Logger.fontLoading.debug("Font already loaded")
-            }
             return
         }
 
         isLoading = true
         defer { isLoading = false }
 
-        Logger.fontLoading.info("Loading font from URL: \(fontURL, privacy: .private(mask: .hash))")
-
         do {
-            // Ask our FontCache actor
             let name = try await FontCache.shared.postScriptName(for: fontURL)
             postScriptName = name
-            Logger.fontLoading.info("Successfully loaded font: \(name, privacy: .public)")
         } catch {
-            Logger.fontLoading.error("Failed to load font from \(fontURL, privacy: .private(mask: .hash)): \(error, privacy: .public)")
+            // Font loading failures are non-fatal — fall back to system font
         }
     }
 }
@@ -175,7 +148,10 @@ public actor FontCache {
     
     /// In-memory map from source URL → registered PostScript name
     private var loadedFonts: [URL: String] = [:]
-    
+
+    /// In-flight download tasks to prevent duplicate downloads
+    private var inFlightTasks: [URL: Task<String, Error>] = [:]
+
     /// Directory in Caches/Fonts where we store the raw data
     private let cacheDirectory: URL
     
@@ -185,15 +161,10 @@ public actor FontCache {
             .first!
         cacheDirectory = base.appendingPathComponent("Fonts", isDirectory: true)
         
-        do {
-            try FileManager.default.createDirectory(
-                at: cacheDirectory,
-                withIntermediateDirectories: true
-            )
-            Logger.fontLoading.info("Font cache directory created at: \(self.cacheDirectory.path, privacy: .private)")
-        } catch {
-            Logger.fontLoading.error("Failed to create font cache directory: \(error, privacy: .public)")
-        }
+        try? FileManager.default.createDirectory(
+            at: cacheDirectory,
+            withIntermediateDirectories: true
+        )
     }
     
     /// Downloads (or reads from disk) the font at `url`, registers it once,
@@ -201,69 +172,76 @@ public actor FontCache {
     public func postScriptName(for url: URL) async throws -> String {
         // 1) Reuse in-memory if already loaded
         if let existing = loadedFonts[url] {
-            Logger.fontLoading.debug("Font already in memory cache: \(existing, privacy: .public)")
             return existing
         }
-        
-        // 2) Compute local file URL in Caches/Fonts
-        let localFile = cacheDirectory.appendingPathComponent(url.lastPathComponent)
-        Logger.fontLoading.debug("Local cache path: \(localFile.lastPathComponent, privacy: .public)")
-        
-        // 3) Ensure the parent folder exists
-        let parentDir = localFile.deletingLastPathComponent()
-        try FileManager.default.createDirectory(
-            at: parentDir,
-            withIntermediateDirectories: true,
-            attributes: nil
-        )
-        
-        // 4) Load font data from disk or download it
+
+        // 2) Deduplicate in-flight requests for the same URL
+        if let existing = inFlightTasks[url] {
+            return try await existing.value
+        }
+
+        let task = Task<String, Error> {
+            try await self.loadAndRegisterFont(for: url)
+        }
+        inFlightTasks[url] = task
+
+        do {
+            let result = try await task.value
+            inFlightTasks[url] = nil
+            return result
+        } catch {
+            inFlightTasks[url] = nil
+            throw error
+        }
+    }
+
+    private func loadAndRegisterFont(for url: URL) async throws -> String {
+        // Check again in case another task completed while we were waiting
+        if let existing = loadedFonts[url] {
+            return existing
+        }
+
+        // Compute local file URL using URL hash to avoid filename collisions
+        let hash = SHA256.hash(data: Data(url.absoluteString.utf8))
+            .compactMap { String(format: "%02x", $0) }
+            .joined()
+        let ext = url.pathExtension
+        let localFile = cacheDirectory.appendingPathComponent(ext.isEmpty ? hash : "\(hash).\(ext)")
+
+        // Load font data from disk or download it
         let data: Data
         if FileManager.default.fileExists(atPath: localFile.path) {
-            Logger.fontLoading.info("Loading font from cache: \(localFile.lastPathComponent, privacy: .public)")
             data = try Data(contentsOf: localFile)
         } else {
-            Logger.fontLoading.info("Downloading font: \(url.lastPathComponent, privacy: .public)")
             do {
-                let (downloaded, response) = try await URLSession.shared.data(from: url)
+                let (downloaded, _) = try await URLSession.shared.data(from: url)
                 data = downloaded
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    Logger.fontLoading.debug("Download completed with status code: \(httpResponse.statusCode, privacy: .public)")
-                }
-                
                 try data.write(to: localFile, options: .atomic)
-                Logger.fontLoading.info("Font cached successfully: \(localFile.lastPathComponent, privacy: .public), size: \(data.count) bytes")
             } catch {
-                Logger.fontLoading.error("Font download failed: \(error, privacy: .public)")
                 throw FontCacheError.downloadFailed(error)
             }
         }
-        
-        // 5) Wrap in CGFont and register with CoreText
+
+        // Wrap in CGFont and register with CoreText
         guard
             let provider = CGDataProvider(data: data as CFData),
-            let cgFont   = CGFont(provider)
+            let cgFont = CGFont(provider)
         else {
-            Logger.fontLoading.error("Invalid font data for: \(url.lastPathComponent, privacy: .public)")
             throw FontCacheError.invalidFontData
         }
-        
+
         var registrationError: Unmanaged<CFError>?
         CTFontManagerRegisterGraphicsFont(cgFont, &registrationError)
         if let err = registrationError?.takeRetainedValue() {
-            Logger.fontLoading.error("Font registration failed: \(err, privacy: .public)")
             throw FontCacheError.registrationFailed(err)
         }
-        
-        // 6) Extract and cache its PostScript name
+
+        // Extract and cache its PostScript name
         guard let psName = cgFont.postScriptName as String? else {
-            Logger.fontLoading.error("Failed to extract PostScript name from font")
             throw FontCacheError.invalidFontData
         }
-        
+
         loadedFonts[url] = psName
-        Logger.fontLoading.info("Font registered successfully: \(psName, privacy: .public)")
 
         // Notify all listeners that this font is now available
         Task { @MainActor in
