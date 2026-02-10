@@ -120,6 +120,7 @@ struct GalleryPagerView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .background(Color.black)
             .ignoresSafeArea()
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     closeButton
@@ -160,16 +161,17 @@ struct GalleryDetailItemView: View {
     var body: some View {
         Color.clear
             .overlay {
-                if let detailComponent {
+                if let component = detailComponent {
                     if zoomEnabled {
                         ZoomableContainer(resetID: zoomResetID) {
-                            ComponentView(detailComponent)
+                            ComponentView(component)
                         }
                     } else {
-                        ComponentView(detailComponent)
+                        ComponentView(component)
                     }
                 }
             }
+            .ignoresSafeArea()
             .onChange(of: selectedItem) {
                 zoomResetID = UUID()
             }

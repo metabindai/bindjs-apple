@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ZoomableContainer<Content: View>: UIViewRepresentable {
     let resetID: UUID
+    var onSingleTap: (() -> Void)?
     @ViewBuilder let content: () -> Content
 
     func makeCoordinator() -> Coordinator {
@@ -18,8 +19,12 @@ struct ZoomableContainer<Content: View>: UIViewRepresentable {
         scrollView.bouncesZoom = true
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
 
         let hostingController = UIHostingController(rootView: content())
+        if #available(iOS 16.4, *) {
+            hostingController.safeAreaRegions = []
+        }
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
 
@@ -37,13 +42,20 @@ struct ZoomableContainer<Content: View>: UIViewRepresentable {
         doubleTap.numberOfTapsRequired = 2
         scrollView.addGestureRecognizer(doubleTap)
 
+        let singleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleSingleTap))
+        singleTap.numberOfTapsRequired = 1
+        singleTap.require(toFail: doubleTap)
+        scrollView.addGestureRecognizer(singleTap)
+
         context.coordinator.hostingView = hostingController.view
         context.coordinator.lastResetID = resetID
+        context.coordinator.onSingleTap = onSingleTap
 
         return scrollView
     }
 
     func updateUIView(_ scrollView: UIScrollView, context: Context) {
+        context.coordinator.onSingleTap = onSingleTap
         if context.coordinator.lastResetID != resetID {
             context.coordinator.lastResetID = resetID
             scrollView.setZoomScale(1, animated: false)
@@ -53,6 +65,7 @@ struct ZoomableContainer<Content: View>: UIViewRepresentable {
     class Coordinator: NSObject, UIScrollViewDelegate {
         var hostingView: UIView?
         var lastResetID: UUID?
+        var onSingleTap: (() -> Void)?
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             hostingView
@@ -67,6 +80,10 @@ struct ZoomableContainer<Content: View>: UIViewRepresentable {
             let offsetX = max((scrollView.bounds.width - scrollView.contentSize.width) / 2, 0)
             let offsetY = max((scrollView.bounds.height - scrollView.contentSize.height) / 2, 0)
             hostingView.frame.origin = CGPoint(x: offsetX, y: offsetY)
+        }
+
+        @objc func handleSingleTap() {
+            onSingleTap?()
         }
 
         @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
