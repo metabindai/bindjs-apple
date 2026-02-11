@@ -53,7 +53,6 @@ const componentNames = [
     "Actions",
     "AlertScene",
     "AngularGradient",
-    "Annotation",
     "AnyView",
     "AssistiveAccess",
     "AsyncImage",
@@ -135,13 +134,8 @@ const componentNames = [
     "Link",
     "List",
     "Main",
-    "Map",
-    "MapCircle",
-    "MapPolygon",
-    "MapPolyline",
     "Markdown",
     "MarkedValueLabel",
-    "Marker",
     "Material",
     "MaximumValueLabel",
     "Menu",
@@ -1277,32 +1271,6 @@ function SheetModifier({ args, name }) {
     }
 }
 
-function GalleryModifier({ args, name }) {
-    let detailCallback;
-    let zoomEnabled = true;
-
-    if (typeof args[0] === 'function') {
-        detailCallback = args[0];
-    } else if (args[0] && typeof args[0] === 'object') {
-        zoomEnabled = args[0].zoomEnabled !== false;
-        detailCallback = args[1];
-    }
-
-    if (!detailCallback || typeof detailCallback !== 'function') {
-        return { props: { detailHandlerId: null, zoomEnabled } };
-    }
-    const detailHandler = (id) => {
-        let result = detailCallback(id);
-        return this.unwrapComponentAST(result);
-    };
-    return {
-        props: {
-            detailHandlerId: this.storeFunction(detailHandler, this.currentPathId(name + '_detail')),
-            zoomEnabled
-        }
-    }
-}
-
 function NavigationDestinationModifier({ args, name }) {
 
     // Assume args[0] contains the props
@@ -2015,7 +1983,6 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
-        this.#registerBuiltInModifier('gallery', GalleryModifier);
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
         // Register event handlers
