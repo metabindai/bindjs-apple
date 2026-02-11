@@ -101,6 +101,10 @@ public class BindJSContext: ObservableObject {
                 // Fallback: No or invalid options; just animate with default
                 withAnimation(.smooth) {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
+                    // Flush synchronously so SwiftUI sees the change inside the animation transaction
+                    // (needsRerender dispatches async, which would miss the transaction for transitions)
+                    self.rerenderScheduled = false
+                    self.objectWillChange.send()
                 }
                 return
             }
@@ -109,11 +113,15 @@ public class BindJSContext: ObservableObject {
             if let jsAnimation = try? JSONDecoder().decode(JSAnimation.self, from: data) {
                 jsAnimation.apply {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
+                    self.rerenderScheduled = false
+                    self.objectWillChange.send()
                 }
             } else {
                 // Could not decode, fallback to default
                 withAnimation(.smooth) {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
+                    self.rerenderScheduled = false
+                    self.objectWillChange.send()
                 }
             }
         }

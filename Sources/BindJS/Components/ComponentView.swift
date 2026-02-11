@@ -132,6 +132,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
     ScrollEdgeEffectHiddenComponent.directiveName: { ScrollEdgeEffectHiddenComponent(from: $0) },
     ScrollEdgeEffectStyleComponent.directiveName: { ScrollEdgeEffectStyleComponent(from: $0) },
+    SensoryFeedbackComponent.directiveName: { SensoryFeedbackComponent(from: $0) },
     SubmitLabelComponent.directiveName: { SubmitLabelComponent(from: $0) },
     ShadowComponent.directiveName: { ShadowComponent(from: $0) },
     SheetComponent.directiveName: { SheetComponent(from: $0) },
@@ -145,6 +146,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ToolbarVisibilityComponent.directiveName: { ToolbarVisibilityComponent(from: $0) },
     TrackingComponent.directiveName: { TrackingComponent(from: $0) },
     TransformEffectComponent.directiveName: { TransformEffectComponent(from: $0) },
+    TransitionComponent.directiveName: { TransitionComponent(from: $0) },
     UnderlineComponent.directiveName: { UnderlineComponent(from: $0) },
     VisualEffectComponent.directiveName: { VisualEffectComponent(from: $0) },
     ZIndexComponent.directiveName: { ZIndexComponent(from: $0) },
@@ -336,6 +338,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ScrollContentBackgroundComponent: content.modifier(m)
         case let m as ScrollEdgeEffectHiddenComponent: content.modifier(m)
         case let m as ScrollEdgeEffectStyleComponent: content.modifier(m)
+        case let m as SensoryFeedbackComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
         case let m as StrikethroughComponent: content.modifier(m)
@@ -349,6 +352,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ToolbarVisibilityComponent: content.modifier(m)
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
+        case let m as TransitionComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)
         case let m as VisualEffectComponent: content.modifier(m)
         case let m as ZIndexComponent: content.modifier(m)
