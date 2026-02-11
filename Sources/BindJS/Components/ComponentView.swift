@@ -63,6 +63,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     AspectRatioComponent.directiveName: { AspectRatioComponent(from: $0) },
     AutocorrectionDisabledComponent.directiveName: { AutocorrectionDisabledComponent(from: $0) },
     BackgroundComponent.directiveName: { BackgroundComponent(from: $0) },
+    BadgeComponent.directiveName: { BadgeComponent(from: $0) },
     BlendModeComponent.directiveName: { BlendModeComponent(from: $0) },
     BlurComponent.directiveName: { BlurComponent(from: $0) },
     BoldComponent.directiveName: { BoldComponent(from: $0) },
@@ -262,6 +263,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as AspectRatioComponent: content.modifier(m)
         case let m as AutocorrectionDisabledComponent: content.modifier(m)
         case let m as BackgroundComponent: content.modifier(m)
+        case let m as BadgeComponent: content.modifier(m)
         case let m as BlendModeComponent: content.modifier(m)
         case let m as BlurComponent: content.modifier(m)
         case let m as BoldComponent: content.modifier(m)
