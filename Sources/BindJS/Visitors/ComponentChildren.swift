@@ -19,10 +19,18 @@ private struct ComponentChildren: ComponentVisitor {
         call.children
     }
     
+    mutating func visitGrid(_ grid: GridComponent) -> [any Component] {
+        grid.children
+    }
+
+    mutating func visitGridRow(_ gridRow: GridRowComponent) -> [any Component] {
+        gridRow.children
+    }
+
     mutating func visitGroup(_ group: GroupComponent) -> [any Component] {
         group.content
     }
-    
+
     mutating func visitHStack(_ hStack: HStackComponent) -> [any Component] {
         hStack.children
     }

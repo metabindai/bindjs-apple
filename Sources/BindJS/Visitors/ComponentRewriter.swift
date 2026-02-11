@@ -20,12 +20,24 @@ public extension ComponentRewriter {
         return copy
     }
     
+    mutating func visitGrid(_ grid: GridComponent) -> Result {
+        var copy = grid
+        copy.children = grid.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitGridRow(_ gridRow: GridRowComponent) -> Result {
+        var copy = gridRow
+        copy.children = gridRow.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
     mutating func visitGroup(_ group: GroupComponent) -> Result {
         var copy = group
         copy.content = group.content.map { $0.accept(visitor: &self) }
         return copy
     }
-    
+
     mutating func visitHStack(_ hStack: HStackComponent) -> Result {
         var copy = hStack
         copy.children = hStack.children.map { $0.accept(visitor: &self) }

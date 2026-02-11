@@ -14,6 +14,8 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     EmptyComponent.directiveName: { EmptyComponent(from: $0) },
     ForEachComponent.directiveName: { ForEachComponent(from: $0) },
     GeometryReaderComponent.directiveName: { GeometryReaderComponent(from: $0) },
+    GridComponent.directiveName: { GridComponent(from: $0) },
+    GridRowComponent.directiveName: { GridRowComponent(from: $0) },
     GroupComponent.directiveName: { GroupComponent(from: $0) },
     HStackComponent.directiveName: { HStackComponent(from: $0) },
     LazyHStackComponent.directiveName: { LazyHStackComponent(from: $0) },
@@ -87,6 +89,10 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ForegroundStyleComponent.directiveName: { ForegroundStyleComponent(from: $0) },
     FrameComponent.directiveName: { makeFrameComponent($0) },
     GlassEffectComponent.directiveName: { GlassEffectComponent(from: $0) },
+    GridCellAnchorComponent.directiveName: { GridCellAnchorComponent(from: $0) },
+    GridCellColumnsComponent.directiveName: { GridCellColumnsComponent(from: $0) },
+    GridCellUnsizedAxesComponent.directiveName: { GridCellUnsizedAxesComponent(from: $0) },
+    GridColumnAlignmentComponent.directiveName: { GridColumnAlignmentComponent(from: $0) },
     GrayscaleComponent.directiveName: { GrayscaleComponent(from: $0) },
     HiddenComponent.directiveName: { HiddenComponent(from: $0) },
     IDComponent.directiveName: { IDComponent(from: $0) },
@@ -193,6 +199,8 @@ public struct ComponentView: View {
         case let empty as EmptyComponent: empty
         case let forEach as ForEachComponent: forEach
         case let geometryReader as GeometryReaderComponent: geometryReader
+        case let grid as GridComponent: grid
+        case let gridRow as GridRowComponent: gridRow
         case let group as GroupComponent: group
         case let hStack as HStackComponent: hStack
         case let image as ImageComponent: image
@@ -285,6 +293,10 @@ struct ComponentViewModifier: ViewModifier {
         case let m as GalleryItemComponent: content.modifier(m)
         #endif
         case let m as GlassEffectComponent: content.modifier(m)
+        case let m as GridCellAnchorComponent: content.modifier(m)
+        case let m as GridCellColumnsComponent: content.modifier(m)
+        case let m as GridCellUnsizedAxesComponent: content.modifier(m)
+        case let m as GridColumnAlignmentComponent: content.modifier(m)
         case let m as GrayscaleComponent: content.modifier(m)
         case let m as HiddenComponent: content.modifier(m)
         case let m as IDComponent: content.modifier(m)
