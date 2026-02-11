@@ -11,6 +11,8 @@ public protocol ComponentVisitor {
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
     mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
+    mutating func visitGrid(_ grid: GridComponent) -> Result
+    mutating func visitGridRow(_ gridRow: GridRowComponent) -> Result
     mutating func visitGroup(_ group: GroupComponent) -> Result
     mutating func visitHStack(_ hStack: HStackComponent) -> Result
     mutating func visitLazyHStack(_ lazyHStack: LazyHStackComponent) -> Result
@@ -103,6 +105,10 @@ public protocol ComponentVisitor {
     mutating func visitMap(_ map: MapComponent) -> Result
     #endif
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result
+    mutating func visitGridCellAnchor(_ gridCellAnchor: GridCellAnchorComponent) -> Result
+    mutating func visitGridCellColumns(_ gridCellColumns: GridCellColumnsComponent) -> Result
+    mutating func visitGridCellUnsizedAxes(_ gridCellUnsizedAxes: GridCellUnsizedAxesComponent) -> Result
+    mutating func visitGridColumnAlignment(_ gridColumnAlignment: GridColumnAlignmentComponent) -> Result
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result
     mutating func visitHidden(_ hidden: HiddenComponent) -> Result
     mutating func visitID(_ id: IDComponent) -> Result
@@ -191,10 +197,18 @@ public extension ComponentVisitor {
         return defaultVisit(geometryReader)
     }
 
+    mutating func visitGrid(_ grid: GridComponent) -> Result {
+        return defaultVisit(grid)
+    }
+
+    mutating func visitGridRow(_ gridRow: GridRowComponent) -> Result {
+        return defaultVisit(gridRow)
+    }
+
     mutating func visitGroup(_ group: GroupComponent) -> Result {
         return defaultVisit(group)
     }
-    
+
     mutating func visitHStack(_ hStack: HStackComponent) -> Result {
         return defaultVisit(hStack)
     }
@@ -530,6 +544,22 @@ public extension ComponentVisitor {
 
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result {
         return defaultVisit(glassEffect)
+    }
+
+    mutating func visitGridCellAnchor(_ gridCellAnchor: GridCellAnchorComponent) -> Result {
+        return defaultVisit(gridCellAnchor)
+    }
+
+    mutating func visitGridCellColumns(_ gridCellColumns: GridCellColumnsComponent) -> Result {
+        return defaultVisit(gridCellColumns)
+    }
+
+    mutating func visitGridCellUnsizedAxes(_ gridCellUnsizedAxes: GridCellUnsizedAxesComponent) -> Result {
+        return defaultVisit(gridCellUnsizedAxes)
+    }
+
+    mutating func visitGridColumnAlignment(_ gridColumnAlignment: GridColumnAlignmentComponent) -> Result {
+        return defaultVisit(gridColumnAlignment)
     }
 
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result {
