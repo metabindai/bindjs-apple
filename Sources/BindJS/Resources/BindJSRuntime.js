@@ -955,6 +955,26 @@ function OnHandler({ args, name }) {
     }
 }
 
+function AnimationViewModifier({ args, name }) {
+    var { animation: animArg, value } = args[0] ?? {}
+
+    var animation = null
+    if (typeof animArg === 'function' && animArg._component) {
+        var ast = animArg()
+        animation = { type: ast.type, ...ast.props }
+        delete animation.children
+    } else if (animArg && typeof animArg === 'object') {
+        animation = animArg
+    }
+
+    return {
+        props: {
+            animation: animation ? JSON.stringify(animation) : null,
+            value: value != null ? String(value) : null
+        }
+    }
+}
+
 function AnimationModifier({ args,  name, content }) {
 
     const value = args[0];
@@ -2017,6 +2037,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('sheet', SheetModifier);
         this.#registerBuiltInModifier('gallery', GalleryModifier);
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
+        this.#registerBuiltInModifier('animation', AnimationViewModifier);
 
         // Register event handlers
         ['onTapGesture', 'onDragGesture', 'onLongPressGesture', 'onHover', 'onAppear', 'onDisappear', 'onSubmit', 'onChange'].map(name => this.#registerBuiltInModifier(name, OnHandler));
