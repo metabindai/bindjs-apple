@@ -249,11 +249,11 @@ public class BindJSContext: ObservableObject {
     // MARK: - ForEach Pre-computation
 
     private struct ForEachResolver: ComponentRewriter {
-        unowned let context: BindJSContext
+        weak let context: BindJSContext?
 
         mutating func visitForEach(_ forEach: ForEachComponent) -> Component {
             var copy = forEach
-            copy.resolvedChildren = context.evaluateForEachChildren(forEach)
+            copy.resolvedChildren = context?.evaluateForEachChildren(forEach)
                 .map { $0.accept(visitor: &self) }
             return copy
         }
