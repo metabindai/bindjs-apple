@@ -1277,6 +1277,22 @@ function SheetModifier({ args, name }) {
     }
 }
 
+function ScrollPositionModifier({ args, name }) {
+    const props = args[0] ?? {};
+    const path = this.currentPathId(name);
+    const environmentId = this.storeEnvironment(path);
+
+    const result = { scrolledID: props.id ?? null, environmentId };
+
+    if (typeof props.setId === 'function') {
+        result.setScrolledIDHandlerId = this.storeFunction(props.setId, path);
+    } else if (props.setIdId) {
+        result.setScrolledIDHandlerId = props.setIdId;
+    }
+
+    return { props: result };
+}
+
 function GalleryModifier({ args, name }) {
     let detailCallback;
     let zoomEnabled = true;
@@ -2015,6 +2031,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
+        this.#registerBuiltInModifier('scrollPosition', ScrollPositionModifier);
         this.#registerBuiltInModifier('gallery', GalleryModifier);
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
