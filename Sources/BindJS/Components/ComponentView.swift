@@ -151,6 +151,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
 private let platformComponentFactories: [String: (Directive) -> Component?] = [
     GalleryComponent.directiveName: { GalleryComponent(from: $0) },
     GalleryItemComponent.directiveName: { GalleryItemComponent(from: $0) },
+    MapComponent.directiveName: { MapComponent(from: $0) },
 ]
 #else
 private let platformComponentFactories: [String: (Directive) -> Component?] = [:]
@@ -200,6 +201,9 @@ public struct ComponentView: View {
         case let lazyVStack as LazyVStackComponent: lazyVStack
         case let linearGradient as LinearGradientComponent: linearGradient
         case let list as ListComponent: list
+        #if os(iOS) || os(visionOS)
+        case let map as MapComponent: map
+        #endif
         case let material as MaterialComponent: material
         case let menu as MenuComponent: menu
         case let model3D as Model3DComponent: model3D

@@ -100,6 +100,7 @@ public protocol ComponentVisitor {
     #if os(iOS) || os(visionOS)
     mutating func visitGallery(_ gallery: GalleryComponent) -> Result
     mutating func visitGalleryItem(_ galleryItem: GalleryItemComponent) -> Result
+    mutating func visitMap(_ map: MapComponent) -> Result
     #endif
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result
@@ -520,6 +521,10 @@ public extension ComponentVisitor {
 
     mutating func visitGalleryItem(_ galleryItem: GalleryItemComponent) -> Result {
         return defaultVisit(galleryItem)
+    }
+
+    mutating func visitMap(_ map: MapComponent) -> Result {
+        return defaultVisit(map)
     }
     #endif
 
