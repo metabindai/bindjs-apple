@@ -97,6 +97,11 @@ public protocol ComponentVisitor {
     mutating func visitForegroundStyle(_ foregroundStyle: ForegroundStyleComponent) -> Result
     mutating func visitFrame(_ frame: FrameComponent) -> Result
     mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result
+    #if os(iOS) || os(visionOS)
+    mutating func visitGallery(_ gallery: GalleryComponent) -> Result
+    mutating func visitGalleryItem(_ galleryItem: GalleryItemComponent) -> Result
+    mutating func visitMap(_ map: MapComponent) -> Result
+    #endif
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result
     mutating func visitHidden(_ hidden: HiddenComponent) -> Result
@@ -509,10 +514,24 @@ public extension ComponentVisitor {
         return defaultVisit(pickerStyle)
     }
 
+    #if os(iOS) || os(visionOS)
+    mutating func visitGallery(_ gallery: GalleryComponent) -> Result {
+        return defaultVisit(gallery)
+    }
+
+    mutating func visitGalleryItem(_ galleryItem: GalleryItemComponent) -> Result {
+        return defaultVisit(galleryItem)
+    }
+
+    mutating func visitMap(_ map: MapComponent) -> Result {
+        return defaultVisit(map)
+    }
+    #endif
+
     mutating func visitGlassEffect(_ glassEffect: GlassEffectComponent) -> Result {
         return defaultVisit(glassEffect)
     }
-    
+
     mutating func visitGrayscale(_ grayscale: GrayscaleComponent) -> Result {
         return defaultVisit(grayscale)
     }
