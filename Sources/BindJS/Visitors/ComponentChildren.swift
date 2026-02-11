@@ -132,6 +132,10 @@ private struct ComponentChildren: ComponentVisitor {
     mutating func visitBackground(_ background: BackgroundComponent) -> [any Component] {
         [background.content]
     }
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> [any Component] {
+        [listRowBackground.content]
+    }
     
     mutating func visitBorder(_ border: BorderComponent) -> [any Component] {
         [border.style]

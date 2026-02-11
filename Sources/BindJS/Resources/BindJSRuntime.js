@@ -2010,6 +2010,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('resizable', Resizable);
 
         this.#registerBuiltInModifier('background', ContentModifier);
+        this.#registerBuiltInModifier('listRowBackground', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
         this.#registerBuiltInModifier('contextMenu', ContentModifier);
         this.#registerBuiltInModifier('toolbar', ContentModifier);

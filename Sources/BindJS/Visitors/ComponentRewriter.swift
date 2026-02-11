@@ -169,6 +169,12 @@ public extension ComponentRewriter {
         copy.content = background.content.accept(visitor: &self)
         return copy
     }
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result {
+        var copy = listRowBackground
+        copy.content = listRowBackground.content.accept(visitor: &self)
+        return copy
+    }
     
     mutating func visitBorder(_ border: BorderComponent) -> Result {
         var copy = border
