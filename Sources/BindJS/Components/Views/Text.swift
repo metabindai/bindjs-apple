@@ -41,7 +41,7 @@ extension TextComponent {
         } else if let verbatim: String = directive["verbatim"] {
             self.storage = .verbatim(verbatim)
         } else {
-            return nil
+            self.storage = .verbatim("")
         }
     }
     
