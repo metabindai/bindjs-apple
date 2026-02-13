@@ -172,6 +172,19 @@ public extension ComponentRewriter {
         }
         return copy
     }
+
+    mutating func visitPath(_ path: PathComponent) -> Result {
+        var copy = path
+        switch path.style {
+        case .fill(let component):
+            copy.style = .fill(component.accept(visitor: &self))
+        case .stroke(let component, let lineWidth):
+            copy.style = .stroke(component.accept(visitor: &self), lineWidth: lineWidth)
+        case .none:
+            copy.style = nil
+        }
+        return copy
+    }
     
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> Result {
         var copy = accessibilityRepresentation

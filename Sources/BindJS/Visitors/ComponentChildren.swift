@@ -133,6 +133,17 @@ private struct ComponentChildren: ComponentVisitor {
             return []
         }
     }
+
+    mutating func visitPath(_ path: PathComponent) -> [any Component] {
+        switch path.style {
+        case .fill(let component):
+            return [component]
+        case .stroke(let component, _):
+            return [component]
+        case .none:
+            return []
+        }
+    }
     
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> [any Component] {
         [accessibilityRepresentation.representation]

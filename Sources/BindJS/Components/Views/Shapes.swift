@@ -12,6 +12,8 @@ func makeShape(_ component: Component) -> (any Shape)? {
         return roundedRectangle.swiftUI
     case let capsule as CapsuleComponent:
         return capsule.swiftUI
+    case let path as PathComponent:
+        return path.swiftUI
     default:
         return nil
     }
