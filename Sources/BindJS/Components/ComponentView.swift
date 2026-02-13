@@ -101,6 +101,9 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ItalicComponent.directiveName: { ItalicComponent(from: $0) },
     KeyboardTypeComponent.directiveName: { KeyboardTypeComponent(from: $0) },
     LayoutPriorityComponent.directiveName: { LayoutPriorityComponent(from: $0) },
+    ListRowBackgroundComponent.directiveName: { ListRowBackgroundComponent(from: $0) },
+    ListRowSeparatorComponent.directiveName: { ListRowSeparatorComponent(from: $0) },
+    ListStyleComponent.directiveName: { ListStyleComponent(from: $0) },
     LineLimitComponent.directiveName: { LineLimitComponent(from: $0) },
     LineSpacingComponent.directiveName: { LineSpacingComponent(from: $0) },
     MaskComponent.directiveName: { MaskComponent(from: $0) },
@@ -306,6 +309,9 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ItalicComponent: content.modifier(m)
         case let m as KeyboardTypeComponent: content.modifier(m)
         case let m as LayoutPriorityComponent: content.modifier(m)
+        case let m as ListRowBackgroundComponent: content.modifier(m)
+        case let m as ListRowSeparatorComponent: content.modifier(m)
+        case let m as ListStyleComponent: content.modifier(m)
         case let m as LineLimitComponent: content.modifier(m)
         case let m as LineSpacingComponent: content.modifier(m)
         case let m as MaskComponent: content.modifier(m)

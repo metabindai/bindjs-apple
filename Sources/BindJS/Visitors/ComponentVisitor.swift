@@ -116,6 +116,9 @@ public protocol ComponentVisitor {
     mutating func visitIgnoresSafeArea(_ ignoresSafeArea: IgnoresSafeAreaComponent) -> Result
     mutating func visitItalic(_ italic: ItalicComponent) -> Result
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result
+    mutating func visitListRowSeparator(_ listRowSeparator: ListRowSeparatorComponent) -> Result
+    mutating func visitListStyle(_ listStyle: ListStyleComponent) -> Result
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result
     mutating func visitMask(_ mask: MaskComponent) -> Result
@@ -590,7 +593,19 @@ public extension ComponentVisitor {
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result {
         return defaultVisit(layoutPriority)
     }
-    
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result {
+        return defaultVisit(listRowBackground)
+    }
+
+    mutating func visitListRowSeparator(_ listRowSeparator: ListRowSeparatorComponent) -> Result {
+        return defaultVisit(listRowSeparator)
+    }
+
+    mutating func visitListStyle(_ listStyle: ListStyleComponent) -> Result {
+        return defaultVisit(listStyle)
+    }
+
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result {
         return defaultVisit(lineLimit)
     }
