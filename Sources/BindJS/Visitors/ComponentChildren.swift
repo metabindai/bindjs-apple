@@ -62,6 +62,10 @@ private struct ComponentChildren: ComponentVisitor {
         unresolved.children
     }
     
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> [any Component] {
+        viewThatFits.children
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> [any Component] {
         vStack.children
     }

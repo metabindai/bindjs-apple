@@ -47,6 +47,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ToolbarItemComponent.directiveName: { ToolbarItemComponent(from: $0) },
     ToolbarItemGroupComponent.directiveName: { ToolbarItemGroupComponent(from: $0) },
     VideoComponent.directiveName: { VideoComponent(from: $0) },
+    ViewThatFitsComponent.directiveName: { ViewThatFitsComponent(from: $0) },
     VStackComponent.directiveName: { VStackComponent(from: $0) },
     ZStackComponent.directiveName: { ZStackComponent(from: $0) },
 
@@ -233,6 +234,7 @@ public struct ComponentView: View {
         case let textField as TextFieldComponent: textField
         case let toggle as ToggleComponent: toggle
         case let unresolved as UnresolvedComponent: unresolved
+        case let viewThatFits as ViewThatFitsComponent: viewThatFits
         case let vStack as VStackComponent: vStack
         case let video as VideoComponent: video
         case let zStack as ZStackComponent: zStack

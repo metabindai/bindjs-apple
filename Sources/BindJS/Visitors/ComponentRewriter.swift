@@ -81,6 +81,12 @@ public extension ComponentRewriter {
         return copy
     }
     
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result {
+        var copy = viewThatFits
+        copy.children = viewThatFits.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> Result {
         var copy = vStack
         copy.children = vStack.children.map { $0.accept(visitor: &self) }
