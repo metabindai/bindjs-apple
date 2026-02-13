@@ -80,6 +80,7 @@ public protocol ComponentVisitor {
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result
     mutating func visitColorScheme(_ colorScheme: ColorSchemeComponent) -> Result
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result
+    mutating func visitContentTransition(_ contentTransition: ContentTransitionComponent) -> Result
     mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result
     mutating func visitContrast(_ contrast: ContrastComponent) -> Result
     mutating func visitControlSize(_ controlSize: ControlSizeComponent) -> Result
@@ -450,6 +451,10 @@ public extension ComponentVisitor {
     
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result {
         return defaultVisit(contentShape)
+    }
+
+    mutating func visitContentTransition(_ contentTransition: ContentTransitionComponent) -> Result {
+        return defaultVisit(contentTransition)
     }
 
     mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result {
