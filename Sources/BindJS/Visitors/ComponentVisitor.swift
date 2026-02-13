@@ -57,7 +57,8 @@ public protocol ComponentVisitor {
     mutating func visitRectangle(_ rectangle: RectangleComponent) -> Result
     mutating func visitRoundedRectangle(_ roundedRectangle: RoundedRectangleComponent) -> Result
     mutating func visitCapsule(_ capsule: CapsuleComponent) -> Result
-    
+    mutating func visitPath(_ path: PathComponent) -> Result
+
     // Modifier Components
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result
     mutating func visitAccessibilityHint(_ accessibilityHint: AccessibilityHintComponent) -> Result
@@ -366,7 +367,11 @@ public extension ComponentVisitor {
     mutating func visitCapsule(_ capsule: CapsuleComponent) -> Result {
         return defaultVisit(capsule)
     }
-    
+
+    mutating func visitPath(_ path: PathComponent) -> Result {
+        return defaultVisit(path)
+    }
+
     // Modifier Components Default Implementations
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result {
         return defaultVisit(accessibilityHidden)

@@ -30,6 +30,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ModifiedComponent.directiveName: { ModifiedComponent(from: $0) },
     NavigationLinkComponent.directiveName: { NavigationLinkComponent(from: $0) },
     NavigationStackComponent.directiveName: { NavigationStackComponent(from: $0) },
+    PathComponent.directiveName: { PathComponent(from: $0) },
     PickerComponent.directiveName: { PickerComponent(from: $0) },
     PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
     ProgressViewComponent.directiveName: { ProgressViewComponent(from: $0) },
@@ -218,6 +219,7 @@ public struct ComponentView: View {
         case let modified as ModifiedComponent: modified
         case let navigationLink as NavigationLinkComponent: navigationLink
         case let navigationStack as NavigationStackComponent: navigationStack
+        case let path as PathComponent: path
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
         case let progressView as ProgressViewComponent: progressView
