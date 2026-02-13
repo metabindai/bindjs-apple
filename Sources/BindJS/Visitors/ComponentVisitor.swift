@@ -42,6 +42,7 @@ public protocol ComponentVisitor {
     mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result
     mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
     mutating func visitZStack(_ zStack: ZStackComponent) -> Result
@@ -330,7 +331,11 @@ public extension ComponentVisitor {
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {
         return defaultVisit(unresolved)
     }
-    
+
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result {
+        return defaultVisit(viewThatFits)
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> Result {
         return defaultVisit(vStack)
     }
