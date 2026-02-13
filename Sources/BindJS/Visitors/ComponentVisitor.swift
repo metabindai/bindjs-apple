@@ -159,12 +159,14 @@ public protocol ComponentVisitor {
     mutating func visitToolbarVisibility(_ toolbarVisibility: ToolbarVisibilityComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
+    mutating func visitTransition(_ transition: TransitionComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result
+    mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result
     mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
@@ -765,7 +767,11 @@ public extension ComponentVisitor {
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result {
         return defaultVisit(transformEffect)
     }
-    
+
+    mutating func visitTransition(_ transition: TransitionComponent) -> Result {
+        return defaultVisit(transition)
+    }
+
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result {
         return defaultVisit(underline)
     }
@@ -789,7 +795,11 @@ public extension ComponentVisitor {
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result {
         return defaultVisit(scrollEdgeEffectStyle)
     }
-    
+
+    mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result {
+        return defaultVisit(sensoryFeedback)
+    }
+
     mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result {
         return defaultVisit(submitLabel)
     }
