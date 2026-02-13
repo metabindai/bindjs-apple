@@ -18,6 +18,15 @@ private struct ComponentChildren: ComponentVisitor {
     mutating func visitCall(_ call: ComponentCall) -> [any Component] {
         call.children
     }
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> [any Component] {
+        var children: [any Component] = []
+        if let label = contentUnavailableView.label { children.append(label) }
+        if let title = contentUnavailableView.title { children.append(title) }
+        if let description = contentUnavailableView.description { children.append(description) }
+        children.append(contentsOf: contentUnavailableView.actions)
+        return children
+    }
     
     mutating func visitGrid(_ grid: GridComponent) -> [any Component] {
         grid.children

@@ -8,6 +8,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     CapsuleComponent.directiveName: { CapsuleComponent(from: $0) },
     CircleComponent.directiveName: { CircleComponent(from: $0) },
     ColorComponent.directiveName: { ColorComponent(from: $0) },
+    ContentUnavailableViewComponent.directiveName: { ContentUnavailableViewComponent(from: $0) },
     DividerComponent.directiveName: { DividerComponent(from: $0) },
     EllipseComponent.directiveName: { EllipseComponent(from: $0) },
     EllipticalGradientComponent.directiveName: { EllipticalGradientComponent(from: $0) },
@@ -199,6 +200,7 @@ public struct ComponentView: View {
         case let capsule as CapsuleComponent: capsule
         case let circle as CircleComponent: circle
         case let color as ColorComponent: color
+        case let contentUnavailable as ContentUnavailableViewComponent: contentUnavailable
         case let divider as DividerComponent: divider
         case let ellipse as EllipseComponent: ellipse
         case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
