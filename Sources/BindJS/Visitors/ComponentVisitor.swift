@@ -8,6 +8,7 @@ public protocol ComponentVisitor {
     mutating func visitButton(_ button: ButtonComponent) -> Result
     mutating func visitCall(_ call: ComponentCall) -> Result
     mutating func visitColor(_ color: ColorComponent) -> Result
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
     mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
@@ -184,7 +185,11 @@ public extension ComponentVisitor {
     mutating func visitColor(_ color: ColorComponent) -> Result {
         return defaultVisit(color)
     }
-    
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result {
+        return defaultVisit(contentUnavailableView)
+    }
+
     mutating func visitDivider(_ divider: DividerComponent) -> Result {
         return defaultVisit(divider)
     }

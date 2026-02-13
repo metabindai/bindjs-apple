@@ -19,6 +19,21 @@ public extension ComponentRewriter {
         copy.children = call.children.map { $0.accept(visitor: &self) }
         return copy
     }
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result {
+        var copy = contentUnavailableView
+        if let label = contentUnavailableView.label {
+            copy.label = label.accept(visitor: &self)
+        }
+        if let title = contentUnavailableView.title {
+            copy.title = title.accept(visitor: &self)
+        }
+        if let description = contentUnavailableView.description {
+            copy.description = description.accept(visitor: &self)
+        }
+        copy.actions = contentUnavailableView.actions.map { $0.accept(visitor: &self) }
+        return copy
+    }
     
     mutating func visitGrid(_ grid: GridComponent) -> Result {
         var copy = grid
