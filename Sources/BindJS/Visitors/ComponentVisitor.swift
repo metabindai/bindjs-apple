@@ -158,6 +158,7 @@ public protocol ComponentVisitor {
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result
@@ -758,10 +759,14 @@ public extension ComponentVisitor {
         return defaultVisit(keyboardType)
     }
     
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result {
+        return defaultVisit(safeAreaInset)
+    }
+
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
         return defaultVisit(scrollContentBackground)
     }
-    
+
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result {
         return defaultVisit(scrollEdgeEffectHidden)
     }
