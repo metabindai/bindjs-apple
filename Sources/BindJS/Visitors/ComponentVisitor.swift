@@ -8,6 +8,7 @@ public protocol ComponentVisitor {
     mutating func visitButton(_ button: ButtonComponent) -> Result
     mutating func visitCall(_ call: ComponentCall) -> Result
     mutating func visitColor(_ color: ColorComponent) -> Result
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result
     mutating func visitDivider(_ divider: DividerComponent) -> Result
     mutating func visitForEach(_ forEach: ForEachComponent) -> Result
     mutating func visitGeometryReader(_ geometryReader: GeometryReaderComponent) -> Result
@@ -41,6 +42,7 @@ public protocol ComponentVisitor {
     mutating func visitToolbarItem(_ toolbarItem: ToolbarItemComponent) -> Result
     mutating func visitToolbarItemGroup(_ toolbarItemGroup: ToolbarItemGroupComponent) -> Result
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
     mutating func visitZStack(_ zStack: ZStackComponent) -> Result
@@ -57,7 +59,8 @@ public protocol ComponentVisitor {
     mutating func visitRectangle(_ rectangle: RectangleComponent) -> Result
     mutating func visitRoundedRectangle(_ roundedRectangle: RoundedRectangleComponent) -> Result
     mutating func visitCapsule(_ capsule: CapsuleComponent) -> Result
-    
+    mutating func visitPath(_ path: PathComponent) -> Result
+
     // Modifier Components
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result
     mutating func visitAccessibilityHint(_ accessibilityHint: AccessibilityHintComponent) -> Result
@@ -70,6 +73,7 @@ public protocol ComponentVisitor {
     mutating func visitAllowsTightening(_ allowsTightening: AllowsTighteningComponent) -> Result
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result
     mutating func visitBackground(_ background: BackgroundComponent) -> Result
+    mutating func visitBadge(_ badge: BadgeComponent) -> Result
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result
     mutating func visitBlur(_ blur: BlurComponent) -> Result
     mutating func visitBold(_ bold: BoldComponent) -> Result
@@ -80,6 +84,7 @@ public protocol ComponentVisitor {
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result
     mutating func visitColorScheme(_ colorScheme: ColorSchemeComponent) -> Result
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result
+    mutating func visitContentTransition(_ contentTransition: ContentTransitionComponent) -> Result
     mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result
     mutating func visitContrast(_ contrast: ContrastComponent) -> Result
     mutating func visitControlSize(_ controlSize: ControlSizeComponent) -> Result
@@ -115,6 +120,9 @@ public protocol ComponentVisitor {
     mutating func visitIgnoresSafeArea(_ ignoresSafeArea: IgnoresSafeAreaComponent) -> Result
     mutating func visitItalic(_ italic: ItalicComponent) -> Result
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result
+    mutating func visitListRowSeparator(_ listRowSeparator: ListRowSeparatorComponent) -> Result
+    mutating func visitListStyle(_ listStyle: ListStyleComponent) -> Result
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result
     mutating func visitMask(_ mask: MaskComponent) -> Result
@@ -155,14 +163,17 @@ public protocol ComponentVisitor {
     mutating func visitToolbarVisibility(_ toolbarVisibility: ToolbarVisibilityComponent) -> Result
     mutating func visitTracking(_ tracking: TrackingComponent) -> Result
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result
+    mutating func visitTransition(_ transition: TransitionComponent) -> Result
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result
     mutating func visitVisualEffect(_ visualEffect: VisualEffectComponent) -> Result
     mutating func visitKeyboardType(_ keyboardType: KeyboardTypeComponent) -> Result
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result
     mutating func visitScrollTargetBehavior(_ scrollTargetBehavior: ScrollTargetBehaviorComponent) -> Result
     mutating func visitScrollTargetLayout(_ scrollTargetLayout: ScrollTargetLayoutComponent) -> Result
+    mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result
     mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
 }
@@ -186,7 +197,11 @@ public extension ComponentVisitor {
     mutating func visitColor(_ color: ColorComponent) -> Result {
         return defaultVisit(color)
     }
-    
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result {
+        return defaultVisit(contentUnavailableView)
+    }
+
     mutating func visitDivider(_ divider: DividerComponent) -> Result {
         return defaultVisit(divider)
     }
@@ -318,7 +333,11 @@ public extension ComponentVisitor {
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result {
         return defaultVisit(unresolved)
     }
-    
+
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result {
+        return defaultVisit(viewThatFits)
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> Result {
         return defaultVisit(vStack)
     }
@@ -368,7 +387,11 @@ public extension ComponentVisitor {
     mutating func visitCapsule(_ capsule: CapsuleComponent) -> Result {
         return defaultVisit(capsule)
     }
-    
+
+    mutating func visitPath(_ path: PathComponent) -> Result {
+        return defaultVisit(path)
+    }
+
     // Modifier Components Default Implementations
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result {
         return defaultVisit(accessibilityHidden)
@@ -413,7 +436,11 @@ public extension ComponentVisitor {
     mutating func visitBackground(_ background: BackgroundComponent) -> Result {
         return defaultVisit(background)
     }
-    
+
+    mutating func visitBadge(_ badge: BadgeComponent) -> Result {
+        return defaultVisit(badge)
+    }
+
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result {
         return defaultVisit(blendMode)
     }
@@ -452,6 +479,10 @@ public extension ComponentVisitor {
     
     mutating func visitContentShape(_ contentShape: ContentShapeComponent) -> Result {
         return defaultVisit(contentShape)
+    }
+
+    mutating func visitContentTransition(_ contentTransition: ContentTransitionComponent) -> Result {
+        return defaultVisit(contentTransition)
     }
 
     mutating func visitContextMenu(_ contextMenu: ContextMenuComponent) -> Result {
@@ -587,7 +618,19 @@ public extension ComponentVisitor {
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result {
         return defaultVisit(layoutPriority)
     }
-    
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result {
+        return defaultVisit(listRowBackground)
+    }
+
+    mutating func visitListRowSeparator(_ listRowSeparator: ListRowSeparatorComponent) -> Result {
+        return defaultVisit(listRowSeparator)
+    }
+
+    mutating func visitListStyle(_ listStyle: ListStyleComponent) -> Result {
+        return defaultVisit(listStyle)
+    }
+
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result {
         return defaultVisit(lineLimit)
     }
@@ -747,7 +790,11 @@ public extension ComponentVisitor {
     mutating func visitTransformEffect(_ transformEffect: TransformEffectComponent) -> Result {
         return defaultVisit(transformEffect)
     }
-    
+
+    mutating func visitTransition(_ transition: TransitionComponent) -> Result {
+        return defaultVisit(transition)
+    }
+
     mutating func visitUnderline(_ underline: UnderlineComponent) -> Result {
         return defaultVisit(underline)
     }
@@ -760,10 +807,14 @@ public extension ComponentVisitor {
         return defaultVisit(keyboardType)
     }
     
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result {
+        return defaultVisit(safeAreaInset)
+    }
+
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result {
         return defaultVisit(scrollContentBackground)
     }
-    
+
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result {
         return defaultVisit(scrollEdgeEffectHidden)
     }
@@ -778,6 +829,10 @@ public extension ComponentVisitor {
 
     mutating func visitScrollTargetLayout(_ scrollTargetLayout: ScrollTargetLayoutComponent) -> Result {
         return defaultVisit(scrollTargetLayout)
+    }
+
+    mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result {
+        return defaultVisit(sensoryFeedback)
     }
 
     mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result {

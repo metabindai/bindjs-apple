@@ -18,6 +18,15 @@ private struct ComponentChildren: ComponentVisitor {
     mutating func visitCall(_ call: ComponentCall) -> [any Component] {
         call.children
     }
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> [any Component] {
+        var children: [any Component] = []
+        if let label = contentUnavailableView.label { children.append(label) }
+        if let title = contentUnavailableView.title { children.append(title) }
+        if let description = contentUnavailableView.description { children.append(description) }
+        children.append(contentsOf: contentUnavailableView.actions)
+        return children
+    }
     
     mutating func visitGrid(_ grid: GridComponent) -> [any Component] {
         grid.children
@@ -62,6 +71,10 @@ private struct ComponentChildren: ComponentVisitor {
         unresolved.children
     }
     
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> [any Component] {
+        viewThatFits.children
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> [any Component] {
         vStack.children
     }
@@ -124,6 +137,17 @@ private struct ComponentChildren: ComponentVisitor {
             return []
         }
     }
+
+    mutating func visitPath(_ path: PathComponent) -> [any Component] {
+        switch path.style {
+        case .fill(let component):
+            return [component]
+        case .stroke(let component, _):
+            return [component]
+        case .none:
+            return []
+        }
+    }
     
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> [any Component] {
         [accessibilityRepresentation.representation]
@@ -131,6 +155,10 @@ private struct ComponentChildren: ComponentVisitor {
     
     mutating func visitBackground(_ background: BackgroundComponent) -> [any Component] {
         [background.content]
+    }
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> [any Component] {
+        [listRowBackground.content]
     }
     
     mutating func visitBorder(_ border: BorderComponent) -> [any Component] {
@@ -143,6 +171,10 @@ private struct ComponentChildren: ComponentVisitor {
     
     mutating func visitOverlay(_ overlay: OverlayComponent) -> [any Component] {
         [overlay.content]
+    }
+
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> [any Component] {
+        [safeAreaInset.content]
     }
 
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> [any Component] {

@@ -19,6 +19,21 @@ public extension ComponentRewriter {
         copy.children = call.children.map { $0.accept(visitor: &self) }
         return copy
     }
+
+    mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result {
+        var copy = contentUnavailableView
+        if let label = contentUnavailableView.label {
+            copy.label = label.accept(visitor: &self)
+        }
+        if let title = contentUnavailableView.title {
+            copy.title = title.accept(visitor: &self)
+        }
+        if let description = contentUnavailableView.description {
+            copy.description = description.accept(visitor: &self)
+        }
+        copy.actions = contentUnavailableView.actions.map { $0.accept(visitor: &self) }
+        return copy
+    }
     
     mutating func visitGrid(_ grid: GridComponent) -> Result {
         var copy = grid
@@ -81,6 +96,12 @@ public extension ComponentRewriter {
         return copy
     }
     
+    mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result {
+        var copy = viewThatFits
+        copy.children = viewThatFits.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
     mutating func visitVStack(_ vStack: VStackComponent) -> Result {
         var copy = vStack
         copy.children = vStack.children.map { $0.accept(visitor: &self) }
@@ -157,6 +178,19 @@ public extension ComponentRewriter {
         }
         return copy
     }
+
+    mutating func visitPath(_ path: PathComponent) -> Result {
+        var copy = path
+        switch path.style {
+        case .fill(let component):
+            copy.style = .fill(component.accept(visitor: &self))
+        case .stroke(let component, let lineWidth):
+            copy.style = .stroke(component.accept(visitor: &self), lineWidth: lineWidth)
+        case .none:
+            copy.style = nil
+        }
+        return copy
+    }
     
     mutating func visitAccessibilityRepresentation(_ accessibilityRepresentation: AccessibilityRepresentationComponent) -> Result {
         var copy = accessibilityRepresentation
@@ -167,6 +201,12 @@ public extension ComponentRewriter {
     mutating func visitBackground(_ background: BackgroundComponent) -> Result {
         var copy = background
         copy.content = background.content.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result {
+        var copy = listRowBackground
+        copy.content = listRowBackground.content.accept(visitor: &self)
         return copy
     }
     
@@ -185,6 +225,12 @@ public extension ComponentRewriter {
     mutating func visitOverlay(_ overlay: OverlayComponent) -> Result {
         var copy = overlay
         copy.content = overlay.content.accept(visitor: &self)
+        return copy
+    }
+
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result {
+        var copy = safeAreaInset
+        copy.content = safeAreaInset.content.accept(visitor: &self)
         return copy
     }
 

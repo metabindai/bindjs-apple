@@ -8,6 +8,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     CapsuleComponent.directiveName: { CapsuleComponent(from: $0) },
     CircleComponent.directiveName: { CircleComponent(from: $0) },
     ColorComponent.directiveName: { ColorComponent(from: $0) },
+    ContentUnavailableViewComponent.directiveName: { ContentUnavailableViewComponent(from: $0) },
     DividerComponent.directiveName: { DividerComponent(from: $0) },
     EllipseComponent.directiveName: { EllipseComponent(from: $0) },
     EllipticalGradientComponent.directiveName: { EllipticalGradientComponent(from: $0) },
@@ -30,6 +31,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ModifiedComponent.directiveName: { ModifiedComponent(from: $0) },
     NavigationLinkComponent.directiveName: { NavigationLinkComponent(from: $0) },
     NavigationStackComponent.directiveName: { NavigationStackComponent(from: $0) },
+    PathComponent.directiveName: { PathComponent(from: $0) },
     PickerComponent.directiveName: { PickerComponent(from: $0) },
     PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
     ProgressViewComponent.directiveName: { ProgressViewComponent(from: $0) },
@@ -47,6 +49,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ToolbarItemComponent.directiveName: { ToolbarItemComponent(from: $0) },
     ToolbarItemGroupComponent.directiveName: { ToolbarItemGroupComponent(from: $0) },
     VideoComponent.directiveName: { VideoComponent(from: $0) },
+    ViewThatFitsComponent.directiveName: { ViewThatFitsComponent(from: $0) },
     VStackComponent.directiveName: { VStackComponent(from: $0) },
     ZStackComponent.directiveName: { ZStackComponent(from: $0) },
 
@@ -63,6 +66,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     AspectRatioComponent.directiveName: { AspectRatioComponent(from: $0) },
     AutocorrectionDisabledComponent.directiveName: { AutocorrectionDisabledComponent(from: $0) },
     BackgroundComponent.directiveName: { BackgroundComponent(from: $0) },
+    BadgeComponent.directiveName: { BadgeComponent(from: $0) },
     BlendModeComponent.directiveName: { BlendModeComponent(from: $0) },
     BlurComponent.directiveName: { BlurComponent(from: $0) },
     BoldComponent.directiveName: { BoldComponent(from: $0) },
@@ -73,6 +77,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ColorInvertComponent.directiveName: { ColorInvertComponent(from: $0) },
     ColorSchemeComponent.directiveName: { ColorSchemeComponent(from: $0) },
     ContentShapeComponent.directiveName: { ContentShapeComponent(from: $0) },
+    ContentTransitionComponent.directiveName: { ContentTransitionComponent(from: $0) },
     ContextMenuComponent.directiveName: { ContextMenuComponent(from: $0) },
     ContrastComponent.directiveName: { ContrastComponent(from: $0) },
     ControlSizeComponent.directiveName: { ControlSizeComponent(from: $0) },
@@ -100,6 +105,9 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ItalicComponent.directiveName: { ItalicComponent(from: $0) },
     KeyboardTypeComponent.directiveName: { KeyboardTypeComponent(from: $0) },
     LayoutPriorityComponent.directiveName: { LayoutPriorityComponent(from: $0) },
+    ListRowBackgroundComponent.directiveName: { ListRowBackgroundComponent(from: $0) },
+    ListRowSeparatorComponent.directiveName: { ListRowSeparatorComponent(from: $0) },
+    ListStyleComponent.directiveName: { ListStyleComponent(from: $0) },
     LineLimitComponent.directiveName: { LineLimitComponent(from: $0) },
     LineSpacingComponent.directiveName: { LineSpacingComponent(from: $0) },
     MaskComponent.directiveName: { MaskComponent(from: $0) },
@@ -129,11 +137,13 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScaledToFillComponent.directiveName: { ScaledToFillComponent(from: $0) },
     ScaledToFitComponent.directiveName: { ScaledToFitComponent(from: $0) },
     ScaleEffectComponent.directiveName: { ScaleEffectComponent(from: $0) },
+    SafeAreaInsetComponent.directiveName: { SafeAreaInsetComponent(from: $0) },
     ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
     ScrollEdgeEffectHiddenComponent.directiveName: { ScrollEdgeEffectHiddenComponent(from: $0) },
     ScrollEdgeEffectStyleComponent.directiveName: { ScrollEdgeEffectStyleComponent(from: $0) },
     ScrollTargetBehaviorComponent.directiveName: { ScrollTargetBehaviorComponent(from: $0) },
     ScrollTargetLayoutComponent.directiveName: { ScrollTargetLayoutComponent(from: $0) },
+    SensoryFeedbackComponent.directiveName: { SensoryFeedbackComponent(from: $0) },
     SubmitLabelComponent.directiveName: { SubmitLabelComponent(from: $0) },
     ShadowComponent.directiveName: { ShadowComponent(from: $0) },
     SheetComponent.directiveName: { SheetComponent(from: $0) },
@@ -147,6 +157,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ToolbarVisibilityComponent.directiveName: { ToolbarVisibilityComponent(from: $0) },
     TrackingComponent.directiveName: { TrackingComponent(from: $0) },
     TransformEffectComponent.directiveName: { TransformEffectComponent(from: $0) },
+    TransitionComponent.directiveName: { TransitionComponent(from: $0) },
     UnderlineComponent.directiveName: { UnderlineComponent(from: $0) },
     VisualEffectComponent.directiveName: { VisualEffectComponent(from: $0) },
     ZIndexComponent.directiveName: { ZIndexComponent(from: $0) },
@@ -195,6 +206,7 @@ public struct ComponentView: View {
         case let capsule as CapsuleComponent: capsule
         case let circle as CircleComponent: circle
         case let color as ColorComponent: color
+        case let contentUnavailable as ContentUnavailableViewComponent: contentUnavailable
         case let divider as DividerComponent: divider
         case let ellipse as EllipseComponent: ellipse
         case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
@@ -220,6 +232,7 @@ public struct ComponentView: View {
         case let modified as ModifiedComponent: modified
         case let navigationLink as NavigationLinkComponent: navigationLink
         case let navigationStack as NavigationStackComponent: navigationStack
+        case let path as PathComponent: path
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
         case let progressView as ProgressViewComponent: progressView
@@ -235,6 +248,7 @@ public struct ComponentView: View {
         case let textField as TextFieldComponent: textField
         case let toggle as ToggleComponent: toggle
         case let unresolved as UnresolvedComponent: unresolved
+        case let viewThatFits as ViewThatFitsComponent: viewThatFits
         case let vStack as VStackComponent: vStack
         case let video as VideoComponent: video
         case let zStack as ZStackComponent: zStack
@@ -264,6 +278,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as AspectRatioComponent: content.modifier(m)
         case let m as AutocorrectionDisabledComponent: content.modifier(m)
         case let m as BackgroundComponent: content.modifier(m)
+        case let m as BadgeComponent: content.modifier(m)
         case let m as BlendModeComponent: content.modifier(m)
         case let m as BlurComponent: content.modifier(m)
         case let m as BoldComponent: content.modifier(m)
@@ -274,6 +289,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ColorInvertComponent: content.modifier(m)
         case let m as ColorSchemeComponent: content.modifier(m)
         case let m as ContentShapeComponent: content.modifier(m)
+        case let m as ContentTransitionComponent: content.modifier(m)
         case let m as ContextMenuComponent: content.modifier(m)
         case let m as ContrastComponent: content.modifier(m)
         case let m as ControlSizeComponent: content.modifier(m)
@@ -306,6 +322,9 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ItalicComponent: content.modifier(m)
         case let m as KeyboardTypeComponent: content.modifier(m)
         case let m as LayoutPriorityComponent: content.modifier(m)
+        case let m as ListRowBackgroundComponent: content.modifier(m)
+        case let m as ListRowSeparatorComponent: content.modifier(m)
+        case let m as ListStyleComponent: content.modifier(m)
         case let m as LineLimitComponent: content.modifier(m)
         case let m as LineSpacingComponent: content.modifier(m)
         case let m as MaskComponent: content.modifier(m)
@@ -331,6 +350,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as PresentationDetentsComponent: content.modifier(m)
         case let m as QuickLookComponent: content.modifier(m)
         case let m as RotationEffectComponent: content.modifier(m)
+        case let m as SafeAreaInsetComponent: content.modifier(m)
         case let m as SaturationComponent: content.modifier(m)
         case let m as ScaleEffectComponent: content.modifier(m)
         case let m as ScaledToFillComponent: content.modifier(m)
@@ -340,6 +360,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ScrollEdgeEffectStyleComponent: content.modifier(m)
         case let m as ScrollTargetBehaviorComponent: content.modifier(m)
         case let m as ScrollTargetLayoutComponent: content.modifier(m)
+        case let m as SensoryFeedbackComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
         case let m as StrikethroughComponent: content.modifier(m)
@@ -353,6 +374,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ToolbarVisibilityComponent: content.modifier(m)
         case let m as TrackingComponent: content.modifier(m)
         case let m as TransformEffectComponent: content.modifier(m)
+        case let m as TransitionComponent: content.modifier(m)
         case let m as UnderlineComponent: content.modifier(m)
         case let m as VisualEffectComponent: content.modifier(m)
         case let m as ZIndexComponent: content.modifier(m)
