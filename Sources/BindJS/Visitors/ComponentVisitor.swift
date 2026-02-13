@@ -70,6 +70,7 @@ public protocol ComponentVisitor {
     mutating func visitAllowsTightening(_ allowsTightening: AllowsTighteningComponent) -> Result
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result
     mutating func visitBackground(_ background: BackgroundComponent) -> Result
+    mutating func visitBadge(_ badge: BadgeComponent) -> Result
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result
     mutating func visitBlur(_ blur: BlurComponent) -> Result
     mutating func visitBold(_ bold: BoldComponent) -> Result
@@ -411,7 +412,11 @@ public extension ComponentVisitor {
     mutating func visitBackground(_ background: BackgroundComponent) -> Result {
         return defaultVisit(background)
     }
-    
+
+    mutating func visitBadge(_ badge: BadgeComponent) -> Result {
+        return defaultVisit(badge)
+    }
+
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result {
         return defaultVisit(blendMode)
     }
