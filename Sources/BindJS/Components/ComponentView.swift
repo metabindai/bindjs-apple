@@ -141,6 +141,8 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
     ScrollEdgeEffectHiddenComponent.directiveName: { ScrollEdgeEffectHiddenComponent(from: $0) },
     ScrollEdgeEffectStyleComponent.directiveName: { ScrollEdgeEffectStyleComponent(from: $0) },
+    ScrollTargetBehaviorComponent.directiveName: { ScrollTargetBehaviorComponent(from: $0) },
+    ScrollTargetLayoutComponent.directiveName: { ScrollTargetLayoutComponent(from: $0) },
     SensoryFeedbackComponent.directiveName: { SensoryFeedbackComponent(from: $0) },
     SubmitLabelComponent.directiveName: { SubmitLabelComponent(from: $0) },
     ShadowComponent.directiveName: { ShadowComponent(from: $0) },
@@ -356,6 +358,8 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ScrollContentBackgroundComponent: content.modifier(m)
         case let m as ScrollEdgeEffectHiddenComponent: content.modifier(m)
         case let m as ScrollEdgeEffectStyleComponent: content.modifier(m)
+        case let m as ScrollTargetBehaviorComponent: content.modifier(m)
+        case let m as ScrollTargetLayoutComponent: content.modifier(m)
         case let m as SensoryFeedbackComponent: content.modifier(m)
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)

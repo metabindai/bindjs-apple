@@ -171,6 +171,8 @@ public protocol ComponentVisitor {
     mutating func visitScrollContentBackground(_ scrollContentBackground: ScrollContentBackgroundComponent) -> Result
     mutating func visitScrollEdgeEffectHidden(_ scrollEdgeEffectHidden: ScrollEdgeEffectHiddenComponent) -> Result
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result
+    mutating func visitScrollTargetBehavior(_ scrollTargetBehavior: ScrollTargetBehaviorComponent) -> Result
+    mutating func visitScrollTargetLayout(_ scrollTargetLayout: ScrollTargetLayoutComponent) -> Result
     mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result
     mutating func visitSubmitLabel(_ submitLabel: SubmitLabelComponent) -> Result
     mutating func visitZIndex(_ zIndex: ZIndexComponent) -> Result
@@ -819,6 +821,14 @@ public extension ComponentVisitor {
     
     mutating func visitScrollEdgeEffectStyle(_ scrollEdgeEffectStyle: ScrollEdgeEffectStyleComponent) -> Result {
         return defaultVisit(scrollEdgeEffectStyle)
+    }
+
+    mutating func visitScrollTargetBehavior(_ scrollTargetBehavior: ScrollTargetBehaviorComponent) -> Result {
+        return defaultVisit(scrollTargetBehavior)
+    }
+
+    mutating func visitScrollTargetLayout(_ scrollTargetLayout: ScrollTargetLayoutComponent) -> Result {
+        return defaultVisit(scrollTargetLayout)
     }
 
     mutating func visitSensoryFeedback(_ sensoryFeedback: SensoryFeedbackComponent) -> Result {
