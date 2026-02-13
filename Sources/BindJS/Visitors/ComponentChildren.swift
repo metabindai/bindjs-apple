@@ -158,6 +158,10 @@ private struct ComponentChildren: ComponentVisitor {
         [overlay.content]
     }
 
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> [any Component] {
+        [safeAreaInset.content]
+    }
+
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> [any Component] {
         navigationStack.children
     }

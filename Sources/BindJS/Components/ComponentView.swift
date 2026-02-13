@@ -134,6 +134,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScaledToFillComponent.directiveName: { ScaledToFillComponent(from: $0) },
     ScaledToFitComponent.directiveName: { ScaledToFitComponent(from: $0) },
     ScaleEffectComponent.directiveName: { ScaleEffectComponent(from: $0) },
+    SafeAreaInsetComponent.directiveName: { SafeAreaInsetComponent(from: $0) },
     ScrollContentBackgroundComponent.directiveName: { ScrollContentBackgroundComponent(from: $0) },
     ScrollEdgeEffectHiddenComponent.directiveName: { ScrollEdgeEffectHiddenComponent(from: $0) },
     ScrollEdgeEffectStyleComponent.directiveName: { ScrollEdgeEffectStyleComponent(from: $0) },
@@ -341,6 +342,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as PresentationDetentsComponent: content.modifier(m)
         case let m as QuickLookComponent: content.modifier(m)
         case let m as RotationEffectComponent: content.modifier(m)
+        case let m as SafeAreaInsetComponent: content.modifier(m)
         case let m as SaturationComponent: content.modifier(m)
         case let m as ScaleEffectComponent: content.modifier(m)
         case let m as ScaledToFillComponent: content.modifier(m)

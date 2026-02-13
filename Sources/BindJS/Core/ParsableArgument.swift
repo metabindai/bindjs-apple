@@ -290,6 +290,16 @@ extension Axis.Set: ParsableArgument {
     }
 }
 
+extension VerticalEdge: ParsableArgument {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "top": self = .top
+        case "bottom": self = .bottom
+        default: return nil
+        }
+    }
+}
+
 extension Edge.Set: ParsableArgument {
     init?(rawValue: String) {
         switch rawValue {

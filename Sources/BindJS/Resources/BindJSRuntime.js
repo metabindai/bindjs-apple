@@ -2012,6 +2012,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('background', ContentModifier);
         this.#registerBuiltInModifier('listRowBackground', ContentModifier);
         this.#registerBuiltInModifier('overlay', ContentModifier);
+        this.#registerBuiltInModifier('safeAreaInset', ContentModifier);
         this.#registerBuiltInModifier('contextMenu', ContentModifier);
         this.#registerBuiltInModifier('toolbar', ContentModifier);
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);

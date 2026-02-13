@@ -209,6 +209,12 @@ public extension ComponentRewriter {
         return copy
     }
 
+    mutating func visitSafeAreaInset(_ safeAreaInset: SafeAreaInsetComponent) -> Result {
+        var copy = safeAreaInset
+        copy.content = safeAreaInset.content.accept(visitor: &self)
+        return copy
+    }
+
     mutating func visitNavigationStack(_ navigationStack: NavigationStackComponent) -> Result {
         var copy = navigationStack
         copy.children = navigationStack.children.map { $0.accept(visitor: &self) }
