@@ -87,6 +87,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     DynamicTypeSizeComponent.directiveName: { DynamicTypeSizeComponent(from: $0) },
     FixedSizeComponent.directiveName: { FixedSizeComponent(from: $0) },
     FocusedComponent.directiveName: { FocusedComponent(from: $0) },
+    FullScreenCoverComponent.directiveName: { FullScreenCoverComponent(from: $0) },
     FontComponent.directiveName: { FontComponent(from: $0) },
     FontDesignComponent.directiveName: { FontDesignComponent(from: $0) },
     FontWeightComponent.directiveName: { FontWeightComponent(from: $0) },
@@ -307,6 +308,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as FontWidthComponent: content.modifier(m)
         case let m as ForegroundStyleComponent: content.modifier(m)
         case let m as FrameComponent: content.modifier(m)
+        case let m as FullScreenCoverComponent: content.modifier(m)
         #if os(iOS) || os(visionOS)
         case let m as GalleryComponent: content.modifier(m)
         case let m as GalleryItemComponent: content.modifier(m)

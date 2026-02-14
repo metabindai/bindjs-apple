@@ -103,6 +103,7 @@ public protocol ComponentVisitor {
     mutating func visitFontWidth(_ fontWidth: FontWidthComponent) -> Result
     mutating func visitForegroundStyle(_ foregroundStyle: ForegroundStyleComponent) -> Result
     mutating func visitFrame(_ frame: FrameComponent) -> Result
+    mutating func visitFullScreenCover(_ fullScreenCover: FullScreenCoverComponent) -> Result
     mutating func visitPickerStyle(_ pickerStyle: PickerStyleComponent) -> Result
     #if os(iOS) || os(visionOS)
     mutating func visitGallery(_ gallery: GalleryComponent) -> Result
@@ -747,7 +748,11 @@ public extension ComponentVisitor {
     mutating func visitShadow(_ shadow: ShadowComponent) -> Result {
         return defaultVisit(shadow)
     }
-    
+
+    mutating func visitFullScreenCover(_ fullScreenCover: FullScreenCoverComponent) -> Result {
+        return defaultVisit(fullScreenCover)
+    }
+
     mutating func visitSheet(_ sheet: SheetComponent) -> Result {
         return defaultVisit(sheet)
     }

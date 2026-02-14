@@ -2071,6 +2071,7 @@ class BindJSRuntime {
         this.#registerBuiltInModifier('visualEffect', VisualEffectModifier);
         this.#registerBuiltInModifier('sheet', SheetModifier);
         this.#registerBuiltInModifier('scrollPosition', ScrollPositionModifier);
+        this.#registerBuiltInModifier('fullScreenCover', SheetModifier);
         this.#registerBuiltInModifier('gallery', GalleryModifier);
         this.#registerBuiltInModifier('navigationDestination', NavigationDestinationModifier);
 
