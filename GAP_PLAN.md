@@ -66,7 +66,7 @@ Elevates from functional to refined. These are the details that make apps feel n
 | **`.hoverEffect()`** | Pointer effects on iPadOS/visionOS |
 | ~~**`.safeAreaInset()`**~~ | ~~Floating bottom bars, overlaid toolbars~~ — **Done** |
 | **`.redacted(reason:)`** | Skeleton/placeholder loading states |
-| **`.containerRelativeFrame()`** | Responsive sizing relative to scroll container (iOS 17+) |
+| ~~**`.containerRelativeFrame()`**~~ | ~~Responsive sizing relative to scroll container (iOS 17+)~~ — **Done** ([bindjs-apple#69](https://github.com/yapstudios/bindjs-apple/pull/69), [metabind-cms#299](https://github.com/yapstudios/metabind-cms/pull/299)). Three modes: simple axis, grid count/span/spacing, fractional sizing. |
 | ~~**`.scrollPosition()`**~~ | ~~Programmatic scroll control (iOS 17+)~~ — **Done** ([bindjs-apple#59](https://github.com/yapstudios/bindjs-apple/pull/59), [metabind-cms#277](https://github.com/yapstudios/metabind-cms/pull/277)) |
 
 ---
@@ -81,7 +81,7 @@ Useful for specific use cases but not blocking common experiences.
 
 ### Modifiers
 
-~~`.scrollTargetLayout()`~~, ~~`.scrollTargetBehavior()`~~ ~~(snap scrolling)~~ — **Done** ([bindjs-apple#57](https://github.com/yapstudios/bindjs-apple/pull/57)), `.contentMargins()`, `.geometryGroup()`, `.backgroundStyle()`, `.scrollIndicators()`
+~~`.scrollTargetLayout()`~~, ~~`.scrollTargetBehavior()`~~ ~~(snap scrolling)~~ — **Done** ([bindjs-apple#57](https://github.com/yapstudios/bindjs-apple/pull/57)), `.contentMargins()`, `.geometryGroup()`, `.backgroundStyle()`, ~~`.scrollIndicators()`~~ — **Done**
 
 ---
 
