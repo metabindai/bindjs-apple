@@ -77,6 +77,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ColorInvertComponent.directiveName: { ColorInvertComponent(from: $0) },
     ColorSchemeComponent.directiveName: { ColorSchemeComponent(from: $0) },
     ContentShapeComponent.directiveName: { ContentShapeComponent(from: $0) },
+    ContainerRelativeFrameComponent.directiveName: { ContainerRelativeFrameComponent(from: $0) },
     ContentTransitionComponent.directiveName: { ContentTransitionComponent(from: $0) },
     ContextMenuComponent.directiveName: { ContextMenuComponent(from: $0) },
     ContrastComponent.directiveName: { ContrastComponent(from: $0) },
@@ -291,6 +292,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ColorInvertComponent: content.modifier(m)
         case let m as ColorSchemeComponent: content.modifier(m)
         case let m as ContentShapeComponent: content.modifier(m)
+        case let m as ContainerRelativeFrameComponent: content.modifier(m)
         case let m as ContentTransitionComponent: content.modifier(m)
         case let m as ContextMenuComponent: content.modifier(m)
         case let m as ContrastComponent: content.modifier(m)
