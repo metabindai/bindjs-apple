@@ -144,6 +144,7 @@ const componentNames = [
     "Marker",
     "Material",
     "MaximumValueLabel",
+    "MetabindView",
     "Menu",
     "MenuBarExtra",
     "MenuButton",
