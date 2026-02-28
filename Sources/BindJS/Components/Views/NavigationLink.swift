@@ -4,6 +4,7 @@ public struct NavigationLinkComponent: Component {
     public static var directiveName: String = "NavigationLink"
 
     @EnvironmentObject private var context: BindJSContext
+    @Environment(\.componentRegistry) private var componentRegistry
 
     @State var destination: Component
 
@@ -32,11 +33,15 @@ extension NavigationLinkComponent: View {
             NavigationLink {
                 NavigationLinkContentView(destinationHandlerId: destinationHandlerId)
                     .environmentObject(context)
+                    .environment(\.componentRegistry, componentRegistry)
             } label: {
                 ComponentView(label)
             }
         } else {
-            NavigationLink(destination: NavigationLinkContentView(destinationHandlerId: destinationHandlerId)) {
+            NavigationLink(destination: NavigationLinkContentView(destinationHandlerId: destinationHandlerId)
+                .environmentObject(context)
+                .environment(\.componentRegistry, componentRegistry)
+            ) {
                 ComponentView(label)
             }
         }
@@ -50,11 +55,21 @@ struct NavigationLinkContentView : View {
 
     func reloadDestination() {
         guard let destinationHandlerId else { return }
-        
+
         if let jsValue = context.callEventHandler(id: destinationHandlerId, arguments: []),
-           let directive = jsValue.toDirective(),
-           let component = makeComponent(directive) {
-            self.destination = component
+           let directive = jsValue.toDirective() {
+            // If the directive is a known built-in component, create it directly.
+            // Otherwise, wrap it in a ComponentCall so the ComponentRegistry can
+            // resolve it (e.g. MetabindView registered via .withComponent()).
+            if let component = makeComponentIfBuiltIn(directive) {
+                self.destination = component
+            } else if let call = ComponentCall(from: Directive(
+                type: "ComponentCall",
+                props: ["name": directive.type, "props": directive.props],
+                children: directive.children
+            )) {
+                self.destination = call
+            }
         }
     }
     

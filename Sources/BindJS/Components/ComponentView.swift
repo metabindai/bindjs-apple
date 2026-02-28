@@ -195,6 +195,13 @@ func makeComponent(_ directive: Directive) -> Component? {
     return UnresolvedComponent(from: directive)
 }
 
+/// Returns a component only if the directive type matches a built-in factory.
+/// Returns nil for unknown types (instead of falling back to UnresolvedComponent),
+/// allowing callers to route through the ComponentRegistry instead.
+func makeComponentIfBuiltIn(_ directive: Directive) -> Component? {
+    componentFactories[directive.type]?(directive)
+}
+
 public struct ComponentView: View {
     let component: Component
     
