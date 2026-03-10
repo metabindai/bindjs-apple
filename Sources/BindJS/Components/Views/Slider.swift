@@ -7,8 +7,7 @@ public struct SliderComponent: Component {
 
     public var value: Double?
     public var setValueId: String?
-    public var lowerBound: Double
-    public var upperBound: Double
+    public var range: [Double]
     public var step: Double?
     public var label: String?
     public var minimumValueLabel: Component?
@@ -22,8 +21,11 @@ extension SliderComponent {
 
         value = directive["value"]
         setValueId = directive["setValueId"]
-        lowerBound = directive["lowerBound"] ?? 0
-        upperBound = directive["upperBound"] ?? 1
+        if let rangeArray = directive.props["range"] as? [Double], rangeArray.count >= 2 {
+            range = rangeArray
+        } else {
+            range = [0, 1]
+        }
         step = directive["step"]
         label = directive["label"]
         minimumValueLabel = (directive["minimumValueLabel"] as Directive?).flatMap(makeComponent)
@@ -38,6 +40,8 @@ extension SliderComponent {
 
 extension SliderComponent: View {
     public var body: some View {
+        let lowerBound = range.first ?? 0
+        let upperBound = range.last ?? 1
         let currentValue = min(max(value ?? lowerBound, lowerBound), upperBound)
 
         let binding = Binding<Double>(
