@@ -13,19 +13,22 @@ import Combine
 public struct BindJSView: View {
     let content: ResolvedContent
     let previewIndex: Int?
+    let arguments: [String: Any]
 
-    public init(content: ResolvedContent) {
+    public init(content: ResolvedContent, arguments: [String: Any] = [:]) {
         self.content = content
         self.previewIndex = nil
+        self.arguments = arguments
     }
 
-    public init(content: ResolvedContent, previewIndex: Int?) {
+    public init(content: ResolvedContent, previewIndex: Int?, arguments: [String: Any] = [:]) {
         self.content = content
         self.previewIndex = previewIndex
+        self.arguments = arguments
     }
 
     public var body: some View {
-        ContextHostView(content: content, previewIndex: previewIndex)
+        ContextHostView(content: content, previewIndex: previewIndex, arguments: arguments)
     }
 }
 
@@ -71,6 +74,7 @@ public extension View {
 private struct ContextHostView: View {
     let content: ResolvedContent
     let previewIndex: Int?
+    let arguments: [String: Any]
 
     @StateObject private var context: BindJSContext
     @State private var registeredContentHash: Int
@@ -80,9 +84,10 @@ private struct ContextHostView: View {
     @Environment(\.self) private var environment
     @Environment(\.openURL) private var openURL
 
-    init(content: ResolvedContent, previewIndex: Int? = nil) {
+    init(content: ResolvedContent, previewIndex: Int? = nil, arguments: [String: Any] = [:]) {
         self.content = content
         self.previewIndex = previewIndex
+        self.arguments = arguments
 
         // Create and register context
         let ctx = BindJSContext()
@@ -112,7 +117,7 @@ private struct ContextHostView: View {
             if let index = previewIndex {
                 context.viewForPreview("_body", previewIndex: index)
             } else {
-                context.viewForName("_body")
+                context.viewForName("_body", arguments: arguments)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
