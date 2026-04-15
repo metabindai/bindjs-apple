@@ -120,7 +120,7 @@ private struct ContextHostView: View {
                 context.viewForName("_body", arguments: arguments)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
         .preference(key: BindJSPreviewsKey.self, value: availablePreviews)
         .task {
             queryPreviews()
