@@ -1971,6 +1971,10 @@ class BindJSRuntime {
                 animationBlock();
             }
         };
+
+        // MCP host interface. Set by the renderer to provide tool calls,
+        // messaging, context updates, etc. Null when not in an MCP context.
+        this.mcpHost = null;
     }
 
     willRender() {
@@ -2151,6 +2155,11 @@ class BindJSRuntime {
 
         // With animation callback
         this.registerCallback('withAnimation', withAnimation.bind(this));
+
+        // useMCPHost — returns the renderer-provided MCP host interface, or null.
+        this.registerCallback('useMCPHost', function () {
+            return this.mcpHost ?? null;
+        }.bind(this));
     }
 
     /**
