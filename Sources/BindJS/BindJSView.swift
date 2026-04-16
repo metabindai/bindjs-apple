@@ -51,15 +51,18 @@ public struct BindJSConfiguration {
     public var environment: [String: any Codable] = [:]
     public var appState: Binding<[String: Any]>?
     public var onAction: ((ContentAction) -> Void)?
+    public var mcpHost: MCPHostBridge?
 
     public init(
         environment: [String: any Codable] = [:],
         appState: Binding<[String: Any]>? = nil,
-        onAction: ((ContentAction) -> Void)? = nil
+        onAction: ((ContentAction) -> Void)? = nil,
+        mcpHost: MCPHostBridge? = nil
     ) {
         self.environment = environment
         self.appState = appState
         self.onAction = onAction
+        self.mcpHost = mcpHost
     }
 }
 
@@ -163,6 +166,7 @@ private struct ContextHostView: View {
 
     private func setupHooks() {
         context.setOpenURL(openURL)
+        context.setMCPHost(bindJS.mcpHost)
     }
 
     private func setupAppState() {

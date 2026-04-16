@@ -16,6 +16,7 @@ public class BindJSContext: ObservableObject {
     private var appStateCallback: ((String, Any) -> Void)?
     private var jsTimers: JSTimers
     private var rerenderScheduled = false
+    private var mcpHost: MCPHostBridge?
 
     public init() {
         jsContext = JSContext()!
@@ -377,6 +378,175 @@ public class BindJSContext: ObservableObject {
         setupAction()
         setupOnOpenURL()
         setupAppStateListener()
+        if let mcpHost {
+            attachMCPHost(mcpHost)
+        }
+    }
+
+    // MARK: - MCP Host
+
+    /// Attach an `MCPHostBridge` so BindJS components calling `useMCPHost()`
+    /// receive a working host. Pass `nil` to detach.
+    public func setMCPHost(_ host: MCPHostBridge?) {
+        mcpHost = host
+        if let host {
+            attachMCPHost(host)
+        } else {
+            jsContext.evaluateScript("runtime.mcpHost = null")
+        }
+    }
+
+    private func attachMCPHost(_ host: MCPHostBridge) {
+        let hostObject = JSValue(newObjectIn: jsContext)!
+
+        // Promise factory used to bridge async Swift work to JS.
+        let makePromise: () -> (promise: JSValue, resolve: JSValue, reject: JSValue)? = { [weak self] in
+            guard let self,
+                  let factory = self.jsContext.evaluateScript("""
+                  (function () {
+                      let resolveFn, rejectFn;
+                      const p = new Promise((res, rej) => { resolveFn = res; rejectFn = rej; });
+                      return { promise: p, resolve: resolveFn, reject: rejectFn };
+                  })
+                  """),
+                  let bundle = factory.call(withArguments: []),
+                  let promise = bundle.forProperty("promise"),
+                  let resolve = bundle.forProperty("resolve"),
+                  let reject = bundle.forProperty("reject")
+            else { return nil }
+            return (promise, resolve, reject)
+        }
+
+        func bridgedDictionary(_ value: JSValue?) -> [String: Any] {
+            guard let value, !value.isNull, !value.isUndefined,
+                  let object = value.toObject() as? [String: Any]
+            else { return [:] }
+            return object
+        }
+
+        // sendRequest(method, params) -> Promise<any>
+        let sendRequestBlock: @convention(block) (String, JSValue?) -> JSValue? = { [weak host] method, params in
+            guard let host, let bundle = makePromise() else { return nil }
+            let args = bridgedDictionary(params)
+            Task {
+                do {
+                    let result = try await host.sendRequest(method: method, params: args)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: [result as Any]) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // sendNotification(method, params)
+        let sendNotificationBlock: @convention(block) (String, JSValue?) -> Void = { [weak host] method, params in
+            host?.sendNotification(method: method, params: bridgedDictionary(params))
+        }
+
+        // toolCall(name, args) -> Promise<any>
+        let toolCallBlock: @convention(block) (String, JSValue?) -> JSValue? = { [weak host] name, args in
+            guard let host, let bundle = makePromise() else { return nil }
+            let arguments = bridgedDictionary(args)
+            Task {
+                do {
+                    let result = try await host.toolCall(name: name, arguments: arguments)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: [result as Any]) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // sendMessage(message) -> Promise<void>
+        let sendMessageBlock: @convention(block) (String) -> JSValue? = { [weak host] message in
+            guard let host, let bundle = makePromise() else { return nil }
+            Task {
+                do {
+                    try await host.sendMessage(message)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // updateModelContext(content) -> Promise<void>
+        let updateModelContextBlock: @convention(block) (JSValue?) -> JSValue? = { [weak host] content in
+            guard let host, let bundle = makePromise() else { return nil }
+            let payload = bridgedDictionary(content)
+            Task {
+                do {
+                    try await host.updateModelContext(payload)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // sizeChanged(height)
+        let sizeChangedBlock: @convention(block) (Double) -> Void = { [weak host] height in
+            host?.sizeChanged(height: height)
+        }
+
+        // openLink(url) -> Promise<void>
+        let openLinkBlock: @convention(block) (String) -> JSValue? = { [weak host] urlString in
+            guard let host, let bundle = makePromise() else { return nil }
+            guard let url = URL(string: urlString) else {
+                bundle.reject.call(withArguments: ["Invalid URL: \(urlString)"])
+                return bundle.promise
+            }
+            Task {
+                do {
+                    try await host.openLink(url)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // requestDisplayMode(mode) -> Promise<void>
+        let requestDisplayModeBlock: @convention(block) (String) -> JSValue? = { [weak host] mode in
+            guard let host, let bundle = makePromise() else { return nil }
+            Task {
+                do {
+                    try await host.requestDisplayMode(mode)
+                    DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
+        // log(level, message, data?)
+        let logBlock: @convention(block) (String, String, JSValue?) -> Void = { [weak host] level, message, data in
+            let payload: [String: Any]?
+            if let data, !data.isUndefined, !data.isNull {
+                payload = data.toObject() as? [String: Any]
+            } else {
+                payload = nil
+            }
+            host?.log(level: level, message: message, data: payload)
+        }
+
+        hostObject.setObject(sendRequestBlock, forKeyedSubscript: "sendRequest" as NSString)
+        hostObject.setObject(sendNotificationBlock, forKeyedSubscript: "sendNotification" as NSString)
+        hostObject.setObject(toolCallBlock, forKeyedSubscript: "toolCall" as NSString)
+        hostObject.setObject(sendMessageBlock, forKeyedSubscript: "sendMessage" as NSString)
+        hostObject.setObject(updateModelContextBlock, forKeyedSubscript: "updateModelContext" as NSString)
+        hostObject.setObject(sizeChangedBlock, forKeyedSubscript: "sizeChanged" as NSString)
+        hostObject.setObject(openLinkBlock, forKeyedSubscript: "openLink" as NSString)
+        hostObject.setObject(requestDisplayModeBlock, forKeyedSubscript: "requestDisplayMode" as NSString)
+        hostObject.setObject(logBlock, forKeyedSubscript: "log" as NSString)
+
+        runtime.setValue(hostObject, forProperty: "mcpHost")
     }
 
     private static func loadRuntime() -> String {
