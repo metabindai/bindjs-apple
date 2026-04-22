@@ -376,6 +376,17 @@ public class BindJSContext: ObservableObject {
         _ = runtime.invokeMethod("callEventHandler", withArguments: [id, value])
     }
 
+    /// Test-only entry point for evaluating arbitrary JS. Not part of the
+    /// public API — kept `internal` so `@testable import BindJS` tests can
+    /// probe `runtime.mcpHost` and other runtime bindings directly.
+    func evaluateForTesting(_ script: String) -> String? {
+        let result = jsContext.evaluateScript(script)
+        if let result, !result.isNull, !result.isUndefined {
+            return result.toString()
+        }
+        return nil
+    }
+
     public func reset() {
         runtime.invokeMethod("reset", withArguments: [])
         setupNeedsRerender()

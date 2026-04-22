@@ -32,5 +32,9 @@ let package = Package(
                 .copy("Resources/BindJSRuntimeWrapper.js")
             ]
         ),
+        .testTarget(
+            name: "BindJSTests",
+            dependencies: ["BindJS"]
+        ),
     ]
 )
