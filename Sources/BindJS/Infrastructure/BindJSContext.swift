@@ -1,5 +1,8 @@
 import SwiftUI
 import JavaScriptCore
+import os
+
+private let bindJSLog = Logger(subsystem: "BindJS", category: "Runtime")
 
 public struct BindJSPreviewInfo: Sendable, Equatable {
     public let id: String
@@ -22,7 +25,9 @@ public class BindJSContext: ObservableObject {
         jsContext = JSContext()!
         jsContext.exceptionHandler = { _, exception in
             if let exception = exception {
-                print("JS Error: \(exception)")
+                let message = exception.toString() ?? "<unprintable>"
+                let stack = exception.forProperty("stack")?.toString() ?? ""
+                bindJSLog.error("JS Error: \(message, privacy: .public)\n\(stack, privacy: .public)")
             }
         }
         jsTimers = JSTimers()
@@ -68,7 +73,7 @@ public class BindJSContext: ObservableObject {
                     .invokeMethod("stringify", withArguments: [jsVal])?
                     .toString() ?? "[object]"
             }.joined(separator: " ")
-            print(output)
+            bindJSLog.info("console: \(output, privacy: .public)")
         }
 
         let console = JSValue(newObjectIn: jsContext)!
@@ -386,13 +391,18 @@ public class BindJSContext: ObservableObject {
     // MARK: - MCP Host
 
     /// Attach an `MCPHostBridge` so BindJS components calling `useMCPHost()`
-    /// receive a working host. Pass `nil` to detach.
+    /// receive a working host. Pass `nil` to detach. No-op if the same
+    /// instance is already attached, to keep the JS-side reference stable
+    /// across renders.
     public func setMCPHost(_ host: MCPHostBridge?) {
+        if (mcpHost === host) || (mcpHost == nil && host == nil) {
+            return
+        }
         mcpHost = host
         if let host {
             attachMCPHost(host)
         } else {
-            jsContext.evaluateScript("runtime.mcpHost = null")
+            runtime.invokeMethod("setMCPHost", withArguments: [NSNull()])
         }
     }
 
@@ -536,17 +546,53 @@ public class BindJSContext: ObservableObject {
             host?.log(level: level, message: message, data: payload)
         }
 
+        // elicit(schema, metadata?) -> Promise<{action, content?}>
+        let elicitBlock: @convention(block) (JSValue?, JSValue?) -> JSValue? = { [weak host, weak self] schema, metadata in
+            guard let host, let bundle = makePromise() else { return nil }
+            let schemaDict = bridgedDictionary(schema)
+            let metadataDict: [String: Any]? = (metadata.flatMap { v -> [String: Any]? in
+                guard !v.isUndefined, !v.isNull else { return nil }
+                return v.toObject() as? [String: Any]
+            })
+            Task { [weak self] in
+                do {
+                    let response = try await host.elicit(schema: schemaDict, metadata: metadataDict)
+                    let payload: [String: Any]
+                    switch response.action {
+                    case .accept:
+                        payload = ["action": "accept", "content": response.content as Any]
+                    case .decline:
+                        payload = ["action": "decline"]
+                    case .cancel:
+                        payload = ["action": "cancel"]
+                    }
+                    await MainActor.run {
+                        guard let ctx = self?.jsContext,
+                              let value = JSValue(object: payload, in: ctx) else {
+                            _ = bundle.resolve.call(withArguments: [NSNull()])
+                            return
+                        }
+                        _ = bundle.resolve.call(withArguments: [value])
+                    }
+                } catch {
+                    DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
+                }
+            }
+            return bundle.promise
+        }
+
         hostObject.setObject(sendRequestBlock, forKeyedSubscript: "sendRequest" as NSString)
         hostObject.setObject(sendNotificationBlock, forKeyedSubscript: "sendNotification" as NSString)
         hostObject.setObject(toolCallBlock, forKeyedSubscript: "toolCall" as NSString)
         hostObject.setObject(sendMessageBlock, forKeyedSubscript: "sendMessage" as NSString)
         hostObject.setObject(updateModelContextBlock, forKeyedSubscript: "updateModelContext" as NSString)
+        hostObject.setObject(elicitBlock, forKeyedSubscript: "elicit" as NSString)
         hostObject.setObject(sizeChangedBlock, forKeyedSubscript: "sizeChanged" as NSString)
         hostObject.setObject(openLinkBlock, forKeyedSubscript: "openLink" as NSString)
         hostObject.setObject(requestDisplayModeBlock, forKeyedSubscript: "requestDisplayMode" as NSString)
         hostObject.setObject(logBlock, forKeyedSubscript: "log" as NSString)
 
-        runtime.setValue(hostObject, forProperty: "mcpHost")
+        runtime.invokeMethod("setMCPHost", withArguments: [hostObject as Any])
     }
 
     private static func loadRuntime() -> String {

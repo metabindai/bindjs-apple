@@ -40,5 +40,6 @@ Object.assign(this, {
     reset: () => runtime.reset(),
     setAppState: (state) => runtime.registerAppState(state),
     updatedAppState: (key, value, completionCallback) => runtime.updatedAppState(key, value, (s) => ({ ...s, [key]: value }), completionCallback),
-    setOnOpenURL: (callback) => runtime.onOpenURL = callback
+    setOnOpenURL: (callback) => runtime.onOpenURL = callback,
+    setMCPHost: (host) => runtime.mcpHost = host
 });
