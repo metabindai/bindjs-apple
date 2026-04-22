@@ -1674,7 +1674,19 @@ function convertComponentProps(props) {
                 // So environment works correctly.
                 const result = makeComponent(() => {
                     let body = getExport(item._component, 'body');
-                    return body(item)
+                    // Recursively hydrate nested ComponentInstance shells inside
+                    // this item's fields before calling body. Without this pass,
+                    // a component that spreads `props.content` into its children
+                    // (e.g. ProductRecommendationSection) would spread raw
+                    // `{_component, _type, ...}` dicts instead of live
+                    // components, and they'd silently render as nothing.
+                    const hydrated = {};
+                    for (const key in item) {
+                        if (Object.hasOwn(item, key)) {
+                            hydrated[key] = process(item[key])[0];
+                        }
+                    }
+                    return body(hydrated)
                 });
 
                 return [result, true];
