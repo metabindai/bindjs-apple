@@ -16,7 +16,7 @@ jobs:
     name: swift test (macOS)
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Select Xcode 16
         uses: maxim-lobanov/setup-xcode@v1
