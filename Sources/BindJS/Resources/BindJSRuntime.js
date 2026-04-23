@@ -1674,7 +1674,19 @@ function convertComponentProps(props) {
                 // So environment works correctly.
                 const result = makeComponent(() => {
                     let body = getExport(item._component, 'body');
-                    return body(item)
+
+                    // Strip shell metadata so body receives clean props, then
+                    // recursively hydrate any nested ComponentInstance shells.
+                    // Without this pass, a component that spreads
+                    // `props.content` into its children (e.g.
+                    // ProductRecommendationSection) would spread raw
+                    // `{_component, _type, ...}` dicts instead of live
+                    // components, and they'd silently render as nothing.
+                    // Mirrors metabind-cms#393.
+                    const { _component, _type, _id, ...itemProps } = item;
+                    const processedProps = process(itemProps)[0];
+
+                    return body(processedProps)
                 });
 
                 return [result, true];

@@ -469,11 +469,14 @@ public class BindJSContext: ObservableObject {
         let toolCallBlock: @convention(block) (String, JSValue?) -> JSValue? = { [weak host] name, args in
             guard let host, let bundle = makePromise() else { return nil }
             let arguments = bridgedDictionary(args)
+            bindJSLog.info("[host] toolCall '\(name, privacy: .public)' argKeys=\(arguments.keys.sorted().joined(separator: ","), privacy: .public)")
             Task {
                 do {
                     let result = try await host.toolCall(name: name, arguments: arguments)
+                    bindJSLog.info("[host] toolCall '\(name, privacy: .public)' resolved \(result == nil ? "nil" : "value", privacy: .public)")
                     DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: [result as Any]) }
                 } catch {
+                    bindJSLog.error("[host] toolCall '\(name, privacy: .public)' rejected: \(error.localizedDescription, privacy: .public)")
                     DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
                 }
             }
@@ -483,11 +486,13 @@ public class BindJSContext: ObservableObject {
         // sendMessage(message) -> Promise<void>
         let sendMessageBlock: @convention(block) (String) -> JSValue? = { [weak host] message in
             guard let host, let bundle = makePromise() else { return nil }
+            bindJSLog.info("[host] sendMessage bytes=\(message.count, privacy: .public)")
             Task {
                 do {
                     try await host.sendMessage(message)
                     DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
                 } catch {
+                    bindJSLog.error("[host] sendMessage rejected: \(error.localizedDescription, privacy: .public)")
                     DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
                 }
             }
@@ -498,11 +503,13 @@ public class BindJSContext: ObservableObject {
         let updateModelContextBlock: @convention(block) (JSValue?) -> JSValue? = { [weak host] content in
             guard let host, let bundle = makePromise() else { return nil }
             let payload = bridgedDictionary(content)
+            bindJSLog.info("[host] updateModelContext keys=\(payload.keys.sorted().joined(separator: ","), privacy: .public)")
             Task {
                 do {
                     try await host.updateModelContext(payload)
                     DispatchQueue.main.async { _ = bundle.resolve.call(withArguments: []) }
                 } catch {
+                    bindJSLog.error("[host] updateModelContext rejected: \(error.localizedDescription, privacy: .public)")
                     DispatchQueue.main.async { _ = bundle.reject.call(withArguments: [error.localizedDescription]) }
                 }
             }
@@ -565,6 +572,7 @@ public class BindJSContext: ObservableObject {
                 guard !v.isUndefined, !v.isNull else { return nil }
                 return v.toObject() as? [String: Any]
             })
+            bindJSLog.info("[host] elicit schemaKeys=\(schemaDict.keys.sorted().joined(separator: ","), privacy: .public) metadataKeys=\(metadataDict?.keys.sorted().joined(separator: ",") ?? "<none>", privacy: .public)")
             Task { [weak self] in
                 do {
                     let response = try await host.elicit(schema: schemaDict, metadata: metadataDict)
