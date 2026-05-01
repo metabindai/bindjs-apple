@@ -82,9 +82,29 @@ struct OnDragGestureWrapper<Content: View>: View {
                     .updating($velocity) { value, state, _ in
                         state = value.predictedEndTranslation
                     }
-                    // 5) final end
-                    .onEnded { _ in
-                        callHandler(.ended)
+                    // 5) final end — read translation/velocity directly off
+                    // `value`. SwiftUI resets @GestureState to its initial
+                    // value the moment the gesture ends, so reading the
+                    // bound state here would always return zero.
+                    .onEnded { value in
+                        _ = context.callEventHandler(
+                            id: configuration.handlerId,
+                            arguments: [
+                                "phase": GesturePhase.ended.rawValue,
+                                "locationInView": [
+                                    "x": round2(value.location.x),
+                                    "y": round2(value.location.y)
+                                ],
+                                "translation": [
+                                    "x": round2(value.translation.width),
+                                    "y": round2(value.translation.height)
+                                ],
+                                "velocity": [
+                                    "x": round2(value.velocity.width),
+                                    "y": round2(value.velocity.height)
+                                ]
+                            ]
+                        )
                     }
             )
     }
