@@ -141,10 +141,50 @@ private struct AspectImageContentSizingMode: ViewModifier {
 private struct SVGImageView: View {
     let svgData: String
     let resizable: Bool
-    
+
     var body: some View {
-        SVGView(string: svgData)
+        // SVGView wraps its rendering in a GeometryReader (greedy), which
+        // makes it fill any unconstrained slot. When the SVG declares an
+        // intrinsic size on its root element and the caller hasn't asked
+        // for resizable behavior, clamp to that size — matches web parity.
+        if !resizable, let intrinsic = parseSVGIntrinsicSize(svgData) {
+            SVGView(string: svgData)
+                .frame(width: intrinsic.width, height: intrinsic.height)
+        } else {
+            SVGView(string: svgData)
+        }
     }
+}
+
+private func parseSVGIntrinsicSize(_ svgData: String) -> CGSize? {
+    // Pull width/height attributes off the first <svg ...> element.
+    // Ignores percentage units and viewBox-only sizing.
+    guard let openIdx = svgData.range(of: "<svg", options: .caseInsensitive)?.lowerBound,
+          let closeIdx = svgData[openIdx...].firstIndex(of: ">") else {
+        return nil
+    }
+    let header = String(svgData[openIdx...closeIdx])
+
+    func attr(_ name: String) -> CGFloat? {
+        let pattern = "\\b\(name)\\s*=\\s*\"([^\"]+)\""
+        guard let range = header.range(of: pattern, options: .regularExpression) else {
+            return nil
+        }
+        let raw = String(header[range])
+        guard let q1 = raw.firstIndex(of: "\""),
+              let q2 = raw.lastIndex(of: "\""),
+              q1 != q2 else { return nil }
+        let value = String(raw[raw.index(after: q1)..<q2])
+            .replacingOccurrences(of: "px", with: "")
+            .trimmingCharacters(in: .whitespaces)
+        if value.contains("%") { return nil }
+        return Double(value).map { CGFloat($0) }
+    }
+
+    if let w = attr("width"), let h = attr("height") {
+        return CGSize(width: w, height: h)
+    }
+    return nil
 }
 
 private struct SVGURLView: View {
