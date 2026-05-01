@@ -59,11 +59,12 @@ When changes to bindjs-apple need to ship downstream (to metabind-apple-internal
    ```bash
    bash ./Scripts/build-xcframework.sh
    ```
-   This temporarily adds `type: .dynamic` to Package.swift (restored on exit), builds for iOS device + simulator with module stability, creates the XCFramework, zips it, and prints the checksum.
+   This temporarily adds `type: .dynamic` to Package.swift (restored on exit), builds four slices (iOS device, iOS simulator, macOS, Mac Catalyst) with module stability, creates the XCFramework, zips it, and prints the checksum.
 
    Output:
    - `.build/xcframework/BindJS.xcframework.zip` — the distributable zip
    - Checksum (SHA256) — printed at the end
+   - Slices: `ios-arm64`, `ios-arm64_x86_64-simulator`, `macos-arm64_x86_64`, `ios-arm64_x86_64-maccatalyst`
 
 2. **Determine the next version** by checking existing tags:
    ```bash
