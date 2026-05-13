@@ -5,8 +5,6 @@ public struct FullScreenCoverComponent: Component {
 
     @EnvironmentObject private var context: BindJSContext
 
-    @State var content: Component
-
     public var isPresented: Bool
     public var contentHandlerId : String?
     public var dismissHandlerId : String?
@@ -23,24 +21,11 @@ public struct FullScreenCoverComponent: Component {
             _ = context.callEventHandler(id: dismissHandlerId, arguments: [])
         }
     }
-
-    func reloadContent(isPresented: Bool) {
-        guard let contentHandlerId else { return }
-        guard isPresented else { return }
-
-        if let jsValue = context.callEventHandler(id: contentHandlerId, arguments: []), let directive = jsValue.toDirective() {
-            if let component = makeComponent(directive) {
-                self.content = component
-            }
-        }
-    }
 }
 
 extension FullScreenCoverComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
-
-        content = EmptyComponent()
 
         isPresented = directive["isPresented"] ?? false
         contentHandlerId = directive["contentHandlerId"]
@@ -65,20 +50,22 @@ extension FullScreenCoverComponent: ViewModifier {
             .sheet(isPresented: isPresentedBinding, onDismiss: {
                 handleDismiss()
             }) {
-                ComponentView(self.content)
+                LazyMaterializedComponentView(
+                    handlerId: contentHandlerId,
+                    isActive: isPresented
+                )
+                .environmentObject(context)
             }
             #else
             .fullScreenCover(isPresented: isPresentedBinding, onDismiss: {
                 handleDismiss()
             }) {
-                ComponentView(self.content)
+                LazyMaterializedComponentView(
+                    handlerId: contentHandlerId,
+                    isActive: isPresented
+                )
+                .environmentObject(context)
             }
             #endif
-            .onChange(of: self.isPresented) { old, new in
-                reloadContent(isPresented: new)
-            }
-            .onAppear {
-                reloadContent(isPresented: self.isPresented)
-            }
     }
 }

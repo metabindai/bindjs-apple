@@ -2,10 +2,8 @@ import SwiftUI
 
 public struct SheetComponent: Component {
     public static var directiveName: String = "sheet"
-    
-    @EnvironmentObject private var context: BindJSContext
 
-    @State var content: Component
+    @EnvironmentObject private var context: BindJSContext
 
     public var isPresented: Bool
     public var contentHandlerId : String?
@@ -23,24 +21,11 @@ public struct SheetComponent: Component {
             _ = context.callEventHandler(id: dismissHandlerId, arguments: [])
         }
     }
-    
-    func reloadContent(isPresented: Bool) {
-        guard let contentHandlerId else { return }
-        guard isPresented else { return }
-
-        if let jsValue = context.callEventHandler(id: contentHandlerId, arguments: []), let directive = jsValue.toDirective() {
-            if let component = makeComponent(directive) {
-                self.content = component
-            }
-        }
-    }
 }
 
 extension SheetComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
-        
-        content = EmptyComponent()
         
         isPresented = directive["isPresented"] ?? false
         contentHandlerId = directive["contentHandlerId"]
@@ -64,13 +49,11 @@ extension SheetComponent: ViewModifier {
             .sheet(isPresented: isPresentedBinding, onDismiss: {
                 handleDismiss()
             }) {
-                ComponentView(self.content)
-            }
-            .onChange(of: self.isPresented) { old, new in
-                reloadContent(isPresented: new)
-            }
-            .onAppear {
-                reloadContent(isPresented: self.isPresented)
+                LazyMaterializedComponentView(
+                    handlerId: contentHandlerId,
+                    isActive: isPresented
+                )
+                .environmentObject(context)
             }
     }
 }

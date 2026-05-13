@@ -14,6 +14,8 @@ public class BindJSContext: ObservableObject {
     private let runtime: JSValue
     private var actionCallback: ((ContentAction) -> Void)?
 
+    public private(set) var renderRevision: UInt64 = 0
+
     private var openURL: OpenURLAction?
     private var appState: [String: Any] = [:]
     private var appStateCallback: ((String, Any) -> Void)?
@@ -89,7 +91,7 @@ public class BindJSContext: ObservableObject {
             self.rerenderScheduled = true
             DispatchQueue.main.async {
                 self.rerenderScheduled = false
-                self.objectWillChange.send()
+                self.notifyViewsChanged()
             }
         }
         jsContext.setObject(rerender, forKeyedSubscript: "needsRerender" as NSString)
@@ -110,7 +112,7 @@ public class BindJSContext: ObservableObject {
                     // Flush synchronously so SwiftUI sees the change inside the animation transaction
                     // (needsRerender dispatches async, which would miss the transaction for transitions)
                     self.rerenderScheduled = false
-                    self.objectWillChange.send()
+                    self.notifyViewsChanged()
                 }
                 return
             }
@@ -120,14 +122,14 @@ public class BindJSContext: ObservableObject {
                 jsAnimation.apply {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
                     self.rerenderScheduled = false
-                    self.objectWillChange.send()
+                    self.notifyViewsChanged()
                 }
             } else {
                 // Could not decode, fallback to default
                 withAnimation(.smooth) {
                     _ = self.callEventHandler(id: callbackId, arguments: [])
                     self.rerenderScheduled = false
-                    self.objectWillChange.send()
+                    self.notifyViewsChanged()
                 }
             }
         }
@@ -186,7 +188,7 @@ public class BindJSContext: ObservableObject {
 
     public func register(name: String, source: String) {
         runtime.invokeMethod("setComponents", withArguments: [[name: source]])
-        objectWillChange()
+        notifyViewsChanged()
     }
 
     @ViewBuilder
@@ -293,7 +295,8 @@ public class BindJSContext: ObservableObject {
         return components
     }
 
-    private func objectWillChange() {
+    private func notifyViewsChanged() {
+        renderRevision &+= 1
         objectWillChange.send()
     }
 
@@ -669,7 +672,7 @@ public class BindJSContext: ObservableObject {
                 self.rerenderScheduled = true
                 DispatchQueue.main.async {
                     self.rerenderScheduled = false
-                    self.objectWillChange.send()
+                    self.notifyViewsChanged()
                 }
             }
             
