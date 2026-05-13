@@ -75,17 +75,17 @@ When changes to bindjs-apple need to ship downstream (to metabind-apple-internal
    ```swift
    .binaryTarget(
        name: "BindJS",
-       url: "https://github.com/yapstudios/bindjs-apple-binary/releases/download/<VERSION>/BindJS.xcframework.zip",
+       url: "https://github.com/metabindai/bindjs-apple-binary/releases/download/<VERSION>/BindJS.xcframework.zip",
        checksum: "<CHECKSUM>"
    )
    ```
-   Commit and push to `develop` (the default branch).
+   Commit and push to `main` (the default branch).
 
 4. **Create the GitHub release** targeting the commit that has the updated Package.swift:
    ```bash
    gh release create <VERSION> .build/xcframework/BindJS.xcframework.zip \
      --title "<VERSION>" --notes "Release notes" \
-     --target <COMMIT_SHA> --repo yapstudios/bindjs-apple-binary
+     --target <COMMIT_SHA> --repo metabindai/bindjs-apple-binary
    ```
    **Important:** Use `--target` to point at the Package.swift update commit. Creating the release before pushing the Package.swift update will tag the wrong commit, and SPM will resolve the old checksum.
 
@@ -95,7 +95,7 @@ When changes to bindjs-apple need to ship downstream (to metabind-apple-internal
 - The build script backs up and restores Package.swift automatically
 - `BUILD_LIBRARY_FOR_DISTRIBUTION=YES` enables module stability for binary distribution
 - SVGViewKit is statically linked into the framework; GLTFKit2 is provided separately by bindjs-apple-binary
-- Binary repo default branch is `develop`
+- Binary repo is `metabindai/bindjs-apple-binary` (public), default branch `main`
 
 ## Component Implementation Notes
 
