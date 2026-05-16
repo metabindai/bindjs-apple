@@ -13,6 +13,18 @@ public extension ComponentRewriter {
         copy.label = button.label.accept(visitor: &self)
         return copy
     }
+
+    mutating func visitChart(_ chart: ChartComponent) -> Result {
+        var copy = chart
+        copy.children = chart.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
+
+    mutating func visitPieChart(_ pieChart: PieChartComponent) -> Result {
+        var copy = pieChart
+        copy.children = pieChart.children.map { $0.accept(visitor: &self) }
+        return copy
+    }
     
     mutating func visitCall(_ call: ComponentCall) -> Result {
         var copy = call
