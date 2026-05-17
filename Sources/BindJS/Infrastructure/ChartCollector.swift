@@ -25,6 +25,23 @@ public struct ChartCollector {
         return model
     }
 
+    static func collectRenderableRoot(_ component: Component) -> ChartModel? {
+        if let call = component as? ComponentCall, let wrapped = call.children.first {
+            return collectRenderableRoot(wrapped)
+        }
+
+        var modifiers: [Component] = []
+        let base = unwrapModified(component, modifiers: &modifiers)
+        guard let chart = base as? ChartComponent else { return nil }
+        guard modifiers.allSatisfy(isRenderableChartRootModifier) else { return nil }
+
+        var model = collect(chart: chart)
+        for modifier in modifiers.reversed() {
+            applyChartModifier(modifier, to: &model, path: "Chart")
+        }
+        return model
+    }
+
     static func isChartLevelModifier(_ component: Component) -> Bool {
         component is ChartXAxisComponent
             || component is ChartYAxisComponent
@@ -38,6 +55,12 @@ public struct ChartCollector {
             || component is ChartXSelectionComponent
             || component is ChartYAxisLabelComponent
             || component is ChartYSelectionComponent
+    }
+
+    private static func isRenderableChartRootModifier(_ component: Component) -> Bool {
+        isChartLevelModifier(component)
+            || component is AccessibilityLabelComponent
+            || component is AccessibilityHintComponent
     }
 
     private var model = ChartModel()

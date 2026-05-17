@@ -19,12 +19,7 @@ extension ChartYAxisComponent {
 }
 
 extension ChartYAxisComponent: ViewModifier {
-    @ViewBuilder
     public func body(content: Content) -> some View {
-        if options.hidden {
-            content.chartYAxis(.hidden)
-        } else {
-            content.chartYAxis(.automatic)
-        }
+        content.modifier(ChartAxisApplier(axis: .y, options: options))
     }
 }

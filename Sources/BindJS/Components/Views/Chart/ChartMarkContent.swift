@@ -261,7 +261,19 @@ private func symbolStyled<Content: ChartContent>(_ content: Content, mark: Chart
     case .cross:
         content.symbol(BasicChartSymbolShape.cross)
     case .none:
-        content
+        switch mark.style.foregroundStyle {
+        case .series(let channel):
+            switch channel.value {
+            case .string(let value):
+                content.symbol(by: .value(channel.label ?? "Symbol", value))
+            case .number(let value):
+                content.symbol(by: .value(channel.label ?? "Symbol", value))
+            case .bool(let value):
+                content.symbol(by: .value(channel.label ?? "Symbol", value ? "true" : "false"))
+            }
+        case .color, .none:
+            content
+        }
     }
 }
 

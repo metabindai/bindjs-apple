@@ -26,12 +26,36 @@ public struct PieChartCollector {
         return model
     }
 
+    static func collectRenderableRoot(_ component: Component) -> PieChartModel? {
+        if let call = component as? ComponentCall, let wrapped = call.children.first {
+            return collectRenderableRoot(wrapped)
+        }
+
+        var modifiers: [Component] = []
+        let base = unwrapModified(component, modifiers: &modifiers)
+        guard let chart = base as? PieChartComponent else { return nil }
+        guard modifiers.allSatisfy(isRenderablePieChartRootModifier) else { return nil }
+
+        var model = collect(chart: chart)
+        for modifier in modifiers.reversed() {
+            applyPieChartModifier(modifier, to: &model, path: "PieChart")
+        }
+        return model
+    }
+
     static func isPieChartLevelModifier(_ component: Component) -> Bool {
         component is ChartForegroundStyleScaleComponent
             || component is ChartLegendComponent
             || component is ChartSelectionComponent
             || component is AccessibilityLabelComponent
             || component is AccessibilityHintComponent
+    }
+
+    private static func isRenderablePieChartRootModifier(_ component: Component) -> Bool {
+        isPieChartLevelModifier(component)
+            || component is ChartXSelectionComponent
+            || component is ChartYSelectionComponent
+            || ChartCollector.isChartLevelModifier(component)
     }
 
     private var model = PieChartModel()

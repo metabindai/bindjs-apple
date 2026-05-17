@@ -22,6 +22,6 @@ extension ChartSymbolScaleComponent {
 
 extension ChartSymbolScaleComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        content
+        content.modifier(ChartSymbolScaleApplier(scale: scale))
     }
 }

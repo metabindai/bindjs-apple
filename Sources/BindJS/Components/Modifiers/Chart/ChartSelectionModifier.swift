@@ -42,7 +42,7 @@ extension ChartXSelectionComponent {
 
 extension ChartXSelectionComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        content
+        content.modifier(ChartXSelectionRuntimeApplier(binding: binding))
     }
 }
 
@@ -65,7 +65,25 @@ extension ChartYSelectionComponent {
 
 extension ChartYSelectionComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        content
+        content.modifier(ChartYSelectionRuntimeApplier(binding: binding))
+    }
+}
+
+private struct ChartXSelectionRuntimeApplier: ViewModifier {
+    @EnvironmentObject private var context: BindJSContext
+    let binding: ChartSelectionBinding
+
+    func body(content: Content) -> some View {
+        content.modifier(ChartXSelectionApplier(binding: binding, context: context))
+    }
+}
+
+private struct ChartYSelectionRuntimeApplier: ViewModifier {
+    @EnvironmentObject private var context: BindJSContext
+    let binding: ChartSelectionBinding
+
+    func body(content: Content) -> some View {
+        content.modifier(ChartYSelectionApplier(binding: binding, context: context))
     }
 }
 
