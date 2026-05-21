@@ -3,7 +3,12 @@ import Foundation
 public struct PieChartCollector {
     public static func collect(chart: PieChartComponent) -> PieChartModel {
         var collector = PieChartCollector()
-        collector.model.innerRadius = chart.innerRadius.map { max(0, min($0, 1)) }
+        collector.model.innerRadius = chart.innerRadius
+        if let innerRadius = chart.innerRadius, !(0...1).contains(innerRadius) {
+            collector.diagnostics.append(
+                ChartDiagnostic(.warning, "PieChart innerRadius must be between 0 and 1; rendering will clamp the value", path: "PieChart")
+            )
+        }
         collector.collectChildren(chart.children, path: "PieChart.children")
         var model = collector.model
         model.diagnostics = collector.diagnostics
@@ -110,6 +115,9 @@ public struct PieChartCollector {
             diagnostics.append(ChartDiagnostic(.error, "\(componentName) requires a literal numeric value", path: path))
             return
         }
+        if slice.value <= 0 {
+            diagnostics.append(ChartDiagnostic(.warning, "\(componentName) value must be greater than zero; slice will not render", path: path))
+        }
         model.slices.append(slice)
     }
 
@@ -162,8 +170,10 @@ public struct PieChartCollector {
         switch modifier {
         case let foregroundScale as ChartForegroundStyleScaleComponent:
             model.style.foregroundStyleScale = foregroundScale.scale
+            model.style.foregroundStyleScaleDomain = foregroundScale.domain
+            appendInvalidScaleEntryDiagnostics(foregroundScale.invalidEntries, model: &model, path: path)
         case let legend as ChartLegendComponent:
-            model.legend.hidden = legend.hidden
+            model.legend = ChartLegendOptions(hidden: legend.hidden, position: legend.position, spacing: legend.spacing)
         case let selection as ChartSelectionComponent:
             model.selection = selection.binding
         case let accessibilityLabel as AccessibilityLabelComponent:
@@ -177,5 +187,20 @@ public struct PieChartCollector {
         default:
             model.diagnostics.append(ChartDiagnostic(.warning, "Ignoring unsupported pie chart modifier \(type(of: modifier).directiveName)", path: path))
         }
+    }
+
+    private static func appendInvalidScaleEntryDiagnostics(
+        _ entries: [String],
+        model: inout PieChartModel,
+        path: String
+    ) {
+        guard !entries.isEmpty else { return }
+        model.diagnostics.append(
+            ChartDiagnostic(
+                .warning,
+                "Ignoring unsupported pie foreground style scale entries: \(entries.joined(separator: ", "))",
+                path: path
+            )
+        )
     }
 }

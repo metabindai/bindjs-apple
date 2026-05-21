@@ -28,7 +28,7 @@ extension ChartAxisValues {
             return
         }
         if let values = raw as? [Any] {
-            self = .values(values.compactMap { ChartValue($0) }.filter(\.isAxisValue))
+            self = .values(values.compactMap { ChartValue($0) })
             return
         }
         return nil
@@ -56,12 +56,54 @@ extension ChartValueFormatter {
     }
 }
 
+enum ChartScaleDomainOrder {
+    static let metadataKey = "__bindjsScaleDomain"
+
+    static func isMetadataEntry(_ key: String, value: Any) -> Bool {
+        (key == metadataKey || key == "domainOrder" || key == "order") && value is [String]
+    }
+
+    static func orderedKeys<Value>(from directive: Directive, presentIn scale: [String: Value]) -> [String] {
+        let explicit = directive.props[metadataKey] as? [String]
+            ?? directive.props["domainOrder"] as? [String]
+            ?? directive.props["order"] as? [String]
+
+        let preferred = explicit ?? Array(directive.props.keys)
+        var seen = Set<String>()
+        var ordered = preferred.filter { key in
+            guard scale[key] != nil, !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }
+
+        for key in scale.keys where !seen.contains(key) {
+            ordered.append(key)
+        }
+        return ordered
+    }
+}
+
+enum ChartScaleTypeName: String {
+    case linear
+    case log
+    case date
+    case category
+}
+
+extension ChartScaleOption {
+    var scaleTypeName: ChartScaleTypeName? {
+        guard let type else { return nil }
+        return ChartScaleTypeName(rawValue: type)
+    }
+}
+
 extension ChartScaleOption {
     init(from directive: Directive) {
         let rawDomain = directive.props["domain"] as? [Any]
+        let rawType: String? = directive["type"]
         self.init(
-            type: directive["type"],
-            domain: rawDomain?.compactMap { ChartValue($0) }.filter(\.isAxisValue)
+            type: rawType?.lowercased(),
+            domain: rawDomain?.compactMap { ChartValue($0) }
         )
     }
 }
@@ -80,6 +122,19 @@ extension Array where Element == ChartValue {
         return lower > upper
     }
 
+    var dateRange: ClosedRange<Date>? {
+        guard count == 2 else { return nil }
+        guard let lower = self[0].dateValue, let upper = self[1].dateValue else { return nil }
+        guard lower <= upper else { return nil }
+        return lower...upper
+    }
+
+    var hasInvalidDateRange: Bool {
+        guard count == 2 else { return false }
+        guard let lower = self[0].dateValue, let upper = self[1].dateValue else { return false }
+        return lower > upper
+    }
+
     var stringDomain: [String]? {
         let strings = compactMap { value -> String? in
             guard case .string(let string) = value else { return nil }
@@ -92,10 +147,21 @@ extension Array where Element == ChartValue {
 extension ChartValue {
     var isAxisValue: Bool {
         switch self {
-        case .number, .string:
+        case .number, .string, .date:
             return true
         case .bool:
             return false
+        }
+    }
+
+    var dateValue: Date? {
+        switch self {
+        case .date(let date):
+            return date
+        case .string(let string):
+            return ChartDateParser.date(from: string)
+        case .number, .bool:
+            return nil
         }
     }
 }

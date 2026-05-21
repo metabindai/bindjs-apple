@@ -20,6 +20,6 @@ extension ChartYAxisComponent {
 
 extension ChartYAxisComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        content.modifier(ChartAxisApplier(axis: .y, options: options))
+        content.modifier(ChartAxisApplier(axis: .y, options: options, scale: nil))
     }
 }

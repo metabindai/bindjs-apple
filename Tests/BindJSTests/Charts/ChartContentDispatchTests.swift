@@ -1,3 +1,4 @@
+import Foundation
 import SwiftUI
 import Testing
 @testable import BindJS
@@ -215,7 +216,7 @@ struct ChartCollectorTests {
             Directive(type: "Chart", children: [bar(x: "Jan", y: 12)])
                 .modifier(Directive(type: "chartYAxis", props: ["hidden": true]))
                 .modifier(Directive(type: "chartYScale", props: ["domain": [0, 20]]))
-                .modifier(Directive(type: "chartLegend", props: ["visibility": "hidden"]))
+                .modifier(Directive(type: "chartLegend", props: ["position": "bottom", "spacing": 12]))
                 .modifier(Directive(type: "chartYAxisLabel", props: ["rawValue": "Revenue"]))
                 .modifier(Directive(type: "accessibilityHint", props: ["rawValue": "Monthly revenue chart"]))
         )
@@ -225,8 +226,123 @@ struct ChartCollectorTests {
         #expect(model.axes.y?.hidden == true)
         #expect(model.axes.y?.label == "Revenue")
         #expect(model.scales.y?.domain == [.number(0), .number(20)])
-        #expect(model.legend.hidden == true)
+        #expect(model.legend.hidden == false)
+        #expect(model.legend.position == "bottom")
+        #expect(model.legend.spacing == 12)
         #expect(model.accessibility.description == "Monthly revenue chart")
+    }
+
+    @Test func collectsDateScaleTypeAndDateDomain() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                line(x: "2026-01-01", y: 12),
+                line(x: "2026-02-01", y: 15)
+            ])
+            .modifier(Directive(type: "chartXScale", props: [
+                "type": "date",
+                "domain": ["2026-01-01", "2026-02-01"]
+            ]))
+            .modifier(Directive(type: "chartXAxis", props: [
+                "values": ["2026-01-01", "2026-02-01"],
+                "formatter": ["style": "date", "dateStyle": "short"]
+            ]))
+        )
+
+        let model = try #require(ChartCollector.collect(root: root))
+
+        #expect(model.scales.x?.type == "date")
+        #expect(model.scales.x?.domain == [.string("2026-01-01"), .string("2026-02-01")])
+        #expect(model.axes.x?.formatter == .date(dateStyle: "short", timeStyle: nil))
+        #expect(model.diagnostics.isEmpty)
+        _ = ChartRenderedView(model: model)
+    }
+
+    @Test func rejectsUnparseableDateScaleValues() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                line(x: "Jan", y: 12)
+            ])
+            .modifier(Directive(type: "chartXScale", props: ["type": "date"]))
+        )
+
+        let diagnostics = try #require(ChartCollector.collect(root: root)?.diagnostics)
+
+        #expect(diagnostics.contains { $0.severity == .error && $0.message.contains("requires ISO-8601 date x-values") })
+    }
+
+    @Test func rejectsUnparseableDateScaleRangeEndpoints() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                rectangle(x: "2026-01-01", y: "North", x2: "Feb", y2: "South")
+            ])
+            .modifier(Directive(type: "chartXScale", props: ["type": "date"]))
+        )
+
+        let diagnostics = try #require(ChartCollector.collect(root: root)?.diagnostics)
+
+        #expect(diagnostics.contains { $0.severity == .error && $0.message.contains("requires ISO-8601 date x2-values") })
+    }
+
+    @Test func dateScaledSelectionsUseDateBindings() throws {
+        let scale = ChartScaleOption(type: "date")
+        let expectedDate = try #require(ChartDateParser.date(from: "2026-01-01"))
+
+        #expect(chartSelectionValueKind(for: .string("2026-01-01"), scale: scale) == .date)
+        #expect(chartSelectionResolvedValue(.string("2026-01-01"), scale: scale) == .date(expectedDate))
+        #expect(chartSelectionValueKind(for: nil, scale: scale) == .date)
+    }
+
+    @Test func directScaleModifiersUseSharedScaleTypeHandling() {
+        let dateScale = ChartScaleOption(type: "date", domain: [.string("2026-01-01"), .string("2026-02-01")])
+        let logScale = ChartScaleOption(type: "log", domain: [.number(1), .number(10)])
+
+        _ = EmptyView().modifier(ChartXScaleComponent(scale: dateScale))
+        _ = EmptyView().modifier(ChartYScaleComponent(scale: logScale))
+    }
+
+    @Test func preservesExplicitScaleDomainOrder() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                rectangle(x: "Jan", y: "North").modifier(Directive(type: "foregroundStyle", props: ["by": "High", "label": "Intensity"])),
+                rectangle(x: "Jan", y: "South").modifier(Directive(type: "foregroundStyle", props: ["by": "Medium", "label": "Intensity"])),
+                rectangle(x: "Feb", y: "South").modifier(Directive(type: "foregroundStyle", props: ["by": "Low", "label": "Intensity"]))
+            ])
+            .modifier(Directive(type: "chartForegroundStyleScale", props: [
+                "__bindjsScaleDomain": ["High", "Medium", "Low"],
+                "High": "red",
+                "Medium": "orange",
+                "Low": "blue"
+            ]))
+            .modifier(Directive(type: "chartSymbolScale", props: [
+                "__bindjsScaleDomain": ["High", "Medium", "Low"],
+                "High": "triangle",
+                "Medium": "square",
+                "Low": "circle"
+            ]))
+        )
+
+        let model = try #require(ChartCollector.collect(root: root))
+
+        #expect(model.style.foregroundStyleScale == ["High": "red", "Medium": "orange", "Low": "blue"])
+        #expect(model.style.foregroundStyleScaleDomain == ["High", "Medium", "Low"])
+        #expect(model.style.symbolScaleDomain == ["High", "Medium", "Low"])
+    }
+
+    @Test func scaleDomainMetadataDoesNotDropLiteralOrderKeys() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                point(x: "Jan", y: 12)
+            ])
+            .modifier(Directive(type: "chartForegroundStyleScale", props: ["order": "red"]))
+            .modifier(Directive(type: "chartSymbolScale", props: ["order": "circle"]))
+        )
+
+        let model = try #require(ChartCollector.collect(root: root))
+
+        #expect(model.style.foregroundStyleScale == ["order": "red"])
+        #expect(model.style.foregroundStyleScaleDomain == ["order"])
+        #expect(model.style.symbolScale == ["order": .circle])
+        #expect(model.style.symbolScaleDomain == ["order"])
     }
 
     @Test @MainActor func runtimeConstructorsEmitChartDirectives() throws {
@@ -248,6 +364,28 @@ struct ChartCollectorTests {
         #expect(model.axes.y?.hidden == true)
         #expect(model.marks[0].style.foregroundStyle == .color("red"))
         #expect(model.marks[1].style.interpolationMethod == .monotone)
+    }
+
+    @Test @MainActor func runtimePreservesScaleObjectOrder() throws {
+        let context = BindJSContext()
+        context.register(
+            name: "OrderedScaleSmoke",
+            source: """
+            const body = () => Chart({}, [
+              RectangleMark({ x: { value: "Jan" }, y: { value: "North" } }).foregroundStyle({ by: "High", label: "Priority" }),
+              RectangleMark({ x: { value: "Feb" }, y: { value: "South" } }).foregroundStyle({ by: "Medium", label: "Priority" }),
+              RectangleMark({ x: { value: "Mar" }, y: { value: "West" } }).foregroundStyle({ by: "Low", label: "Priority" })
+            ])
+            .chartForegroundStyleScale({ High: "red", Medium: "orange", Low: "blue" })
+            .chartSymbolScale({ High: "triangle", Medium: "square", Low: "circle" });
+            """
+        )
+
+        let component = try #require(context.componentForName("OrderedScaleSmoke"))
+        let model = try #require(ChartCollector.collect(root: component))
+
+        #expect(model.style.foregroundStyleScaleDomain == ["High", "Medium", "Low"])
+        #expect(model.style.symbolScaleDomain == ["High", "Medium", "Low"])
     }
 
     @Test func collectsTierTwoCartesianModifiers() throws {
@@ -283,14 +421,44 @@ struct ChartCollectorTests {
         #expect(model.marks[1].style.annotation == ChartAnnotation(text: "Peak", position: .top))
         #expect(model.marks[2].channels.x?.value == .string("Feb"))
         #expect(model.marks[2].style.annotation == ChartAnnotation(text: "Launch", position: .trailing))
-        #expect(model.axes.x?.values == .values([.string("Jan"), .string("Feb")]))
+        #expect(model.axes.x?.values == .values([.string("Jan"), .string("Feb"), .bool(true)]))
         #expect(model.axes.x?.position == "top")
         #expect(model.axes.x?.labelsHidden == true)
         #expect(model.axes.x?.formatter == .number(minimumFractionDigits: nil, maximumFractionDigits: 0))
         #expect(model.style.symbolScale == ["North": .circle, "South": .square])
         #expect(model.selection?.x == ChartSelectionBinding(value: .string("Jan"), onChangeId: "selectMonth"))
         #expect(model.selection?.y == ChartSelectionBinding(value: .number(12), onChangeId: "selectValue"))
-        #expect(model.diagnostics.isEmpty)
+        #expect(model.diagnostics.contains { $0.severity == .warning && $0.message.contains("boolean value in chart x-axis values") })
+    }
+
+    @Test func axisValuesKeepRenderableValuesWhenBooleansArePresent() {
+        let axis = ChartAxisOption(values: .values([.string("Jan"), .string("Feb"), .bool(true)]))
+
+        #expect(axis.stringAxisValues == ["Jan", "Feb"])
+        #expect(axis.numericAxisValues == nil)
+    }
+
+    @Test func warnsForInvalidScaleEntries() throws {
+        let root = try component(
+            Directive(type: "Chart", children: [
+                point(x: "Jan", y: 12)
+            ])
+            .modifier(Directive(type: "chartForegroundStyleScale", props: [
+                "North": 42,
+                "South": "green"
+            ]))
+            .modifier(Directive(type: "chartSymbolScale", props: [
+                "North": "star",
+                "South": "square"
+            ]))
+        )
+
+        let model = try #require(ChartCollector.collect(root: root))
+
+        #expect(model.style.foregroundStyleScale == ["South": "green"])
+        #expect(model.style.symbolScale == ["South": .square])
+        #expect(model.diagnostics.contains { $0.severity == .warning && $0.message.contains("foreground style scale entries: North") })
+        #expect(model.diagnostics.contains { $0.severity == .warning && $0.message.contains("symbol scale entries: North") })
     }
 
     @Test func chartSelectionBridgeDispatchesPortablePayload() {
@@ -308,6 +476,39 @@ struct ChartCollectorTests {
         #expect(events.count == 1)
         #expect(events[0].0 == "selectMonth")
         #expect(events[0].1 == .string("Feb"))
+
+        let optionalSelection: String? = "Mar"
+        ChartSelectionBridge.dispatch(
+            binding: ChartSelectionBinding(value: .string("Jan"), onChangeId: "selectMonth"),
+            value: optionalSelection
+        ) { handlerId, selectedValue in
+            if let value = ChartValue(selectedValue) {
+                events.append((handlerId, value))
+            }
+        }
+
+        #expect(events[1].0 == "selectMonth")
+        #expect(events[1].1 == .string("Mar"))
+
+        var nullPayload: Any?
+        ChartSelectionBridge.dispatch(
+            binding: ChartSelectionBinding(value: .string("Jan"), onChangeId: "selectMonth"),
+            value: nil
+        ) { _, selectedValue in
+            nullPayload = selectedValue
+        }
+
+        #expect(nullPayload is NSNull)
+
+        let optionalNilSelection: String? = nil
+        ChartSelectionBridge.dispatch(
+            binding: ChartSelectionBinding(value: .string("Jan"), onChangeId: "selectMonth"),
+            value: optionalNilSelection
+        ) { _, selectedValue in
+            nullPayload = selectedValue
+        }
+
+        #expect(nullPayload is NSNull)
     }
 
     @Test func collectsPieSlicesAndModifiers() throws {
@@ -327,7 +528,7 @@ struct ChartCollectorTests {
 
         let model = try #require(PieChartCollector.collect(root: root))
 
-        #expect(model.innerRadius == 1)
+        #expect(model.innerRadius == 1.6)
         #expect(model.slices.count == 2)
         #expect(model.slices[0].id == "north")
         #expect(model.slices[0].value == 40)
@@ -340,7 +541,21 @@ struct ChartCollectorTests {
         #expect(model.legend.hidden == true)
         #expect(model.selection == PieSelectionBinding(value: "north", onChangeId: "selectRegion"))
         #expect(model.accessibility.label == "Revenue share")
-        #expect(model.diagnostics.isEmpty)
+        #expect(model.diagnostics.contains { $0.severity == .warning && $0.message.contains("innerRadius") })
+    }
+
+    @Test func warnsForNonPositivePieSlices() throws {
+        let root = try component(
+            Directive(type: "PieChart", children: [
+                pieSlice(id: "empty", value: 0, label: "Empty"),
+                pieSlice(id: "refunds", value: -4, label: "Refunds")
+            ])
+        )
+
+        let model = try #require(PieChartCollector.collect(root: root))
+
+        #expect(model.slices.map(\.id) == ["empty", "refunds"])
+        #expect(model.diagnostics.filter { $0.severity == .warning && $0.message.contains("slice will not render") }.count == 2)
     }
 
     @Test func rejectsInvalidPieChildrenAndModifiers() throws {
@@ -378,6 +593,17 @@ struct ChartCollectorTests {
         #expect(events.count == 1)
         #expect(events[0].0 == "selectRegion")
         #expect(events[0].1 == "south")
+
+        var nullPayload: Any?
+        PieSelectionBridge.dispatch(
+            selection: PieSelectionBinding(value: "north", onChangeId: "selectRegion"),
+            angleValue: nil,
+            model: model
+        ) { _, selectedValue in
+            nullPayload = selectedValue
+        }
+
+        #expect(nullPayload is NSNull)
     }
 
     @Test @MainActor func runtimeConstructorsEmitPieDirectives() throws {

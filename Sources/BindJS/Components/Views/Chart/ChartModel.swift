@@ -238,22 +238,32 @@ public struct ChartScaleOption: Equatable {
 
 public struct ChartLegendOptions: Equatable {
     public var hidden: Bool
+    public var position: String?
+    public var spacing: Double?
 
-    public init(hidden: Bool = false) {
+    public init(hidden: Bool = false, position: String? = nil, spacing: Double? = nil) {
         self.hidden = hidden
+        self.position = position
+        self.spacing = spacing
     }
 }
 
 public struct ChartStyleOptions: Equatable {
     public var foregroundStyleScale: [String: String]
+    public var foregroundStyleScaleDomain: [String]
     public var symbolScale: [String: ChartMarkStyle.SymbolName]
+    public var symbolScaleDomain: [String]
 
     public init(
         foregroundStyleScale: [String: String] = [:],
-        symbolScale: [String: ChartMarkStyle.SymbolName] = [:]
+        foregroundStyleScaleDomain: [String] = [],
+        symbolScale: [String: ChartMarkStyle.SymbolName] = [:],
+        symbolScaleDomain: [String] = []
     ) {
         self.foregroundStyleScale = foregroundStyleScale
+        self.foregroundStyleScaleDomain = foregroundStyleScaleDomain
         self.symbolScale = symbolScale
+        self.symbolScaleDomain = symbolScaleDomain
     }
 }
 

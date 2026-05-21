@@ -5,16 +5,20 @@ public struct ChartLegendComponent: Component {
     public static var directiveName: String = "chartLegend"
 
     public var hidden: Bool
+    public var position: String?
+    public var spacing: Double?
 }
 
 extension ChartLegendComponent {
     public init?(from directive: Directive) {
         guard directive.type == Self.directiveName else { return nil }
-        if let visibility: String = directive["visibility"] ?? directive["position"] ?? directive.rawValue() {
-            hidden = visibility == "hidden"
-        } else {
-            hidden = directive["hidden"] ?? false
-        }
+        let hiddenFlag: Bool = directive["hidden"] ?? false
+        let visibility: String? = directive["visibility"] ?? directive.rawValue()
+        let rawPosition: String? = directive["position"] ?? directive.rawValue()
+
+        hidden = hiddenFlag || visibility == "hidden" || rawPosition == "hidden"
+        position = hidden ? nil : rawPosition
+        spacing = directive["spacing"]
     }
 
     public func accept<V>(visitor: inout V) -> V.Result where V: ComponentVisitor {
@@ -25,10 +29,6 @@ extension ChartLegendComponent {
 extension ChartLegendComponent: ViewModifier {
     @ViewBuilder
     public func body(content: Content) -> some View {
-        if hidden {
-            content.chartLegend(.hidden)
-        } else {
-            content
-        }
+        content.modifier(ChartLegendApplier(legend: ChartLegendOptions(hidden: hidden, position: position, spacing: spacing)))
     }
 }

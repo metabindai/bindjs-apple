@@ -779,6 +779,10 @@ function GenericModifier({ args, name }) {
         props = { rawValue: props };
     }
 
+    if ((name == 'chartForegroundStyleScale' || name == 'chartSymbolScale') && props && typeof props == 'object') {
+        props = { ...props, __bindjsScaleDomain: Object.keys(props) };
+    }
+
     return { props }
 }
 

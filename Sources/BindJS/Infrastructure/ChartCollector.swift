@@ -22,6 +22,7 @@ public struct ChartCollector {
         for modifier in modifiers.reversed() {
             applyChartModifier(modifier, to: &model, path: "Chart")
         }
+        validateModel(&model, path: "Chart")
         return model
     }
 
@@ -39,6 +40,7 @@ public struct ChartCollector {
         for modifier in modifiers.reversed() {
             applyChartModifier(modifier, to: &model, path: "Chart")
         }
+        validateModel(&model, path: "Chart")
         return model
     }
 
@@ -191,10 +193,14 @@ public struct ChartCollector {
             model.scales.y = scale.scale
         case let foregroundScale as ChartForegroundStyleScaleComponent:
             model.style.foregroundStyleScale = foregroundScale.scale
+            model.style.foregroundStyleScaleDomain = foregroundScale.domain
+            appendInvalidScaleEntryDiagnostics(foregroundScale.invalidEntries, scaleName: "foreground style", model: &model, path: path)
         case let legend as ChartLegendComponent:
-            model.legend.hidden = legend.hidden
+            model.legend = ChartLegendOptions(hidden: legend.hidden, position: legend.position, spacing: legend.spacing)
         case let symbolScale as ChartSymbolScaleComponent:
             model.style.symbolScale = symbolScale.scale
+            model.style.symbolScaleDomain = symbolScale.domain
+            appendInvalidScaleEntryDiagnostics(symbolScale.invalidEntries, scaleName: "symbol", model: &model, path: path)
         case let label as ChartXAxisLabelComponent:
             var axis = model.axes.x ?? ChartAxisOption()
             axis.label = label.label
@@ -223,10 +229,88 @@ public struct ChartCollector {
     }
 
     private static func validateScale(_ scale: ChartScaleOption, axis: String, model: inout ChartModel, path: String) {
+        if let type = scale.type, scale.scaleTypeName == nil {
+            model.diagnostics.append(
+                ChartDiagnostic(.warning, "Ignoring unsupported chart \(axis)-scale type '\(type)'", path: path)
+            )
+        }
+        if scale.domain?.contains(where: { !$0.isAxisValue }) == true {
+            model.diagnostics.append(
+                ChartDiagnostic(.warning, "Ignoring unsupported boolean value in chart \(axis)-scale domain", path: path)
+            )
+        }
         if scale.domain?.hasInvalidNumericRange == true {
             model.diagnostics.append(
                 ChartDiagnostic(.error, "Invalid chart \(axis)-scale domain: lower bound must be less than or equal to upper bound", path: path)
             )
+        }
+        if scale.scaleTypeName == .date, scale.domain?.hasInvalidDateRange == true {
+            model.diagnostics.append(
+                ChartDiagnostic(.error, "Invalid chart \(axis)-scale date domain: lower bound must be less than or equal to upper bound", path: path)
+            )
+        }
+        if scale.scaleTypeName == .date, let domain = scale.domain, !domain.isEmpty, domain.dateRange == nil {
+            model.diagnostics.append(
+                ChartDiagnostic(.error, "Invalid chart \(axis)-scale date domain: expected two ISO-8601 date values", path: path)
+            )
+        }
+        if scale.scaleTypeName == .log, let range = scale.domain?.numericRange, range.lowerBound <= 0 {
+            model.diagnostics.append(
+                ChartDiagnostic(.error, "Invalid chart \(axis)-scale log domain: bounds must be greater than zero", path: path)
+            )
+        }
+    }
+
+    private static func appendInvalidScaleEntryDiagnostics(
+        _ entries: [String],
+        scaleName: String,
+        model: inout ChartModel,
+        path: String
+    ) {
+        guard !entries.isEmpty else { return }
+        model.diagnostics.append(
+            ChartDiagnostic(
+                .warning,
+                "Ignoring unsupported chart \(scaleName) scale entries: \(entries.joined(separator: ", "))",
+                path: path
+            )
+        )
+    }
+
+    private static func validateModel(_ model: inout ChartModel, path: String) {
+        validateAxis(model.axes.x, axis: "x", model: &model, path: path)
+        validateAxis(model.axes.y, axis: "y", model: &model, path: path)
+        validateDateChannels(axis: "x", scale: model.scales.x, model: &model, path: path)
+        validateDateChannels(axis: "y", scale: model.scales.y, model: &model, path: path)
+    }
+
+    private static func validateAxis(_ axis: ChartAxisOption?, axis axisName: String, model: inout ChartModel, path: String) {
+        guard case .values(let values) = axis?.values else { return }
+        if values.contains(where: { !$0.isAxisValue }) {
+            model.diagnostics.append(
+                ChartDiagnostic(.warning, "Ignoring unsupported boolean value in chart \(axisName)-axis values", path: path)
+            )
+        }
+    }
+
+    private static func validateDateChannels(axis: String, scale: ChartScaleOption?, model: inout ChartModel, path: String) {
+        guard scale?.scaleTypeName == .date else { return }
+        for mark in model.marks {
+            let channels: [(name: String, channel: ChartChannel?)]
+            if axis == "x" {
+                channels = [("x", mark.channels.x), ("x2", mark.channels.x2)]
+            } else {
+                channels = [("y", mark.channels.y), ("y2", mark.channels.y2)]
+            }
+
+            for (name, channel) in channels {
+                guard let channel else { continue }
+                guard channel.value.dateValue == nil else { continue }
+                model.diagnostics.append(
+                    ChartDiagnostic(.error, "Chart \(axis)-scale type 'date' requires ISO-8601 date \(name)-values", path: path)
+                )
+                return
+            }
         }
     }
 }

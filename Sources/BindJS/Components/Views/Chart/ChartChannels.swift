@@ -4,9 +4,12 @@ public enum ChartValue: Equatable, Hashable {
     case number(Double)
     case string(String)
     case bool(Bool)
+    case date(Date)
 
     init?(_ value: Any?) {
         switch value {
+        case let value as Date:
+            self = .date(value)
         case let value as Bool:
             self = .bool(value)
         case let value as Int:
@@ -39,7 +42,43 @@ public enum ChartValue: Equatable, Hashable {
             return string
         case .bool(let bool):
             return bool ? "true" : "false"
+        case .date(let date):
+            return ChartDateParser.accessibilityFormatter.string(from: date)
         }
+    }
+}
+
+enum ChartDateParser {
+    static let accessibilityFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+
+    private static let internetFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let internetFormatterWithoutFractionalSeconds: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
+    private static let fullDateFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        return formatter
+    }()
+
+    static func date(from string: String) -> Date? {
+        internetFormatter.date(from: string)
+            ?? internetFormatterWithoutFractionalSeconds.date(from: string)
+            ?? fullDateFormatter.date(from: string)
     }
 }
 

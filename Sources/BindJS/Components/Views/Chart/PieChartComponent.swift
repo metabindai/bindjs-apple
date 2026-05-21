@@ -54,10 +54,18 @@ struct PieChartRenderedView: View {
             PieSliceContent(model: model)
         }
         .modifier(PieChartLegendApplier(legend: model.legend))
-        .modifier(PieChartForegroundScaleApplier(scale: model.style.foregroundStyleScale))
+        .modifier(PieChartForegroundScaleApplier(scale: model.style.foregroundStyleScale, domain: model.style.foregroundStyleScaleDomain))
         .modifier(PieChartSelectionApplier(model: model))
-        .accessibilityLabel(model.accessibility.label ?? "")
-        .accessibilityHint(model.accessibility.description ?? "")
+        .modifier(ChartAccessibilityApplier(accessibility: model.accessibility))
+        .preference(key: PieChartModelPreferenceKey.self, value: model)
+    }
+}
+
+struct PieChartModelPreferenceKey: PreferenceKey {
+    static var defaultValue: PieChartModel? = nil
+
+    static func reduce(value: inout PieChartModel?, nextValue: () -> PieChartModel?) {
+        value = nextValue() ?? value
     }
 }
 
@@ -114,13 +122,18 @@ private func accessibilityStyled<Content: ChartContent>(_ content: Content, slic
     }
 }
 
-private struct PieChartLegendApplier: ViewModifier {
+struct PieChartLegendApplier: ViewModifier {
     let legend: ChartLegendOptions
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if legend.hidden {
             content.chartLegend(.hidden)
+        } else if legend.position != nil || legend.spacing != nil {
+            content.chartLegend(
+                position: legend.annotationPosition,
+                spacing: legend.spacing.map { CGFloat($0) }
+            )
         } else {
             content
         }
@@ -129,13 +142,14 @@ private struct PieChartLegendApplier: ViewModifier {
 
 private struct PieChartForegroundScaleApplier: ViewModifier {
     let scale: [String: String]
+    let domain: [String]
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if scale.isEmpty {
             content
         } else {
-            let ordered = scale.keys.sorted()
+            let ordered = orderedDomain(domain, scale: scale)
             content.chartForegroundStyleScale(
                 domain: ordered,
                 range: ordered.map { Color.chartColor(named: scale[$0] ?? $0) }
@@ -162,6 +176,44 @@ private struct PieChartSelectionApplier: ViewModifier {
 
     private func sendSelection(_ value: Double?) {
         PieSelectionBridge.dispatch(selection: model.selection, angleValue: value, model: model) { handlerId, selectedValue in
+            _ = context.callEventHandler(id: handlerId, arguments: selectedValue)
+        }
+    }
+}
+
+struct PieChartSelectionRuntimeApplier: ViewModifier {
+    @EnvironmentObject private var context: BindJSContext
+    @State private var model: PieChartModel?
+    let binding: PieSelectionBinding
+
+    func body(content: Content) -> some View {
+        content
+            .onPreferenceChange(PieChartModelPreferenceKey.self) { model in
+                self.model = model
+            }
+            .modifier(PieChartSelectionBindingApplier(binding: binding, model: model, context: context))
+    }
+}
+
+private struct PieChartSelectionBindingApplier: ViewModifier {
+    let binding: PieSelectionBinding
+    let model: PieChartModel?
+    let context: BindJSContext
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let model, binding.onChangeId != nil {
+            content.chartAngleSelection(value: Binding<Double?>(
+                get: { PieSelectionBridge.angleValue(for: binding.value, in: model) },
+                set: { newValue in sendSelection(newValue, model: model) }
+            ))
+        } else {
+            content
+        }
+    }
+
+    private func sendSelection(_ value: Double?, model: PieChartModel) {
+        PieSelectionBridge.dispatch(selection: binding, angleValue: value, model: model) { handlerId, selectedValue in
             _ = context.callEventHandler(id: handlerId, arguments: selectedValue)
         }
     }
@@ -200,7 +252,7 @@ enum PieSelectionBridge {
         callback: (String, Any) -> Void
     ) {
         guard let onChangeId = selection?.onChangeId else { return }
-        callback(onChangeId, sliceId(for: angleValue, in: model) as Any)
+        callback(onChangeId, chartSelectionPayload(sliceId(for: angleValue, in: model)))
     }
 }
 

@@ -19,7 +19,7 @@ extension ChartSelectionComponent {
 
 extension ChartSelectionComponent: ViewModifier {
     public func body(content: Content) -> some View {
-        content
+        content.modifier(PieChartSelectionRuntimeApplier(binding: binding))
     }
 }
 
@@ -71,19 +71,29 @@ extension ChartYSelectionComponent: ViewModifier {
 
 private struct ChartXSelectionRuntimeApplier: ViewModifier {
     @EnvironmentObject private var context: BindJSContext
+    @State private var model: ChartModel?
     let binding: ChartSelectionBinding
 
     func body(content: Content) -> some View {
-        content.modifier(ChartXSelectionApplier(binding: binding, context: context))
+        content
+            .onPreferenceChange(ChartModelPreferenceKey.self) { model in
+                self.model = model
+            }
+            .modifier(ChartXSelectionApplier(binding: binding, scale: model?.scales.x, context: context))
     }
 }
 
 private struct ChartYSelectionRuntimeApplier: ViewModifier {
     @EnvironmentObject private var context: BindJSContext
+    @State private var model: ChartModel?
     let binding: ChartSelectionBinding
 
     func body(content: Content) -> some View {
-        content.modifier(ChartYSelectionApplier(binding: binding, context: context))
+        content
+            .onPreferenceChange(ChartModelPreferenceKey.self) { model in
+                self.model = model
+            }
+            .modifier(ChartYSelectionApplier(binding: binding, scale: model?.scales.y, context: context))
     }
 }
 

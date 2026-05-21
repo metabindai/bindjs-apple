@@ -19,14 +19,7 @@ extension ChartYScaleComponent {
 }
 
 extension ChartYScaleComponent: ViewModifier {
-    @ViewBuilder
     public func body(content: Content) -> some View {
-        if let range = scale.domain?.numericRange {
-            content.chartYScale(domain: range)
-        } else if let categories = scale.domain?.stringDomain {
-            content.chartYScale(domain: categories)
-        } else {
-            content
-        }
+        content.modifier(ChartSingleScaleApplier(axis: .y, scale: scale))
     }
 }
