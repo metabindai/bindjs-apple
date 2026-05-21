@@ -9,7 +9,11 @@ It's used by [metabind-ai-apple](https://github.com/yapstudios/metabind-ai-apple
 ## Requirements
 
 - Swift 5.11+
-- iOS 17 / macOS 14 / visionOS 1 / tvOS 13 / watchOS 6
+- iOS 17 / macOS 14 / visionOS 1 / tvOS 17 / watchOS 10
+
+## Charts
+
+BindJS includes native Swift Charts-backed `Chart` support for Tier 1 Cartesian charts: `BarMark`, `LineMark`, `AreaMark`, `PointMark`, and y-value `RuleMark`, with axes, scales, legends, series colors, line styling, interpolation, stacking, and chart accessibility. These APIs require the tvOS 17 and watchOS 10 package floors listed above.
 
 ## Install
 

@@ -61,6 +61,15 @@ const componentNames = [
     "Button",
     "Canvas",
     "Capsule",
+    "Chart",
+    "PieChart",
+    "BarMark",
+    "LineMark",
+    "AreaMark",
+    "PointMark",
+    "RuleMark",
+    "RectangleMark",
+    "PieSliceMark",
     "Circle",
     "ColorPicker",
     "CommandGroup",
@@ -768,6 +777,10 @@ function GenericModifier({ args, name }) {
             props = props();
         }
         props = { rawValue: props };
+    }
+
+    if ((name == 'chartForegroundStyleScale' || name == 'chartSymbolScale') && props && typeof props == 'object') {
+        props = { ...props, __bindjsScaleDomain: Object.keys(props) };
     }
 
     return { props }

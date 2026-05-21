@@ -4,7 +4,10 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     // Views
     AngularGradientComponent.directiveName: { AngularGradientComponent(from: $0) },
     ButtonComponent.directiveName: { ButtonComponent(from: $0) },
+    ChartComponent.directiveName: { ChartComponent(from: $0) },
+    PieChartComponent.directiveName: { PieChartComponent(from: $0) },
     ComponentCall.directiveName: { ComponentCall(from: $0) },
+    BarMarkComponent.directiveName: { BarMarkComponent(from: $0) },
     CapsuleComponent.directiveName: { CapsuleComponent(from: $0) },
     CircleComponent.directiveName: { CircleComponent(from: $0) },
     ColorComponent.directiveName: { ColorComponent(from: $0) },
@@ -13,6 +16,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     EllipseComponent.directiveName: { EllipseComponent(from: $0) },
     EllipticalGradientComponent.directiveName: { EllipticalGradientComponent(from: $0) },
     EmptyComponent.directiveName: { EmptyComponent(from: $0) },
+    AreaMarkComponent.directiveName: { AreaMarkComponent(from: $0) },
     ForEachComponent.directiveName: { ForEachComponent(from: $0) },
     GeometryReaderComponent.directiveName: { GeometryReaderComponent(from: $0) },
     GridComponent.directiveName: { GridComponent(from: $0) },
@@ -23,7 +27,9 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     LazyVStackComponent.directiveName: { LazyVStackComponent(from: $0) },
     LabelComponent.directiveName: { LabelComponent(from: $0) },
     ImageComponent.directiveName: { ImageComponent(from: $0) },
+    LineMarkComponent.directiveName: { LineMarkComponent(from: $0) },
     MenuComponent.directiveName: { MenuComponent(from: $0) },
+    PieSliceMarkComponent.directiveName: { PieSliceMarkComponent(from: $0) },
     LinearGradientComponent.directiveName: { LinearGradientComponent(from: $0) },
     ListComponent.directiveName: { ListComponent(from: $0) },
     MaterialComponent.directiveName: { MaterialComponent(from: $0) },
@@ -34,9 +40,12 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     PathComponent.directiveName: { PathComponent(from: $0) },
     PickerComponent.directiveName: { PickerComponent(from: $0) },
     PlaceholderComponent.directiveName: { PlaceholderComponent(from: $0) },
+    PointMarkComponent.directiveName: { PointMarkComponent(from: $0) },
     ProgressViewComponent.directiveName: { ProgressViewComponent(from: $0) },
     RadialGradientComponent.directiveName: { RadialGradientComponent(from: $0) },
     RectangleComponent.directiveName: { RectangleComponent(from: $0) },
+    RectangleMarkComponent.directiveName: { RectangleMarkComponent(from: $0) },
+    RuleMarkComponent.directiveName: { RuleMarkComponent(from: $0) },
     RoundedRectangleComponent.directiveName: { RoundedRectangleComponent(from: $0) },
     ScrollViewComponent.directiveName: { ScrollViewComponent(from: $0) },
     SectionComponent.directiveName: { SectionComponent(from: $0) },
@@ -64,6 +73,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     AllowsHitTestingComponent.directiveName: { AllowsHitTestingComponent(from: $0) },
     AllowsTighteningComponent.directiveName: { AllowsTighteningComponent(from: $0) },
     AspectRatioComponent.directiveName: { AspectRatioComponent(from: $0) },
+    AnnotationComponent.directiveName: { AnnotationComponent(from: $0) },
     AutocorrectionDisabledComponent.directiveName: { AutocorrectionDisabledComponent(from: $0) },
     BackgroundComponent.directiveName: { BackgroundComponent(from: $0) },
     BadgeComponent.directiveName: { BadgeComponent(from: $0) },
@@ -72,6 +82,18 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     BoldComponent.directiveName: { BoldComponent(from: $0) },
     BorderComponent.directiveName: { BorderComponent(from: $0) },
     BrightnessComponent.directiveName: { BrightnessComponent(from: $0) },
+    ChartXAxisComponent.directiveName: { ChartXAxisComponent(from: $0) },
+    ChartYAxisComponent.directiveName: { ChartYAxisComponent(from: $0) },
+    ChartXScaleComponent.directiveName: { ChartXScaleComponent(from: $0) },
+    ChartYScaleComponent.directiveName: { ChartYScaleComponent(from: $0) },
+    ChartForegroundStyleScaleComponent.directiveName: { ChartForegroundStyleScaleComponent(from: $0) },
+    ChartLegendComponent.directiveName: { ChartLegendComponent(from: $0) },
+    ChartSymbolScaleComponent.directiveName: { ChartSymbolScaleComponent(from: $0) },
+    ChartXAxisLabelComponent.directiveName: { ChartXAxisLabelComponent(from: $0) },
+    ChartSelectionComponent.directiveName: { ChartSelectionComponent(from: $0) },
+    ChartXSelectionComponent.directiveName: { ChartXSelectionComponent(from: $0) },
+    ChartYAxisLabelComponent.directiveName: { ChartYAxisLabelComponent(from: $0) },
+    ChartYSelectionComponent.directiveName: { ChartYSelectionComponent(from: $0) },
     ClippedComponent.directiveName: { ClippedComponent(from: $0) },
     ClipShapeComponent.directiveName: { ClipShapeComponent(from: $0) },
     ColorInvertComponent.directiveName: { ColorInvertComponent(from: $0) },
@@ -104,6 +126,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     HiddenComponent.directiveName: { HiddenComponent(from: $0) },
     IDComponent.directiveName: { IDComponent(from: $0) },
     IgnoresSafeAreaComponent.directiveName: { IgnoresSafeAreaComponent(from: $0) },
+    InterpolationMethodComponent.directiveName: { InterpolationMethodComponent(from: $0) },
     ItalicComponent.directiveName: { ItalicComponent(from: $0) },
     KeyboardTypeComponent.directiveName: { KeyboardTypeComponent(from: $0) },
     LayoutPriorityComponent.directiveName: { LayoutPriorityComponent(from: $0) },
@@ -112,6 +135,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ListStyleComponent.directiveName: { ListStyleComponent(from: $0) },
     LineLimitComponent.directiveName: { LineLimitComponent(from: $0) },
     LineSpacingComponent.directiveName: { LineSpacingComponent(from: $0) },
+    LineStyleComponent.directiveName: { LineStyleComponent(from: $0) },
     MaskComponent.directiveName: { MaskComponent(from: $0) },
     MinimumScaleFactorComponent.directiveName: { MinimumScaleFactorComponent(from: $0) },
     MonospacedComponent.directiveName: { MonospacedComponent(from: $0) },
@@ -152,6 +176,8 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ShadowComponent.directiveName: { ShadowComponent(from: $0) },
     SheetComponent.directiveName: { SheetComponent(from: $0) },
     StrikethroughComponent.directiveName: { StrikethroughComponent(from: $0) },
+    SymbolComponent.directiveName: { SymbolComponent(from: $0) },
+    SymbolSizeComponent.directiveName: { SymbolSizeComponent(from: $0) },
     TagComponent.directiveName: { TagComponent(from: $0) },
     TextCaseComponent.directiveName: { TextCaseComponent(from: $0) },
     TextSelectionComponent.directiveName: { TextSelectionComponent(from: $0) },
@@ -213,7 +239,10 @@ public struct ComponentView: View {
         switch component {
         case let angularGradient as AngularGradientComponent: angularGradient
         case let button as ButtonComponent: button
+        case let chart as ChartComponent: chart
+        case let pieChart as PieChartComponent: pieChart
         case let callComponent as ComponentCall: callComponent
+        case let barMark as BarMarkComponent: UnsupportedChartContentView(componentName: type(of: barMark).directiveName)
         case let capsule as CapsuleComponent: capsule
         case let circle as CircleComponent: circle
         case let color as ColorComponent: color
@@ -222,6 +251,7 @@ public struct ComponentView: View {
         case let ellipse as EllipseComponent: ellipse
         case let ellipticalGradient as EllipticalGradientComponent: ellipticalGradient
         case let empty as EmptyComponent: empty
+        case let areaMark as AreaMarkComponent: UnsupportedChartContentView(componentName: type(of: areaMark).directiveName)
         case let forEach as ForEachComponent: forEach
         case let geometryReader as GeometryReaderComponent: geometryReader
         case let grid as GridComponent: grid
@@ -230,6 +260,7 @@ public struct ComponentView: View {
         case let hStack as HStackComponent: hStack
         case let image as ImageComponent: image
         case let label as LabelComponent: label
+        case let lineMark as LineMarkComponent: UnsupportedChartContentView(componentName: type(of: lineMark).directiveName)
         case let lazyHStack as LazyHStackComponent: lazyHStack
         case let lazyVStack as LazyVStackComponent: lazyVStack
         case let linearGradient as LinearGradientComponent: linearGradient
@@ -246,9 +277,13 @@ public struct ComponentView: View {
         case let path as PathComponent: path
         case let picker as PickerComponent: picker
         case let placeholder as PlaceholderComponent: placeholder
+        case let pieSliceMark as PieSliceMarkComponent: UnsupportedChartContentView(componentName: type(of: pieSliceMark).directiveName)
+        case let pointMark as PointMarkComponent: UnsupportedChartContentView(componentName: type(of: pointMark).directiveName)
         case let progressView as ProgressViewComponent: progressView
         case let radialGradient as RadialGradientComponent: radialGradient
         case let rectangle as RectangleComponent: rectangle
+        case let rectangleMark as RectangleMarkComponent: UnsupportedChartContentView(componentName: type(of: rectangleMark).directiveName)
+        case let ruleMark as RuleMarkComponent: UnsupportedChartContentView(componentName: type(of: ruleMark).directiveName)
         case let roundedRectangle as RoundedRectangleComponent: roundedRectangle
         case let scrollView as ScrollViewComponent: scrollView
         case let section as SectionComponent: section
@@ -287,6 +322,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as AllowsHitTestingComponent: content.modifier(m)
         case let m as AllowsTighteningComponent: content.modifier(m)
         case let m as AspectRatioComponent: content.modifier(m)
+        case let m as AnnotationComponent: content.modifier(m)
         case let m as AutocorrectionDisabledComponent: content.modifier(m)
         case let m as BackgroundComponent: content.modifier(m)
         case let m as BadgeComponent: content.modifier(m)
@@ -295,6 +331,18 @@ struct ComponentViewModifier: ViewModifier {
         case let m as BoldComponent: content.modifier(m)
         case let m as BorderComponent: content.modifier(m)
         case let m as BrightnessComponent: content.modifier(m)
+        case let m as ChartXAxisComponent: content.modifier(m)
+        case let m as ChartYAxisComponent: content.modifier(m)
+        case let m as ChartXScaleComponent: content.modifier(m)
+        case let m as ChartYScaleComponent: content.modifier(m)
+        case let m as ChartForegroundStyleScaleComponent: content.modifier(m)
+        case let m as ChartLegendComponent: content.modifier(m)
+        case let m as ChartSymbolScaleComponent: content.modifier(m)
+        case let m as ChartXAxisLabelComponent: content.modifier(m)
+        case let m as ChartSelectionComponent: content.modifier(m)
+        case let m as ChartXSelectionComponent: content.modifier(m)
+        case let m as ChartYAxisLabelComponent: content.modifier(m)
+        case let m as ChartYSelectionComponent: content.modifier(m)
         case let m as ClipShapeComponent: content.modifier(m)
         case let m as ClippedComponent: content.modifier(m)
         case let m as ColorInvertComponent: content.modifier(m)
@@ -332,6 +380,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as HiddenComponent: content.modifier(m)
         case let m as IDComponent: content.modifier(m)
         case let m as IgnoresSafeAreaComponent: content.modifier(m)
+        case let m as InterpolationMethodComponent: content.modifier(m)
         case let m as ItalicComponent: content.modifier(m)
         case let m as KeyboardTypeComponent: content.modifier(m)
         case let m as LayoutPriorityComponent: content.modifier(m)
@@ -340,6 +389,7 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ListStyleComponent: content.modifier(m)
         case let m as LineLimitComponent: content.modifier(m)
         case let m as LineSpacingComponent: content.modifier(m)
+        case let m as LineStyleComponent: content.modifier(m)
         case let m as MaskComponent: content.modifier(m)
         case let m as MinimumScaleFactorComponent: content.modifier(m)
         case let m as MonospacedComponent: content.modifier(m)
@@ -379,6 +429,8 @@ struct ComponentViewModifier: ViewModifier {
         case let m as ShadowComponent: content.modifier(m)
         case let m as SheetComponent: content.modifier(m)
         case let m as StrikethroughComponent: content.modifier(m)
+        case let m as SymbolComponent: content.modifier(m)
+        case let m as SymbolSizeComponent: content.modifier(m)
         case let m as SubmitLabelComponent: content.modifier(m)
         case let m as TagComponent: content.modifier(m)
         case let m as TextCaseComponent: content.modifier(m)

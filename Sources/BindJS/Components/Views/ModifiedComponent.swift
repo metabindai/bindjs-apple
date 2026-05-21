@@ -21,12 +21,19 @@ extension ModifiedComponent {
 }
 
 extension ModifiedComponent: View {
+    @ViewBuilder
     public var body: some View {
-        // In practice this is only one element ever. We should change in the runtime to not be an array.
-        ForEach(content.indices, id: \.self) { index in
-            ComponentView(content[index])
+        if let model = ChartCollector.collectRenderableRoot(self) {
+            ChartRenderedView(model: model)
+        } else if let model = PieChartCollector.collectRenderableRoot(self) {
+            PieChartRenderedView(model: model)
+        } else {
+            // In practice this is only one element ever. We should change in the runtime to not be an array.
+            ForEach(content.indices, id: \.self) { index in
+                ComponentView(content[index])
+            }
+            .modifier(ComponentViewModifier(modifier))
         }
-        .modifier(ComponentViewModifier(modifier))
     }
 }
 

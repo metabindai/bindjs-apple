@@ -37,7 +37,7 @@ extension ColorComponent: View {
     var swiftUI: Color {
         switch storage {
         case .name(let name):
-            (Self.namedColors[name] ?? .primary).opacity(opacity)
+            Self.color(named: name).opacity(opacity)
         case .rgba(let red, let green, let blue, let alpha):
             Color(red: red, green: green, blue: blue, opacity: alpha)
                 .opacity(opacity)
@@ -50,6 +50,22 @@ extension ColorComponent: View {
 }
 
 extension ColorComponent {
+    var chartColorString: String {
+        switch storage {
+        case .name(let name):
+            return name
+        case .rgba(let red, let green, let blue, let alpha):
+            let r = Int((red * 255).rounded())
+            let g = Int((green * 255).rounded())
+            let b = Int((blue * 255).rounded())
+            return "rgba(\(r),\(g),\(b),\(alpha))"
+        }
+    }
+
+    static func color(named name: String) -> Color {
+        namedColors[name] ?? .primary
+    }
+
     private static let namedColors: [String: Color] = {
         var colors: [String: Color] = [
 
@@ -144,4 +160,46 @@ extension ColorComponent {
 
         return colors
     }()
+}
+
+extension Color {
+    static func chartColor(named raw: String) -> Color {
+        if raw.hasPrefix("#") {
+            return color(hex: raw)
+        }
+        if raw.hasPrefix("rgba(") {
+            return color(rgba: raw)
+        }
+        return ColorComponent.color(named: raw)
+    }
+
+    private static func color(hex raw: String) -> Color {
+        var hex = raw.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        if hex.count == 3 {
+            hex = hex.map { "\($0)\($0)" }.joined()
+        }
+        guard let int = UInt64(hex, radix: 16) else { return .primary }
+        if hex.count == 8 {
+            return Color(
+                red: Double((int >> 24) & 0xff) / 255,
+                green: Double((int >> 16) & 0xff) / 255,
+                blue: Double((int >> 8) & 0xff) / 255,
+                opacity: Double(int & 0xff) / 255
+            )
+        }
+        return Color(
+            red: Double((int >> 16) & 0xff) / 255,
+            green: Double((int >> 8) & 0xff) / 255,
+            blue: Double(int & 0xff) / 255
+        )
+    }
+
+    private static func color(rgba raw: String) -> Color {
+        let body = raw
+            .replacingOccurrences(of: "rgba(", with: "")
+            .replacingOccurrences(of: ")", with: "")
+        let parts = body.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
+        guard parts.count == 4 else { return .primary }
+        return Color(red: parts[0] / 255, green: parts[1] / 255, blue: parts[2] / 255, opacity: parts[3])
+    }
 }

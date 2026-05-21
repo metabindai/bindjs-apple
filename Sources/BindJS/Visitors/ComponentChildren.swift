@@ -14,6 +14,14 @@ private struct ComponentChildren: ComponentVisitor {
     mutating func visitButton(_ button: ButtonComponent) -> [any Component] {
         [button.label]
     }
+
+    mutating func visitChart(_ chart: ChartComponent) -> [any Component] {
+        chart.children
+    }
+
+    mutating func visitPieChart(_ pieChart: PieChartComponent) -> [any Component] {
+        pieChart.children
+    }
     
     mutating func visitCall(_ call: ComponentCall) -> [any Component] {
         call.children

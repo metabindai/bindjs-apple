@@ -6,6 +6,15 @@ public protocol ComponentVisitor {
     
     // Views Components
     mutating func visitButton(_ button: ButtonComponent) -> Result
+    mutating func visitChart(_ chart: ChartComponent) -> Result
+    mutating func visitPieChart(_ pieChart: PieChartComponent) -> Result
+    mutating func visitBarMark(_ barMark: BarMarkComponent) -> Result
+    mutating func visitLineMark(_ lineMark: LineMarkComponent) -> Result
+    mutating func visitAreaMark(_ areaMark: AreaMarkComponent) -> Result
+    mutating func visitPointMark(_ pointMark: PointMarkComponent) -> Result
+    mutating func visitRuleMark(_ ruleMark: RuleMarkComponent) -> Result
+    mutating func visitRectangleMark(_ rectangleMark: RectangleMarkComponent) -> Result
+    mutating func visitPieSliceMark(_ pieSliceMark: PieSliceMarkComponent) -> Result
     mutating func visitCall(_ call: ComponentCall) -> Result
     mutating func visitColor(_ color: ColorComponent) -> Result
     mutating func visitContentUnavailableView(_ contentUnavailableView: ContentUnavailableViewComponent) -> Result
@@ -72,6 +81,7 @@ public protocol ComponentVisitor {
     mutating func visitAllowsHitTesting(_ allowsHitTesting: AllowsHitTestingComponent) -> Result
     mutating func visitAllowsTightening(_ allowsTightening: AllowsTighteningComponent) -> Result
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result
+    mutating func visitAnnotation(_ annotation: AnnotationComponent) -> Result
     mutating func visitBackground(_ background: BackgroundComponent) -> Result
     mutating func visitBadge(_ badge: BadgeComponent) -> Result
     mutating func visitBlendMode(_ blendMode: BlendModeComponent) -> Result
@@ -79,6 +89,18 @@ public protocol ComponentVisitor {
     mutating func visitBold(_ bold: BoldComponent) -> Result
     mutating func visitBorder(_ border: BorderComponent) -> Result
     mutating func visitBrightness(_ brightness: BrightnessComponent) -> Result
+    mutating func visitChartXAxis(_ chartXAxis: ChartXAxisComponent) -> Result
+    mutating func visitChartYAxis(_ chartYAxis: ChartYAxisComponent) -> Result
+    mutating func visitChartXScale(_ chartXScale: ChartXScaleComponent) -> Result
+    mutating func visitChartYScale(_ chartYScale: ChartYScaleComponent) -> Result
+    mutating func visitChartForegroundStyleScale(_ chartForegroundStyleScale: ChartForegroundStyleScaleComponent) -> Result
+    mutating func visitChartLegend(_ chartLegend: ChartLegendComponent) -> Result
+    mutating func visitChartSymbolScale(_ chartSymbolScale: ChartSymbolScaleComponent) -> Result
+    mutating func visitChartXAxisLabel(_ chartXAxisLabel: ChartXAxisLabelComponent) -> Result
+    mutating func visitChartSelection(_ chartSelection: ChartSelectionComponent) -> Result
+    mutating func visitChartXSelection(_ chartXSelection: ChartXSelectionComponent) -> Result
+    mutating func visitChartYAxisLabel(_ chartYAxisLabel: ChartYAxisLabelComponent) -> Result
+    mutating func visitChartYSelection(_ chartYSelection: ChartYSelectionComponent) -> Result
     mutating func visitClipped(_ clipped: ClippedComponent) -> Result
     mutating func visitClipShape(_ clipShape: ClipShapeComponent) -> Result
     mutating func visitColorInvert(_ colorInvert: ColorInvertComponent) -> Result
@@ -120,6 +142,7 @@ public protocol ComponentVisitor {
     mutating func visitHidden(_ hidden: HiddenComponent) -> Result
     mutating func visitID(_ id: IDComponent) -> Result
     mutating func visitIgnoresSafeArea(_ ignoresSafeArea: IgnoresSafeAreaComponent) -> Result
+    mutating func visitInterpolationMethod(_ interpolationMethod: InterpolationMethodComponent) -> Result
     mutating func visitItalic(_ italic: ItalicComponent) -> Result
     mutating func visitLayoutPriority(_ layoutPriority: LayoutPriorityComponent) -> Result
     mutating func visitListRowBackground(_ listRowBackground: ListRowBackgroundComponent) -> Result
@@ -127,6 +150,7 @@ public protocol ComponentVisitor {
     mutating func visitListStyle(_ listStyle: ListStyleComponent) -> Result
     mutating func visitLineLimit(_ lineLimit: LineLimitComponent) -> Result
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result
+    mutating func visitLineStyle(_ lineStyle: LineStyleComponent) -> Result
     mutating func visitMask(_ mask: MaskComponent) -> Result
     mutating func visitMinimumScaleFactor(_ minimumScaleFactor: MinimumScaleFactorComponent) -> Result
     mutating func visitMonospaced(_ monospaced: MonospacedComponent) -> Result
@@ -156,6 +180,8 @@ public protocol ComponentVisitor {
     mutating func visitShadow(_ shadow: ShadowComponent) -> Result
     mutating func visitSheet(_ sheet: SheetComponent) -> Result
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result
+    mutating func visitSymbol(_ symbol: SymbolComponent) -> Result
+    mutating func visitSymbolSize(_ symbolSize: SymbolSizeComponent) -> Result
     mutating func visitTag(_ tag: TagComponent) -> Result
     mutating func visitTextCase(_ textCase: TextCaseComponent) -> Result
     mutating func visitTextSelection(_ textSelection: TextSelectionComponent) -> Result
@@ -192,6 +218,42 @@ public extension ComponentVisitor {
     // Views Components Default Implementations
     mutating func visitButton(_ button: ButtonComponent) -> Result {
         return defaultVisit(button)
+    }
+
+    mutating func visitChart(_ chart: ChartComponent) -> Result {
+        return defaultVisit(chart)
+    }
+
+    mutating func visitPieChart(_ pieChart: PieChartComponent) -> Result {
+        return defaultVisit(pieChart)
+    }
+
+    mutating func visitBarMark(_ barMark: BarMarkComponent) -> Result {
+        return defaultVisit(barMark)
+    }
+
+    mutating func visitLineMark(_ lineMark: LineMarkComponent) -> Result {
+        return defaultVisit(lineMark)
+    }
+
+    mutating func visitAreaMark(_ areaMark: AreaMarkComponent) -> Result {
+        return defaultVisit(areaMark)
+    }
+
+    mutating func visitPointMark(_ pointMark: PointMarkComponent) -> Result {
+        return defaultVisit(pointMark)
+    }
+
+    mutating func visitRuleMark(_ ruleMark: RuleMarkComponent) -> Result {
+        return defaultVisit(ruleMark)
+    }
+
+    mutating func visitRectangleMark(_ rectangleMark: RectangleMarkComponent) -> Result {
+        return defaultVisit(rectangleMark)
+    }
+
+    mutating func visitPieSliceMark(_ pieSliceMark: PieSliceMarkComponent) -> Result {
+        return defaultVisit(pieSliceMark)
     }
     
     mutating func visitCall(_ call: ComponentCall) -> Result {
@@ -436,6 +498,10 @@ public extension ComponentVisitor {
     mutating func visitAspectRatio(_ aspectRatio: AspectRatioComponent) -> Result {
         return defaultVisit(aspectRatio)
     }
+
+    mutating func visitAnnotation(_ annotation: AnnotationComponent) -> Result {
+        return defaultVisit(annotation)
+    }
     
     mutating func visitBackground(_ background: BackgroundComponent) -> Result {
         return defaultVisit(background)
@@ -463,6 +529,54 @@ public extension ComponentVisitor {
     
     mutating func visitBrightness(_ brightness: BrightnessComponent) -> Result {
         return defaultVisit(brightness)
+    }
+
+    mutating func visitChartXAxis(_ chartXAxis: ChartXAxisComponent) -> Result {
+        return defaultVisit(chartXAxis)
+    }
+
+    mutating func visitChartYAxis(_ chartYAxis: ChartYAxisComponent) -> Result {
+        return defaultVisit(chartYAxis)
+    }
+
+    mutating func visitChartXScale(_ chartXScale: ChartXScaleComponent) -> Result {
+        return defaultVisit(chartXScale)
+    }
+
+    mutating func visitChartYScale(_ chartYScale: ChartYScaleComponent) -> Result {
+        return defaultVisit(chartYScale)
+    }
+
+    mutating func visitChartForegroundStyleScale(_ chartForegroundStyleScale: ChartForegroundStyleScaleComponent) -> Result {
+        return defaultVisit(chartForegroundStyleScale)
+    }
+
+    mutating func visitChartLegend(_ chartLegend: ChartLegendComponent) -> Result {
+        return defaultVisit(chartLegend)
+    }
+
+    mutating func visitChartSymbolScale(_ chartSymbolScale: ChartSymbolScaleComponent) -> Result {
+        return defaultVisit(chartSymbolScale)
+    }
+
+    mutating func visitChartXAxisLabel(_ chartXAxisLabel: ChartXAxisLabelComponent) -> Result {
+        return defaultVisit(chartXAxisLabel)
+    }
+
+    mutating func visitChartSelection(_ chartSelection: ChartSelectionComponent) -> Result {
+        return defaultVisit(chartSelection)
+    }
+
+    mutating func visitChartXSelection(_ chartXSelection: ChartXSelectionComponent) -> Result {
+        return defaultVisit(chartXSelection)
+    }
+
+    mutating func visitChartYAxisLabel(_ chartYAxisLabel: ChartYAxisLabelComponent) -> Result {
+        return defaultVisit(chartYAxisLabel)
+    }
+
+    mutating func visitChartYSelection(_ chartYSelection: ChartYSelectionComponent) -> Result {
+        return defaultVisit(chartYSelection)
     }
     
     mutating func visitClipped(_ clipped: ClippedComponent) -> Result {
@@ -618,6 +732,10 @@ public extension ComponentVisitor {
     mutating func visitIgnoresSafeArea(_ ignoresSafeArea: IgnoresSafeAreaComponent) -> Result {
         return defaultVisit(ignoresSafeArea)
     }
+
+    mutating func visitInterpolationMethod(_ interpolationMethod: InterpolationMethodComponent) -> Result {
+        return defaultVisit(interpolationMethod)
+    }
     
     mutating func visitItalic(_ italic: ItalicComponent) -> Result {
         return defaultVisit(italic)
@@ -645,6 +763,10 @@ public extension ComponentVisitor {
     
     mutating func visitLineSpacing(_ lineSpacing: LineSpacingComponent) -> Result {
         return defaultVisit(lineSpacing)
+    }
+
+    mutating func visitLineStyle(_ lineStyle: LineStyleComponent) -> Result {
+        return defaultVisit(lineStyle)
     }
 
     mutating func visitMask(_ mask: MaskComponent) -> Result {
@@ -765,6 +887,14 @@ public extension ComponentVisitor {
     
     mutating func visitStrikethrough(_ strikethrough: StrikethroughComponent) -> Result {
         return defaultVisit(strikethrough)
+    }
+
+    mutating func visitSymbol(_ symbol: SymbolComponent) -> Result {
+        return defaultVisit(symbol)
+    }
+
+    mutating func visitSymbolSize(_ symbolSize: SymbolSizeComponent) -> Result {
+        return defaultVisit(symbolSize)
     }
     
     mutating func visitTag(_ tag: TagComponent) -> Result {
