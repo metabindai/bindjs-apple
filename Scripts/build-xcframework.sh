@@ -84,6 +84,25 @@ IOS_SIM_FRAMEWORK=$(build_slice    "ios-simulator"  "generic/platform=iOS Simula
 MACOS_FRAMEWORK=$(build_slice      "macos"          "generic/platform=macOS"                        "Release")
 CATALYST_FRAMEWORK=$(build_slice   "maccatalyst"    "generic/platform=macOS,variant=Mac Catalyst"   "Release-maccatalyst")
 
+# Fix up the macOS slice: it is a *versioned* framework (Versions/A + a Current
+# symlink), but build_slice copies Modules + the resource bundle to the framework
+# root — fine for flat (iOS) frameworks, illegal for versioned ones. codesign
+# then rejects "unsealed contents present in the root directory of an embedded
+# framework", breaking every macOS app that signs under a hardened runtime.
+# Relocate those into Versions/A with top-level symlinks, and ad-hoc-sign the
+# nested (executable-less) resource bundle so downstream apps can seal it.
+echo "Fixing up macOS versioned framework structure..."
+(
+    cd "$MACOS_FRAMEWORK"
+    for item in "Modules" "${SCHEME_NAME}_${FRAMEWORK_NAME}.bundle"; do
+        if [ -e "$item" ] && [ ! -L "$item" ]; then
+            mv "$item" "Versions/A/$item"
+            ln -s "Versions/Current/$item" "$item"
+        fi
+    done
+    codesign --force --sign - "Versions/A/${SCHEME_NAME}_${FRAMEWORK_NAME}.bundle"
+)
+
 # Create XCFramework
 echo "Creating XCFramework..."
 xcodebuild -create-xcframework \
@@ -94,9 +113,14 @@ xcodebuild -create-xcframework \
     -output "$XCFRAMEWORK_OUTPUT"
 
 # Create zip
+# NOTE: use ditto, not `zip` — `zip` (without -y) dereferences symlinks, which
+# flattens the macOS framework's Versions/Current + top-level symlinks into real
+# copies. That produces an unsignable framework (codesign rejects it under a
+# hardened runtime), breaking every macOS app that embeds the binary. ditto
+# preserves symlinks and extended attributes.
 echo "Creating zip..."
 cd "$OUTPUT_DIR"
-zip -r -q "$FRAMEWORK_NAME.xcframework.zip" "$FRAMEWORK_NAME.xcframework"
+ditto -c -k --keepParent "$FRAMEWORK_NAME.xcframework" "$FRAMEWORK_NAME.xcframework.zip"
 
 # Calculate checksum
 CHECKSUM=$(swift package compute-checksum "$ZIP_OUTPUT")
