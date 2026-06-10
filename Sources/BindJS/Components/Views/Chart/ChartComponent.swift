@@ -33,6 +33,12 @@ struct ChartRenderedView: View {
         Chart {
             ChartMarkContent(model: model)
         }
+        // Swift Charts does not clip marks to the plot area by default — an
+        // unstacked AreaMark whose zero baseline sits below the y-domain
+        // floor paints all the way past the chart's frame into whatever is
+        // laid out beneath it. The web renderer clips to the SVG viewport;
+        // match that.
+        .chartPlotStyle { plot in plot.clipped() }
         .modifier(ChartAxisApplier(axis: .x, options: model.axes.x, scale: model.scales.x))
         .modifier(ChartAxisApplier(axis: .y, options: model.axes.y, scale: model.scales.y))
         .modifier(ChartAxisLabelApplier(xLabel: model.axes.x?.label, yLabel: model.axes.y?.label))

@@ -204,6 +204,11 @@ private struct ChartFixture: Identifiable, Hashable {
 
     static let all: [ChartFixture] = [
         ChartFixture(
+            name: "net-worth-card",
+            description: "Vault net_worth_trend chart: hidden axes, explicit domains, area + rule + monotone line.",
+            source: #"Chart({}, [ForEach([{l:'Jun',v:34200},{l:'Jul',v:35100},{l:'Aug',v:35800},{l:'Sep',v:35200},{l:'Oct',v:36400},{l:'Nov',v:37500},{l:'Dec',v:36900},{l:'Jan',v:38800},{l:'Feb',v:40100},{l:'Mar',v:41200},{l:'Apr',v:42300},{l:'May',v:43470}], (p, i) => AreaMark({ x: i, y: p.v }).foregroundStyle(Color('#34C759').opacity(0.18)).interpolationMethod('monotone')), RuleMark({ y: 34200 }).foregroundStyle(Color('secondary').opacity(0.4)).lineStyle({ width: 1, dash: [4, 3] }), ForEach([{l:'Jun',v:34200},{l:'Jul',v:35100},{l:'Aug',v:35800},{l:'Sep',v:35200},{l:'Oct',v:36400},{l:'Nov',v:37500},{l:'Dec',v:36900},{l:'Jan',v:38800},{l:'Feb',v:40100},{l:'Mar',v:41200},{l:'Apr',v:42300},{l:'May',v:43470}], (p, i) => LineMark({ x: i, y: p.v }).foregroundStyle(Color('#34C759')).interpolationMethod('monotone').lineStyle({ width: 2.5 }))]).chartXAxis({ hidden: true, gridHidden: true }).chartYAxis({ hidden: true, gridHidden: true }).chartXScale({ type: 'linear', domain: [0, 11] }).chartYScale({ domain: [33087.6, 44582.4] }).allowsHitTesting(false).padding('trailing', 14)"#
+        ),
+        ChartFixture(
             name: "bar-single-series",
             description: "Single-series bar chart with visible axes.",
             source: #"Chart({}, [ForEach([{ month: 'Jan', value: 12 }, { month: 'Feb', value: 18 }], row => BarMark({ x: { value: row.month, label: 'Month' }, y: { value: row.value, label: 'Revenue' } }))]).chartXAxisLabel('Month').chartYAxisLabel('Revenue')"#

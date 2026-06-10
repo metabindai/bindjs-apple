@@ -10,15 +10,14 @@ public enum ChartValue: Equatable, Hashable {
         switch value {
         case let value as Date:
             self = .date(value)
-        case let value as Bool:
-            self = .bool(value)
-        case let value as Int:
-            self = .number(Double(value))
-        case let value as Double:
-            self = .number(value)
-        case let value as Float:
-            self = .number(Double(value))
         case let value as NSNumber:
+            // All numerics and bools land here — Swift Bool/Int/Double/Float
+            // bridge to NSNumber, and JavaScriptCore hands every JS number
+            // over as NSNumber. The CFBoolean type check is the ONLY reliable
+            // discriminator: a `case let value as Bool` pattern before this
+            // would bridge NSNumber(0)/NSNumber(1) to Bool, silently turning
+            // the first two indices of any 0-based chart series into bool
+            // channels that never render.
             if CFGetTypeID(value) == CFBooleanGetTypeID() {
                 self = .bool(value.boolValue)
             } else {
