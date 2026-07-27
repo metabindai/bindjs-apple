@@ -71,6 +71,7 @@ public protocol ComponentVisitor {
     mutating func visitPath(_ path: PathComponent) -> Result
 
     // Modifier Components
+    mutating func visitAnimation(_ animation: AnimationModifierComponent) -> Result
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result
     mutating func visitAccessibilityHint(_ accessibilityHint: AccessibilityHintComponent) -> Result
     mutating func visitAccessibilityLabel(_ accessibilityLabel: AccessibilityLabelComponent) -> Result
@@ -459,6 +460,10 @@ public extension ComponentVisitor {
     }
 
     // Modifier Components Default Implementations
+    mutating func visitAnimation(_ animation: AnimationModifierComponent) -> Result {
+        return defaultVisit(animation)
+    }
+
     mutating func visitAccessibilityHidden(_ accessibilityHidden: AccessibilityHiddenComponent) -> Result {
         return defaultVisit(accessibilityHidden)
     }

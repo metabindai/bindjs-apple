@@ -72,6 +72,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     AccessibilityRemoveTraitsComponent.directiveName: { AccessibilityRemoveTraitsComponent(from: $0) },
     AllowsHitTestingComponent.directiveName: { AllowsHitTestingComponent(from: $0) },
     AllowsTighteningComponent.directiveName: { AllowsTighteningComponent(from: $0) },
+    AnimationModifierComponent.directiveName: { AnimationModifierComponent(from: $0) },
     AspectRatioComponent.directiveName: { AspectRatioComponent(from: $0) },
     AnnotationComponent.directiveName: { AnnotationComponent(from: $0) },
     AutocorrectionDisabledComponent.directiveName: { AutocorrectionDisabledComponent(from: $0) },
@@ -312,6 +313,7 @@ struct ComponentViewModifier: ViewModifier {
 
     public func body(content: Content) -> some View {
         switch component {
+        case let m as AnimationModifierComponent: content.modifier(m)
         case let m as AccessibilityAddTraitsComponent: content.modifier(m)
         case let m as AccessibilityHiddenComponent: content.modifier(m)
         case let m as AccessibilityHintComponent: content.modifier(m)
