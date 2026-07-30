@@ -2,23 +2,55 @@
 
 Native SwiftUI rendering engine for BindJS bundles on iOS, macOS, visionOS, watchOS, and tvOS.
 
-BindJS lets server-authored components ship as a single compiled JavaScript bundle that describes a SwiftUI-shaped tree (VStack, Button, Image, AsyncImage, Charts, Model3D, and hundreds more). This package runs that JS inside a sandboxed JSContext and renders the result as real native SwiftUI — no WebView, no HTML, no layout approximations.
+BindJS lets server-authored components ship as a single compiled JavaScript bundle that describes a SwiftUI-shaped tree (VStack, Button, Image, AsyncImage, Charts, Model3D, and dozens more). This package runs that JS inside a sandboxed JSContext and renders the result as real native SwiftUI — no WebView, no HTML, no layout approximations.
 
-It's used by [metabind-ai-apple](https://github.com/yapstudios/metabind-ai-apple) to render interactive MCP tool results, but works standalone against any BindJS bundle.
+It's used by [metabind-apple](https://github.com/metabindai/metabind-apple), the Metabind Apple SDK, to render Interactive Tool results, but works standalone against any BindJS bundle.
+
+> [!TIP]
+> BindJS powers [Metabind](https://metabind.ai) — the hosted platform for MCP Apps. Turn your app's UI and APIs into a governed agent that runs in your own app and across Claude, ChatGPT, and every MCP host. **[🚀 Start free at metabind.ai](https://metabind.ai)** · **[📖 Read the docs](https://docs.metabind.ai)**
+
+## Documentation
+
+The full BindJS reference lives on [docs.metabind.ai](https://docs.metabind.ai/bindjs/introduction):
+
+- [Introduction](https://docs.metabind.ai/bindjs/introduction) — the runtime, AST, renderers, and modifier pipeline
+- [Authoring](https://docs.metabind.ai/bindjs/authoring/components) — how the components this engine renders are written
+- [Component catalog](https://docs.metabind.ai/bindjs/components/layout-stacks) and [modifier catalog](https://docs.metabind.ai/bindjs/modifiers/layout-frame-and-padding) — every component and modifier, entry by entry
+- [iOS extensions](https://docs.metabind.ai/bindjs/components/ios-layout) — `NavigationStack`, `ToolbarItem`, `ContentUnavailableView`, and other components this engine adds beyond the shared catalog
+
+## The BindJS repositories
+
+| Repo | What it is |
+|---|---|
+| [`bindjs-runtime`](https://github.com/metabindai/bindjs-runtime) | The core runtime and React renderer: `@metabindai/bindjs-runtime` + `@metabindai/bindjs-react` |
+| `bindjs-apple` — this repository | The SwiftUI rendering engine for iOS, macOS, visionOS, tvOS, and watchOS |
+| [`bindjs-android`](https://github.com/metabindai/bindjs-android) | The Jetpack Compose rendering engine for Android |
+
+One BindJS definition renders natively on all three surfaces. All three repos are Apache 2.0.
 
 ## Requirements
 
 - Swift 5.11+
 - iOS 17 / macOS 14 / visionOS 1 / tvOS 17 / watchOS 10
 
-## Charts
+## Features
 
-BindJS includes native Swift Charts-backed `Chart` support for Tier 1 Cartesian charts: `BarMark`, `LineMark`, `AreaMark`, `PointMark`, and y-value `RuleMark`, with axes, scales, legends, series colors, line styling, interpolation, stacking, and chart accessibility. These APIs require the tvOS 17 and watchOS 10 package floors listed above.
+- **SwiftUI-shaped component tree** — VStack, Button, Image, AsyncImage, Model3D, and dozens more, rendered as real native SwiftUI
+- **Modifier pipeline** — layout, appearance, typography, gestures, and animation modifiers applied SwiftUI-style
+- **Swift Charts** — native `Chart` support for Tier 1 Cartesian charts (`BarMark`, `LineMark`, `AreaMark`, `PointMark`, y-value `RuleMark`) with axes, scales, legends, stacking, and chart accessibility; these APIs are why the package floors include tvOS 17 and watchOS 10
+- **Sandboxed JS execution** — component code runs in a JSContext; the JS side only produces declarative directives
+- **MCP host bridge** — the native side of BindJS's `useMCPHost()` contract, so components can call tools and talk back to the embedding app
+
+## Key dependencies
+
+- **JavaScriptCore** — JS execution (system framework)
+- **SVGView** — SVG rendering
+- **GLTFKit2** — 3D model rendering for `Model3D`
 
 ## Install
 
 ```swift
-.package(url: "https://github.com/yapstudios/bindjs-apple.git", from: "1.1.0"),
+.package(url: "https://github.com/metabindai/bindjs-apple.git", from: "1.1.0"),
 ```
 
 ```swift
@@ -45,9 +77,9 @@ struct ComponentView: View {
 
 `BindJSView` evaluates the bundle, walks the component tree, and builds a native SwiftUI view graph. State, layout, animations, and gestures all run in SwiftUI — the JS side only produces declarative directives.
 
-## useMCPHost — components talk to your app
+## The MCP host bridge (useMCPHost)
 
-A BindJS component can call host capabilities at runtime:
+The `useMCPHost()` hook is core BindJS, defined in the shared runtime ([`bindjs-runtime`](https://github.com/metabindai/bindjs-runtime)); this engine ships the native side of the contract, the `MCPHostBridge` protocol. A BindJS component calls host capabilities at runtime:
 
 ```js
 const host = useMCPHost()
@@ -80,9 +112,9 @@ BindJSView(content: content, arguments: args)
     .bindJS(BindJSConfiguration(mcpHost: MyHost()))
 ```
 
-The protocol mirrors the TS [`MCPHost` interface](https://github.com/modelcontextprotocol/ext-apps) used by web hosts (Claude Desktop, ChatGPT, VS Code, etc.), plus a native-only `elicit` for request-input flows. Methods that don't apply on native (`sendRequest`, `sendNotification`, `sizeChanged`) have graceful no-op defaults, so components written against the web contract run unchanged.
+The protocol mirrors the TS [`MCPHost` interface](https://github.com/modelcontextprotocol/ext-apps) used by web hosts (Claude Desktop, ChatGPT, VS Code, etc.), plus `elicit` — a native-only extension for request-input flows. Methods that don't apply on native (`sendRequest`, `sendNotification`, `sizeChanged`) have graceful no-op defaults, so components written against the web contract run unchanged.
 
-For the full Metabind integration (conversation loop, tool rendering, agent proxy), see [metabind-ai-apple](https://github.com/yapstudios/metabind-ai-apple).
+For the full Metabind integration (conversation loop, tool rendering, agent proxy), see [metabind-apple](https://github.com/metabindai/metabind-apple).
 
 ## Logging
 
@@ -96,8 +128,8 @@ Tail with `log show --predicate 'subsystem == "BindJS"' --info --debug --last 5m
 
 ## Distribution
 
-BindJS is also published as a pre-built XCFramework at [bindjs-apple-binary](https://github.com/yapstudios/bindjs-apple-binary) for downstream apps that prefer a binary dependency. See that repo's README for the release process.
+BindJS is also published as a pre-built XCFramework at [bindjs-apple-binary](https://github.com/metabindai/bindjs-apple-binary) for downstream apps that prefer a binary dependency. See that repo's README for the release process.
 
 ## License
 
-MIT. See `LICENSE`.
+Apache License 2.0. See [`LICENSE`](LICENSE).
