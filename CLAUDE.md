@@ -1,57 +1,73 @@
-# MetabindUI Development Guide
+# BindJS for Apple development guide
 
-## Build Commands
+This repo is the BindJS rendering engine for Apple platforms: a single SwiftPM library product, `BindJS`, that evaluates compiled BindJS bundles in a JSContext and renders them as SwiftUI.
+
+## Build commands
+
 - Build package: `swift build`
 - Run tests: `swift test`
-- Run single test: `swift test --filter MetabindUITests/specificTestName`
-- Generate Xcode project: `swift package generate-xcodeproj`
+- Run a single test: `swift test --filter BindJSTests/specificTestName`
 
-## Code Style Guidelines
-- **Naming**: PascalCase for types (Component, View), camelCase for properties/methods
-- **Protocols**: Use `Convertible` suffix for component conversion protocols
-- **SwiftUI Pattern**: Follow SwiftUI modifier pattern (.frame, .padding) for component modifiers
-- **Error Handling**: Use optionals/fallbacks instead of throwing errors upward
-- **Imports**: Minimal imports (Foundation, SwiftUI only)
-- **Documentation**: Document public APIs with comments explaining purpose
-- **Architecture**: Protocol-oriented design with protocol extensions for shared functionality
-- **Testing**: Create unit tests for new component types and modifiers
+## Source layout
 
-## Components Organization
-Components should be organized in Sources/MetabindUI/Convertibles with Views/ for basic views and Modifiers/ for modifiers.
+| Path | Contents |
+|---|---|
+| `Sources/BindJS/BindJSView.swift` | Entry-point view — evaluates a bundle and builds the SwiftUI view graph |
+| `Sources/BindJS/ResolvedContent.swift` | Compiled-bundle model passed into `BindJSView` |
+| `Sources/BindJS/Components/` | `Component` protocol, `ComponentRepresentable`, `ComponentView` (factory registration and render switches), with implementations in `Views/` and `Modifiers/` |
+| `Sources/BindJS/Core/` | `Directive`, `ContentAction`, `GesturePhase`, `JSAnimation`, `ParsableArgument` |
+| `Sources/BindJS/Infrastructure/` | `BindJSContext` (JS execution), `MCPHostBridge`, `ComponentRegistry` (host-app components registered via `.withComponent`), `JSTimers`, chart collectors |
+| `Sources/BindJS/Visitors/` | `ComponentVisitor` protocol plus walker, rewriter, and children helpers |
+| `Sources/BindJS/Resources/` | `BindJSRuntime.js` (bundled runtime — see provenance below), `BindJSRuntimeWrapper.js` (JSContext bootstrap that exposes the runtime to Swift) |
+| `Tests/BindJSTests/` | Unit tests (charts, `MCPHostBridge` integration) |
+| `Scripts/build-xcframework.sh` | Binary release build |
 
-## Creating New Components
+## JS runtime provenance
 
-To add a new component to MetabindUI, follow these steps:
+`Sources/BindJS/Resources/BindJSRuntime.js` is a bundled copy of the rollup output of bindjs-runtime's `packages/runtime` (entry `src/runtime/BindJSRuntime.js`, output `dist-runtime/runtime.js`). **bindjs-runtime is the source of truth.** Make runtime changes there, build the rollup output, and copy it over — the sync is manual today. Don't hand-edit the bundled file; edits are lost on the next sync.
 
-1. **Create the Component File** in `Sources/MetabindUI/Components/Views/` (or `/Modifiers/` for modifiers)
-   - Implement the `Component` protocol with `directiveName` and `init?(from:)` 
-   - Add `accept<V: ComponentVisitor>` method that calls the appropriate visitor method
-   - Make it conform to `View` (or `ViewModifier` for modifiers) with SwiftUI implementation
+## Code style guidelines
+
+- **Naming**: PascalCase for types, camelCase for properties and methods. Component types use the `Component` suffix (`ButtonComponent`, `BoldComponent`)
+- **SwiftUI pattern**: follow the SwiftUI modifier pattern (`.frame`, `.padding`) for component modifiers
+- **Error handling**: use failable initializers (`init?(from:)`) and fallbacks instead of throwing errors upward
+- **Imports**: minimal — most files need only SwiftUI; `JavaScriptCore`, `os`, Charts, and MapKit only where required
+- **Documentation**: document public APIs with comments explaining purpose
+- **Architecture**: protocol-oriented design (`Component` + `ComponentVisitor`) with protocol extensions for shared functionality
+- **Testing**: add unit tests in `Tests/BindJSTests/` for new component types and modifiers
+
+## Creating new components
+
+To add a new component to BindJS, follow these steps:
+
+1. **Create the component file** in `Sources/BindJS/Components/Views/` (or `Modifiers/` for modifiers)
+   - Implement the `Component` protocol: `static var directiveName`, `init?(from:)`, and `accept<V: ComponentVisitor>` calling the matching visitor method
+   - Conform to `View` (or `ViewModifier` for modifiers) with the SwiftUI implementation
    - For components with state, use `@State` properties as needed
 
-2. **Add to ComponentVisitor** in `Sources/MetabindUI/Visitors/ComponentVisitor.swift`
-   - Add visitor method to the protocol: `mutating func visitYourComponent(_ component: YourComponent) -> Result`
-   - Add default implementation in the extension that calls `defaultVisit`
+2. **Add to ComponentVisitor** in `Sources/BindJS/Visitors/ComponentVisitor.swift`
+   - Add the visitor method to the protocol: `mutating func visitYourComponent(_ component: YourComponent) -> Result`
+   - Add a default implementation in the extension that calls `defaultVisit`
 
-3. **Register in makeComponent** in `Sources/MetabindUI/Components/ComponentView.swift`
-   - Add case to the switch statement: `case YourComponent.directiveName: YourComponent(from: directive)`
+3. **Register the factory** in `Sources/BindJS/Components/ComponentView.swift`
+   - Add an entry to the `componentFactories` dictionary: `YourComponent.directiveName: { YourComponent(from: $0) }`
+   - Platform-gated components (Map, Gallery) go in `platformComponentFactories` instead
 
-4. **Add to ComponentView** in `Sources/MetabindUI/Components/ComponentView.swift`
-   - Add case to the body switch: `case let yourComponent as YourComponent: yourComponent`
-   - For modifiers, add to ComponentViewModifier instead
+4. **Add the render case** in the same file
+   - Views: add a case to the `ComponentView.body` switch: `case let yourComponent as YourComponent: yourComponent`
+   - Modifiers: add a case to `ComponentViewModifier.body` instead
 
-5. **Register in JS Runtime** in `Sources/MetabindUI/Resources/JSRuntime.js`
-   - Add the component name to the `componentNames` array (around line 49)
-   - This is REQUIRED for the component to be recognized by the JavaScript runtime
-   - Keep the list alphabetically sorted for consistency
+5. **Register in the JS runtime** — the component name must be in the `componentNames` array or the runtime won't recognize the directive
+   - The array lives in bindjs-runtime at `packages/runtime/src/runtime/ComponentNames.js` (keep it alphabetically sorted)
+   - Add it there, rebuild, and re-sync the bundled `BindJSRuntime.js` (see JS runtime provenance above) — don't edit the bundled copy directly
 
-6. **Build and Test**
-   - Run `swift build` to ensure everything compiles
+6. **Build and test**
+   - Run `swift build` to make sure everything compiles
    - Components should support initialization from directives with various property names
 
-## Publishing a Binary Release
+## Publishing a binary release (maintainers)
 
-When changes to bindjs-apple need to ship downstream (to metabind-apple-internal and metabind-app-apple), build an XCFramework and publish it to the `bindjs-apple-binary` repo.
+When changes to bindjs-apple need to ship downstream (to metabind-apple), build an XCFramework and publish it to the `bindjs-apple-binary` repo.
 
 ### Steps
 
@@ -89,7 +105,7 @@ When changes to bindjs-apple need to ship downstream (to metabind-apple-internal
    ```
    **Important:** Use `--target` to point at the Package.swift update commit. Creating the release before pushing the Package.swift update will tag the wrong commit, and SPM will resolve the old checksum.
 
-5. **Update downstream** — bump the bindjs-apple-binary dependency version in metabind-apple-internal's Package.swift.
+5. **Update downstream** — bump the bindjs-apple-binary dependency version in metabind-apple's Package.swift.
 
 ### Key details
 - The build script backs up and restores Package.swift automatically
@@ -97,19 +113,19 @@ When changes to bindjs-apple need to ship downstream (to metabind-apple-internal
 - SVGViewKit is statically linked into the framework; GLTFKit2 is provided separately by bindjs-apple-binary
 - Binary repo is `metabindai/bindjs-apple-binary` (public), default branch `main`
 
-## Component Implementation Notes
+## Component implementation notes
 
-### Color Handling
-- Colors in MetabindUI use the `ColorComponent` type with named colors (e.g., "gray", "primary") or RGBA values
+### Color handling
+- Colors in BindJS use the `ColorComponent` type with named colors (e.g., "gray", "primary") or RGBA values
 - For simple color fills in shapes, use SwiftUI's `Color` directly with `.fill()` modifier
 - Default opacity values can be applied using `.opacity()` modifier
 
-### Shape Components Pattern
+### Shape components pattern
 - Shape components typically don't need to handle fill/stroke in the component itself
 - The shape's appearance can be modified using SwiftUI's built-in modifiers
 - RoundedRectangle is commonly used for placeholder-style components with customizable corner radius
 
-### Component Initialization
+### Component initialization
 - Use default values in `init?(from:)` for optional parameters (e.g., `directive["cornerRadius"] ?? 10`)
-- Keep components simple - avoid complex state management unless necessary
+- Keep components simple — avoid complex state management unless necessary
 - Components without parameters still need the full protocol implementation
