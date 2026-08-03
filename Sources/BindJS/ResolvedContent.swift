@@ -7,7 +7,7 @@
 import Foundation
 
 /// Resolved content ready for rendering (compiled JavaScript + resolved package dependencies)
-public struct ResolvedContent: Sendable, Equatable, Hashable {
+public struct ResolvedContent: Sendable, Equatable, Hashable {    
     public let compiled: String                  // Main content JavaScript
     public let package: PackageComponents        // Resolved component sources
 
