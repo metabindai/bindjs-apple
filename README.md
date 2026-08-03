@@ -126,10 +126,6 @@ JS exceptions and `console.log` / `console.warn` / `console.error` calls from co
 
 Tail with `log show --predicate 'subsystem == "BindJS"' --info --debug --last 5m`.
 
-## Distribution
-
-BindJS is also published as a pre-built XCFramework at [bindjs-apple-binary](https://github.com/metabindai/bindjs-apple-binary) for downstream apps that prefer a binary dependency. See that repo's README for the release process.
-
 ## License
 
 Apache License 2.0. See [`LICENSE`](LICENSE).
