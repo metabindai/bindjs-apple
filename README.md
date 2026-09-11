@@ -2,12 +2,12 @@
 
 Native SwiftUI rendering engine for BindJS bundles on iOS, macOS, visionOS, watchOS, and tvOS.
 
-BindJS lets server-authored components ship as a single compiled JavaScript bundle that describes a SwiftUI-shaped tree (VStack, Button, Image, AsyncImage, Charts, Model3D, and dozens more). This package runs that JS inside a sandboxed JSContext and renders the result as real native SwiftUI — no WebView, no HTML, no layout approximations.
+BindJS is the open component language for agent UI: write a component once, with its logic, and it renders as native SwiftUI, Jetpack Compose, and React. This package is the SwiftUI half. BindJS lets server-authored components ship as a single compiled JavaScript bundle that describes a SwiftUI-shaped tree (VStack, Button, Image, AsyncImage, Charts, Model3D, and dozens more). This package runs that JS inside a sandboxed JSContext and renders the result as real native SwiftUI — no WebView, no HTML, no layout approximations.
 
 It's used by [metabind-apple](https://github.com/metabindai/metabind-apple), the Metabind Apple SDK, to render Interactive Tool results, but works standalone against any BindJS bundle.
 
 > [!TIP]
-> BindJS powers [Metabind](https://metabind.ai) — the hosted platform for MCP Apps. Turn your app's UI and APIs into a governed agent that runs in your own app and across Claude, ChatGPT, and every MCP host. **[🚀 Start free at metabind.ai](https://metabind.ai)** · **[📖 Read the docs](https://docs.metabind.ai)**
+> BindJS powers [Metabind](https://metabind.ai) — the hosted platform for [MCP Apps](https://github.com/modelcontextprotocol/ext-apps). Turn your app's UI and APIs into a governed agent that runs in your own app and across Claude, ChatGPT, and every MCP host. **[Start free at metabind.ai](https://www.metabind.ai/signup)** · **[Read the docs](https://docs.metabind.ai)**
 
 ## Documentation
 
