@@ -50,6 +50,7 @@ private let componentFactories: [String: (Directive) -> Component?] = [
     ScrollViewComponent.directiveName: { ScrollViewComponent(from: $0) },
     SectionComponent.directiveName: { SectionComponent(from: $0) },
     SecureFieldComponent.directiveName: { SecureFieldComponent(from: $0) },
+    SliderComponent.directiveName: { SliderComponent(from: $0) },
     SpacerComponent.directiveName: { SpacerComponent(from: $0) },
     TextComponent.directiveName: { TextComponent(from: $0) },
     TextEditorComponent.directiveName: { TextEditorComponent(from: $0) },
@@ -288,6 +289,7 @@ public struct ComponentView: View {
         case let scrollView as ScrollViewComponent: scrollView
         case let section as SectionComponent: section
         case let secureField as SecureFieldComponent: secureField
+        case let slider as SliderComponent: slider
         case let spacer as SpacerComponent: spacer
         case let text as TextComponent: text
         case let textEditor as TextEditorComponent: textEditor

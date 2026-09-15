@@ -42,6 +42,7 @@ public protocol ComponentVisitor {
     mutating func visitProgressView(_ progressView: ProgressViewComponent) -> Result
     mutating func visitScrollView(_ scrollView: ScrollViewComponent) -> Result
     mutating func visitSection(_ section: SectionComponent) -> Result
+    mutating func visitSlider(_ slider: SliderComponent) -> Result
     mutating func visitSpacer(_ spacer: SpacerComponent) -> Result
     mutating func visitText(_ text: TextComponent) -> Result
     mutating func visitTextEditor(_ textEditor: TextEditorComponent) -> Result
@@ -363,7 +364,11 @@ public extension ComponentVisitor {
     mutating func visitSection(_ section: SectionComponent) -> Result {
         return defaultVisit(section)
     }
-    
+
+    mutating func visitSlider(_ slider: SliderComponent) -> Result {
+        return defaultVisit(slider)
+    }
+
     mutating func visitSpacer(_ spacer: SpacerComponent) -> Result {
         return defaultVisit(spacer)
     }
