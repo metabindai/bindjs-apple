@@ -18,7 +18,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/yapstudios/SVGView.git", exact: "1.0.7"),
-        .package(url: "https://github.com/warrenm/GLTFKit2", exact: "0.5.14")
+        .package(url: "https://github.com/warrenm/GLTFKit2", exact: "0.5.15")
     ],
     targets: [
         .target(
