@@ -54,6 +54,7 @@ public protocol ComponentVisitor {
     mutating func visitUnresolved(_ unresolved: UnresolvedComponent) -> Result
     mutating func visitViewThatFits(_ viewThatFits: ViewThatFitsComponent) -> Result
     mutating func visitVStack(_ vStack: VStackComponent) -> Result
+    mutating func visitAudioPlayer(_ audioPlayer: AudioPlayerComponent) -> Result
     mutating func visitVideo(_ video: VideoComponent) -> Result
     mutating func visitZStack(_ zStack: ZStackComponent) -> Result
     
@@ -411,6 +412,10 @@ public extension ComponentVisitor {
 
     mutating func visitVStack(_ vStack: VStackComponent) -> Result {
         return defaultVisit(vStack)
+    }
+    
+    mutating func visitAudioPlayer(_ audioPlayer: AudioPlayerComponent) -> Result {
+        return defaultVisit(audioPlayer)
     }
     
     mutating func visitVideo(_ video: VideoComponent) -> Result {
