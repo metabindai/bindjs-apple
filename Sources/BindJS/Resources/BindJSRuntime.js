@@ -57,6 +57,7 @@ const componentNames = [
     "AnyView",
     "AssistiveAccess",
     "AsyncImage",
+    "AudioPlayer",
     "Body",
     "Chart",
     "PieChart",
@@ -1802,6 +1803,8 @@ function withAnimation(arg1, arg2) {
 /**
  * Returns the MCP host interface, or null if not running in an MCP context.
  * The host provides methods for tool calls, messaging, context updates, etc.
+ *
+ * @returns {import("../../mcp-host.js").MCPHost | null}
  *
  * The host object is set by the renderer via `runtime.mcpHost = { ... }`.
  */
